@@ -1,0 +1,222 @@
+---
+title: "Getting Started with spatialAtomizeR"
+author: "Bella Qian"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with spatialAtomizeR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+# Introduction
+
+The `spatialAtomizeR` package implements atom-based Bayesian regression methods (ABRM) for spatial data with misaligned grids. This vignette demonstrates the basic workflow.
+
+## Installation
+
+```{r install, eval=FALSE}
+# Install from GitHub
+devtools::install_github("yourusername/spatialAtomizeR")
+```
+
+```{r load}
+library(spatialAtomizeR)
+```
+
+# Basic Workflow
+
+## 1. Simulate Misaligned Data
+
+First, we generate spatial data with two misaligned grids:
+
+```{r simulate, eval=FALSE}
+sim_data <- simulate_misaligned_data(
+  seed = 42,
+  res1 = c(5, 5),      # Y grid: 5x5 (coarser)
+  res2 = c(10, 10),    # X grid: 10x10 (finer)
+  
+  # Variable distributions
+  dist_covariates_x = c('normal', 'poisson', 'binomial'),
+  dist_covariates_y = c('normal', 'poisson', 'binomial'),
+  dist_y = 'poisson',
+  
+  # Spatial correlation
+  x_correlation = 0.5,
+  y_correlation = 0.5,
+  
+  # Intercepts
+  x_intercepts = c(4, -1, -1),
+  y_intercepts = c(4, -1, -1),
+  
+  # True coefficients
+  beta0_y = -1,
+  beta_x = c(-0.03, 0.1, -0.2),
+  beta_y = c(0.03, -0.1, 0.2)
+)
+```
+
+The simulated data contains:
+- `gridy`: Outcome data on coarser grid
+- `gridx`: Covariate data on finer grid
+- `atoms`: Atomic units (intersections of grids)
+- `true_params`: True parameter values
+
+## 2. Run ABRM Analysis
+
+```{r run_abrm, eval=FALSE}
+# Get the NIMBLE model code
+model_code <- get_abrm_model()
+
+# Run ABRM
+results <- run_abrm(
+  sim_data = sim_data,
+  model_code = model_code,
+  
+  # Specify variable types
+  norm_idx_x = 1,
+  pois_idx_x = 2,
+  binom_idx_x = 3,
+  norm_idx_y = 1,
+  pois_idx_y = 2,
+  binom_idx_y = 3,
+  dist_y = 2,  # 1=normal, 2=poisson, 3=binomial
+  
+  # MCMC settings
+  niter = 50000,
+  nburnin = 30000,
+  nchains = 2,
+  thin = 10
+)
+```
+
+## 3. Examine Results
+
+```{r examine, eval=FALSE}
+# Parameter estimates with bias metrics
+print(results$parameter_estimates)
+
+# Check convergence
+print(results$mcmc_results$convergence$overall_converged)
+
+# View diagnostics for specific parameters
+head(results$mcmc_results$convergence$diagnostics)
+```
+
+## 4. Compare Methods
+
+Compare ABRM with dasymetric mapping:
+
+```{r compare, eval=FALSE}
+comparison <- run_both_methods(
+  sim_data = sim_data,
+  sim_metadata = list(sim_number = 1, x_correlation = 0.5, y_correlation = 0.5),
+  model_code = model_code,
+  nimble_params = list(niter = 50000, nburnin = 30000, thin = 10, nchains = 2),
+  output_dir = "comparison_results",
+  norm_idx_x = 1, pois_idx_x = 2, binom_idx_x = 3,
+  norm_idx_y = 1, pois_idx_y = 2, binom_idx_y = 3,
+  dist_y = 2,
+  outcome_type = 'poisson'
+)
+
+# View comparison
+print(comparison$combined_comparison)
+```
+
+# Sensitivity Analysis
+
+Run analysis across multiple correlation structures:
+
+```{r sensitivity, eval=FALSE}
+sensitivity <- run_sensitivity_analysis(
+  correlation_grid = c(0.2, 0.6),
+  n_sims_per_setting = 3,
+  model_code = model_code,
+  base_seed = 123
+)
+
+# View results by correlation
+print(sensitivity$summary_by_correlation)
+```
+
+# Understanding the Model
+
+## Variable Types
+
+The package supports three distribution types:
+
+- **Normal**: Continuous data (e.g., temperature)
+- **Poisson**: Count data (e.g., disease cases)
+- **Binomial**: Binary outcomes (e.g., presence/absence)
+
+## Spatial Structure
+
+The ABRM uses:
+
+1. **Atoms**: Smallest spatial units (intersections of grids)
+2. **CAR models**: Conditional autoregressive models for spatial correlation
+3. **Wishart priors**: For correlation between variables
+
+## Model Parameters
+
+- `beta_0_x`, `beta_0_yx`, `beta_0_y`: Intercepts
+- `beta_y`: Effects of X and Y covariates on outcome
+- `tau_x`, `tau_y`, `tau_yx`: Spatial precision parameters
+- `Prec_x`, `Prec_yx`: Precision matrices for variable correlations
+
+# Tips for Real Data
+
+## Choosing MCMC Settings
+
+- **Quick test**: niter=5000, nburnin=2000
+- **Standard**: niter=50000, nburnin=30000
+- **High accuracy**: niter=100000, nburnin=50000
+
+Check convergence with:
+- Rhat < 1.1 for all parameters
+- ESS > 400 for all parameters
+
+## Variable Type Specification
+
+Carefully specify which variables follow which distributions:
+```{r types, eval=FALSE}
+# If you have:
+# - covariate_x_1: normal
+# - covariate_x_2: poisson  
+# - covariate_x_3: binomial
+
+norm_idx_x = 1
+pois_idx_x = 2
+binom_idx_x = 3
+```
+
+## Handling Convergence Issues
+
+If convergence fails:
+1. Increase burn-in period
+2. Increase number of iterations
+3. Check for data issues (extreme values, missingness)
+4. Try different initial values
+
+# Further Reading
+
+- See `?simulate_misaligned_data` for simulation details
+- See `?run_abrm` for model fitting options
+- See `?run_sensitivity_analysis` for sensitivity analysis
+
+# Session Info
+
+```{r session}
+sessionInfo()
+```
+
+

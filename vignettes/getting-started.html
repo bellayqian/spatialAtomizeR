@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Bella Qian" />
+
+
+<title>Getting Started with spatialAtomizeR</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with spatialAtomizeR</h1>
+<h4 class="author">Bella Qian</h4>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The <code>spatialAtomizeR</code> package implements atom-based
+Bayesian regression methods (ABRM) for spatial data with misaligned
+grids. This vignette demonstrates the basic workflow.</p>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Install from GitHub</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;yourusername/spatialAtomizeR&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(spatialAtomizeR)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; spatialAtomizeR loaded. Use get_abrm_model() to access the model.</span></span></code></pre></div>
+</div>
+</div>
+<div id="basic-workflow" class="section level1">
+<h1>Basic Workflow</h1>
+<div id="simulate-misaligned-data" class="section level2">
+<h2>1. Simulate Misaligned Data</h2>
+<p>First, we generate spatial data with two misaligned grids:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">simulate_misaligned_data</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">42</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">res1 =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>),      <span class="co"># Y grid: 5x5 (coarser)</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">res2 =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>),    <span class="co"># X grid: 10x10 (finer)</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  </span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="co"># Variable distributions</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">dist_covariates_x =</span> <span class="fu">c</span>(<span class="st">&#39;normal&#39;</span>, <span class="st">&#39;poisson&#39;</span>, <span class="st">&#39;binomial&#39;</span>),</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">dist_covariates_y =</span> <span class="fu">c</span>(<span class="st">&#39;normal&#39;</span>, <span class="st">&#39;poisson&#39;</span>, <span class="st">&#39;binomial&#39;</span>),</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="at">dist_y =</span> <span class="st">&#39;poisson&#39;</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  </span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="co"># Spatial correlation</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="at">x_correlation =</span> <span class="fl">0.5</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="at">y_correlation =</span> <span class="fl">0.5</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  </span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>  <span class="co"># Intercepts</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>  <span class="at">x_intercepts =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>),</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>  <span class="at">y_intercepts =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>),</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>  </span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  <span class="co"># True coefficients</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  <span class="at">beta0_y =</span> <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  <span class="at">beta_x =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.03</span>, <span class="fl">0.1</span>, <span class="sc">-</span><span class="fl">0.2</span>),</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>  <span class="at">beta_y =</span> <span class="fu">c</span>(<span class="fl">0.03</span>, <span class="sc">-</span><span class="fl">0.1</span>, <span class="fl">0.2</span>)</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>)</span></code></pre></div>
+<p>The simulated data contains: - <code>gridy</code>: Outcome data on
+coarser grid - <code>gridx</code>: Covariate data on finer grid -
+<code>atoms</code>: Atomic units (intersections of grids) -
+<code>true_params</code>: True parameter values</p>
+</div>
+<div id="run-abrm-analysis" class="section level2">
+<h2>2. Run ABRM Analysis</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Get the NIMBLE model code</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>model_code <span class="ot">&lt;-</span> <span class="fu">get_abrm_model</span>()</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># Run ABRM</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">run_abrm</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">sim_data =</span> sim_data,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="at">model_code =</span> model_code,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  </span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="co"># Specify variable types</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="at">norm_idx_x =</span> <span class="dv">1</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">pois_idx_x =</span> <span class="dv">2</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  <span class="at">binom_idx_x =</span> <span class="dv">3</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  <span class="at">norm_idx_y =</span> <span class="dv">1</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  <span class="at">pois_idx_y =</span> <span class="dv">2</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="at">binom_idx_y =</span> <span class="dv">3</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="at">dist_y =</span> <span class="dv">2</span>,  <span class="co"># 1=normal, 2=poisson, 3=binomial</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  </span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  <span class="co"># MCMC settings</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>  <span class="at">niter =</span> <span class="dv">50000</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>  <span class="at">nburnin =</span> <span class="dv">30000</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>  <span class="at">nchains =</span> <span class="dv">2</span>,</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>  <span class="at">thin =</span> <span class="dv">10</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="examine-results" class="section level2">
+<h2>3. Examine Results</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Parameter estimates with bias metrics</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">print</span>(results<span class="sc">$</span>parameter_estimates)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># Check convergence</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">print</span>(results<span class="sc">$</span>mcmc_results<span class="sc">$</span>convergence<span class="sc">$</span>overall_converged)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># View diagnostics for specific parameters</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">head</span>(results<span class="sc">$</span>mcmc_results<span class="sc">$</span>convergence<span class="sc">$</span>diagnostics)</span></code></pre></div>
+</div>
+<div id="compare-methods" class="section level2">
+<h2>4. Compare Methods</h2>
+<p>Compare ABRM with dasymetric mapping:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>comparison <span class="ot">&lt;-</span> <span class="fu">run_both_methods</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">sim_data =</span> sim_data,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">sim_metadata =</span> <span class="fu">list</span>(<span class="at">sim_number =</span> <span class="dv">1</span>, <span class="at">x_correlation =</span> <span class="fl">0.5</span>, <span class="at">y_correlation =</span> <span class="fl">0.5</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">model_code =</span> model_code,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">nimble_params =</span> <span class="fu">list</span>(<span class="at">niter =</span> <span class="dv">50000</span>, <span class="at">nburnin =</span> <span class="dv">30000</span>, <span class="at">thin =</span> <span class="dv">10</span>, <span class="at">nchains =</span> <span class="dv">2</span>),</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">output_dir =</span> <span class="st">&quot;comparison_results&quot;</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">norm_idx_x =</span> <span class="dv">1</span>, <span class="at">pois_idx_x =</span> <span class="dv">2</span>, <span class="at">binom_idx_x =</span> <span class="dv">3</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">norm_idx_y =</span> <span class="dv">1</span>, <span class="at">pois_idx_y =</span> <span class="dv">2</span>, <span class="at">binom_idx_y =</span> <span class="dv">3</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="at">dist_y =</span> <span class="dv">2</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="at">outcome_type =</span> <span class="st">&#39;poisson&#39;</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>)</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co"># View comparison</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="fu">print</span>(comparison<span class="sc">$</span>combined_comparison)</span></code></pre></div>
+</div>
+</div>
+<div id="sensitivity-analysis" class="section level1">
+<h1>Sensitivity Analysis</h1>
+<p>Run analysis across multiple correlation structures:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>sensitivity <span class="ot">&lt;-</span> <span class="fu">run_sensitivity_analysis</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">correlation_grid =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.6</span>),</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">n_sims_per_setting =</span> <span class="dv">3</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">model_code =</span> model_code,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">base_seed =</span> <span class="dv">123</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co"># View results by correlation</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="fu">print</span>(sensitivity<span class="sc">$</span>summary_by_correlation)</span></code></pre></div>
+</div>
+<div id="understanding-the-model" class="section level1">
+<h1>Understanding the Model</h1>
+<div id="variable-types" class="section level2">
+<h2>Variable Types</h2>
+<p>The package supports three distribution types:</p>
+<ul>
+<li><strong>Normal</strong>: Continuous data (e.g., temperature)</li>
+<li><strong>Poisson</strong>: Count data (e.g., disease cases)</li>
+<li><strong>Binomial</strong>: Binary outcomes (e.g.,
+presence/absence)</li>
+</ul>
+</div>
+<div id="spatial-structure" class="section level2">
+<h2>Spatial Structure</h2>
+<p>The ABRM uses:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Atoms</strong>: Smallest spatial units (intersections of
+grids)</li>
+<li><strong>CAR models</strong>: Conditional autoregressive models for
+spatial correlation</li>
+<li><strong>Wishart priors</strong>: For correlation between
+variables</li>
+</ol>
+</div>
+<div id="model-parameters" class="section level2">
+<h2>Model Parameters</h2>
+<ul>
+<li><code>beta_0_x</code>, <code>beta_0_yx</code>,
+<code>beta_0_y</code>: Intercepts</li>
+<li><code>beta_y</code>: Effects of X and Y covariates on outcome</li>
+<li><code>tau_x</code>, <code>tau_y</code>, <code>tau_yx</code>: Spatial
+precision parameters</li>
+<li><code>Prec_x</code>, <code>Prec_yx</code>: Precision matrices for
+variable correlations</li>
+</ul>
+</div>
+</div>
+<div id="tips-for-real-data" class="section level1">
+<h1>Tips for Real Data</h1>
+<div id="choosing-mcmc-settings" class="section level2">
+<h2>Choosing MCMC Settings</h2>
+<ul>
+<li><strong>Quick test</strong>: niter=5000, nburnin=2000</li>
+<li><strong>Standard</strong>: niter=50000, nburnin=30000</li>
+<li><strong>High accuracy</strong>: niter=100000, nburnin=50000</li>
+</ul>
+<p>Check convergence with: - Rhat &lt; 1.1 for all parameters - ESS &gt;
+400 for all parameters</p>
+</div>
+<div id="variable-type-specification" class="section level2">
+<h2>Variable Type Specification</h2>
+<p>Carefully specify which variables follow which distributions:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># If you have:</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co"># - covariate_x_1: normal</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># - covariate_x_2: poisson  </span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co"># - covariate_x_3: binomial</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>norm_idx_x <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>pois_idx_x <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>binom_idx_x <span class="ot">=</span> <span class="dv">3</span></span></code></pre></div>
+</div>
+<div id="handling-convergence-issues" class="section level2">
+<h2>Handling Convergence Issues</h2>
+<p>If convergence fails: 1. Increase burn-in period 2. Increase number
+of iterations 3. Check for data issues (extreme values, missingness) 4.
+Try different initial values</p>
+</div>
+</div>
+<div id="further-reading" class="section level1">
+<h1>Further Reading</h1>
+<ul>
+<li>See <code>?simulate_misaligned_data</code> for simulation
+details</li>
+<li>See <code>?run_abrm</code> for model fitting options</li>
+<li>See <code>?run_sensitivity_analysis</code> for sensitivity
+analysis</li>
+</ul>
+</div>
+<div id="session-info" class="section level1">
+<h1>Session Info</h1>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; R version 4.4.3 (2025-02-28)</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; Platform: aarch64-apple-darwin20</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; Running under: macOS Sonoma 14.6</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; Matrix products: default</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib </span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; time zone: America/New_York</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; [1] spatialAtomizeR_0.1.0</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt;  [1] s2_1.1.7            tidyr_1.3.1         sass_0.4.10        </span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt;  [4] generics_0.1.3      class_7.3-23        KernSmooth_2.23-26 </span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt;  [7] stringi_1.8.7       lattice_0.22-7      pracma_2.4.4       </span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; [10] digest_0.6.37       magrittr_2.0.3      evaluate_1.0.3     </span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; [13] grid_4.4.3          fastmap_1.2.0       plyr_1.8.9         </span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; [16] jsonlite_2.0.0      e1071_1.7-16        DBI_1.2.3          </span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; [19] purrr_1.0.4         scales_1.3.0        codetools_0.2-20   </span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt; [22] numDeriv_2016.8-1.1 jquerylib_0.1.4     cli_3.6.5          </span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt; [25] rlang_1.1.6         units_0.8-7         munsell_0.5.1      </span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt; [28] cachem_1.1.0        yaml_2.3.10         tools_4.4.3        </span></span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="co">#&gt; [31] raster_3.6-32       parallel_4.4.3      deldir_2.0-4       </span></span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="co">#&gt; [34] reshape2_1.4.4      coda_0.19-4.1       dplyr_1.1.4        </span></span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="co">#&gt; [37] colorspace_2.1-1    ggplot2_3.5.2       boot_1.3-31        </span></span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="co">#&gt; [40] nimble_1.3.0        vctrs_0.6.5         R6_2.6.1           </span></span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="co">#&gt; [43] proxy_0.4-27        classInt_0.4-11     lifecycle_1.0.4    </span></span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="co">#&gt; [46] stringr_1.5.1       MASS_7.3-65         spdep_1.3-10       </span></span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="co">#&gt; [49] pkgconfig_2.0.3     terra_1.8-42        pillar_1.10.2      </span></span>
+<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a><span class="co">#&gt; [52] bslib_0.9.0         gtable_0.3.6        glue_1.8.0         </span></span>
+<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="co">#&gt; [55] Rcpp_1.0.14         sf_1.0-20           xfun_0.52          </span></span>
+<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="co">#&gt; [58] tibble_3.2.1        tidyselect_1.2.1    rstudioapi_0.17.1  </span></span>
+<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="co">#&gt; [61] knitr_1.50          htmltools_0.5.8.1   igraph_2.1.4       </span></span>
+<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="co">#&gt; [64] rmarkdown_2.29      wk_0.9.4            compiler_4.4.3     </span></span>
+<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a><span class="co">#&gt; [67] BiasedUrn_2.0.12    spData_2.3.4        sp_2.2-0</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
