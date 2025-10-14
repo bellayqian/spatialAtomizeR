@@ -134,6 +134,12 @@ This work was funded by the Robert Wood Johnson Foundation, Grant 81746. Project
 - Nancy Krieger, PhD (Professor, Department of Social and Behavioral Sciences (SBS), HSPH)
 - Nykesha Johnson, MPH (Statistical Data Analyst/Data Manager, SBS, HSPH)
 
+## Citation
+
+If you use this package, please cite:
+
+Qian, Y., & Nethery, R. (2024). spatialAtomizeR: Atom-Based Regression Models for Misaligned Spatial Data. R package version 0.1.0.
+
 ## About
 
 This work is an extension of:
