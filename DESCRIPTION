@@ -3,7 +3,7 @@ Type: Package
 Title: Spatial Analysis with Misaligned Data Using Atom-Based Regression Models
 Version: 0.2.0
 Authors@R: c(
-    person("Yunzhe", "Qian", email = "yqian@hsph.harvard.edu", role = c("aut", "cre")),
+    person("Yunzhe", "Qian", email = "qyzanemos@gmail.com", role = c("aut", "cre")),
     person("Rachel", "Nethery", email = "rnethery@hsph.harvard.edu", role = "aut")
     )
 Description: Implements atom-based regression models (ABRM) for analyzing spatially 
