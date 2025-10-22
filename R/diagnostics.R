@@ -313,12 +313,21 @@ create_summary_statistics <- function(all_results, output_dir) {
             row.names = FALSE)
   
   # Create a summary table for each parameter
+  # FIXED: Aggregate first, then pivot
   param_summary <- all_results %>%
-    dplyr::select(method, variable, estimated_beta, true_beta, bias, relative_bias, within_ci) %>%
+    group_by(method, variable) %>%
+    summarize(
+      mean_estimated_beta = mean(estimated_beta),
+      mean_true_beta = mean(true_beta),
+      mean_bias = mean(bias),
+      mean_relative_bias = mean(relative_bias),
+      coverage_rate = mean(within_ci) * 100,
+      .groups = 'drop'
+    ) %>%
     pivot_wider(
       id_cols = variable,
       names_from = method,
-      values_from = c(estimated_beta, bias, relative_bias, within_ci),
+      values_from = c(mean_estimated_beta, mean_bias, mean_relative_bias, coverage_rate),
       names_sep = "_"
     )
   

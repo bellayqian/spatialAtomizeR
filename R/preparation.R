@@ -295,6 +295,21 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     
   )
   
+  if (length(norm_idx_x)>0){
+    inits$sigma2_x<-rep(1,length(norm_idx_x))
+    inits$w_x<-matrix(rnorm(length(norm_idx_x)*(n_atoms-bookkeeping$J_x)),nrow=(n_atoms-bookkeeping$J_x),ncol=length(norm_idx_x))
+  }
+  
+  if (length(norm_idx_y)>0){
+    inits$sigma2_yx<-rep(1,length(norm_idx_y))
+    inits$w_yx<-matrix(rnorm(length(norm_idx_y)*(n_atoms-bookkeeping$J_y)),nrow=(n_atoms-bookkeeping$J_y),ncol=length(norm_idx_y))
+  }
+  
+  if (dist_y==1){
+    inits$sigma2_y<-1
+    inits$w_y<-rnorm((n_atoms-bookkeeping$J_y))
+  }
+  
   # Add this diagnostic function to check the indexing
   check_nimble_indexing <- function(constants, data) {
     cat("=== NIMBLE Indexing Diagnostics ===\n")
@@ -317,26 +332,26 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     
     # Check population alignment
     if(length(constants$pop_atoms) != D) {
-      cat("ERROR: pop_atoms length doesn't match D!\n")
+      cat("Warning: pop_atoms length doesn't match D!\n")
       return(FALSE)
     }
     
     # Check y_to_atom mapping
     if(any(constants$y_to_atom > D) || any(constants$y_to_atom < 1)) {
-      cat("ERROR: y_to_atom contains invalid indices!\n")
+      cat("Warning: y_to_atom contains invalid indices!\n")
       return(FALSE)
     }
     
     # Check temp_yx dimensions
     if(nrow(data$yx_obs) != constants$S_y) {
-      cat("ERROR: yx_obs rows don't match S_y!\n")
+      cat("Warning: yx_obs rows don't match S_y!\n")
       return(FALSE)
     }
     
     cat("Basic indexing checks passed\n")
     return(TRUE)
   }
-  # check_nimble_indexing(constants, data)
+  check_nimble_indexing(constants, data)
   
   # Initialize latent values with proper population-scaled splits
   # For x_latent

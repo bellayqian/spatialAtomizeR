@@ -176,7 +176,10 @@ get_abrm_model <- function() {
     for(j in 1:p_y) {
       sigma2_yx[j] ~ dinvgamma(2, 1)
     }
-    sigma2_y ~ dinvgamma(2, 1)
+    
+    if(vartype_y == 1) {
+      sigma2_y ~ dinvgamma(2, 1)
+    }
     
     tau_y ~ dgamma(2, 2)
     phi_y[1:S_y] ~ dcar_normal(adj_y[], weights_y[], num_y[], tau_y)
@@ -213,34 +216,43 @@ get_abrm_model <- function() {
     ## MODELING X-GRID COVARIATES ##
     ################################
     
+    # Calculate type-specific parameters for X variables
     for(j in 1:p_x) {
       for(d in 1:D) {
+        # Linear predictor (common to all types)
         linear_pred_x[d,j] <- beta_0_x[j] + phi_x[expand_x[d],j]
       }
     }
     
+    # Observed X values (atom-equivalent observations)
     if (norm_n_x>0){
       for (j in 1:norm_n_x){
         for(i in 1:J_x) {
+          # Normal
           x[i,norm_idx_x[j]] ~ dnorm(pop_atoms_x[i] * linear_pred_x[i,norm_idx_x[j]],
-                                     sd = pop_atoms_x[i] * sqrt(sigma2_x[norm_idx_x[j]]))
+                                     sd = pop_atoms_x[i] * sqrt(sigma2_x[j]))
+          
         }
         
         for(m in 1:(S_x-J_x)) {
-          nat_x <- length(xlatent_ind[m,1]:xlatent_ind[m,2])
+          # Normal: Use Cong et al. algorithm
+          nat_x[m,j] <- length(xlatent_ind[m,1]:xlatent_ind[m,2])
           
           mu_norm_x[(xlatent_ind[m,1]):(xlatent_ind[m,2]), j]<- pop_atoms_x[(J_x+xlatent_ind[m,1]):(J_x+xlatent_ind[m,2])] * linear_pred_x[(J_x+xlatent_ind[m,1]):(J_x+xlatent_ind[m,2]), norm_idx_x[j]]
           
-          cov_norm_x[(xlatent_ind[m,1]):(xlatent_ind[m,2]), (xlatent_ind[m,1]):(xlatent_ind[m,2]), j] <-sigma2_x[norm_idx_x[j]] * diag(pop_atoms_x[(J_x+xlatent_ind[m,1]):(J_x+xlatent_ind[m,2])]^2)
+          cov_norm_x[(xlatent_ind[m,1]):(xlatent_ind[m,2]), (xlatent_ind[m,1]):(xlatent_ind[m,2]), j] <-sigma2_x[j] * diag(pop_atoms_x[(J_x+xlatent_ind[m,1]):(J_x+xlatent_ind[m,2])]^2)
           
+          # Sample from unconstrained multivariate normal
           w_x[xlatent_ind[m,1]:xlatent_ind[m,2], j] ~ dmnorm(
             mu_norm_x[(xlatent_ind[m,1]):(xlatent_ind[m,2]), j],
             cov = cov_norm_x[(xlatent_ind[m,1]):(xlatent_ind[m,2]), (xlatent_ind[m,1]):(xlatent_ind[m,2]), j]
           )
           
+          # Project onto constraint hyperplane
           x_latent[xlatent_ind[m,1]:xlatent_ind[m,2], norm_idx_x[j]] <-
             w_x[xlatent_ind[m,1]:xlatent_ind[m,2], j] +
-            (1/nat_x) * (x[J_x+m,norm_idx_x[j]] - sum(w_x[xlatent_ind[m,1]:xlatent_ind[m,2], j])) * rep(1, nat_x)
+            (1/nat_x[m,j]) * (x[J_x+m,norm_idx_x[j]] - sum(w_x[xlatent_ind[m,1]:xlatent_ind[m,2], j])) * rep(1, nat_x[m,j])
+          
         }
       }
     }
@@ -251,12 +263,15 @@ get_abrm_model <- function() {
           x[i,pois_idx_x[j]] ~ dpois(pop_atoms_x[i]*exp(linear_pred_x[i,pois_idx_x[j]]))
         }
         for(m in 1:(S_x-J_x)) {
+          # Poisson: Use multinomial
+          
           prob_pois_x[(xlatent_ind[m,1]):(xlatent_ind[m,2]),j] <- (pop_atoms_x[(J_x+xlatent_ind[m,1]):(J_x+xlatent_ind[m,2])] * exp(linear_pred_x[(J_x+xlatent_ind[m,1]):(J_x+xlatent_ind[m,2]),pois_idx_x[j]])) /
             sum(pop_atoms_x[(J_x+xlatent_ind[m,1]):(J_x+xlatent_ind[m,2])] * exp(linear_pred_x[(J_x+xlatent_ind[m,1]):(J_x+xlatent_ind[m,2]),pois_idx_x[j]]))
           
           x_latent[xlatent_ind[m,1]:xlatent_ind[m,2],pois_idx_x[j]] ~
             dmulti(size=x[J_x+m,pois_idx_x[j]],
                    prob=prob_pois_x[(xlatent_ind[m,1]):(xlatent_ind[m,2]),j])
+          
         }
       }
     }
@@ -264,10 +279,12 @@ get_abrm_model <- function() {
     if (binom_n_x>0){
       for (j in 1:binom_n_x){
         for(i in 1:J_x) {
+          # Binomial
           x[i,binom_idx_x[j]] ~ dbinom(size = pop_atoms_x[i],
                                        prob = exp(linear_pred_x[i,binom_idx_x[j]])/(1+exp(linear_pred_x[i,binom_idx_x[j]])))
         }
         for(m in 1:(S_x-J_x)) {
+          # Binomial: Use multivariate non-central hypergeometric
           x_latent[xlatent_ind[m,1]:xlatent_ind[m,2], binom_idx_x[j]] ~
             dmfnchypg(total = x[J_x+m,binom_idx_x[j]],
                       odds = exp(linear_pred_x[(J_x+xlatent_ind[m,1]):(J_x+xlatent_ind[m,2]),binom_idx_x[j]]),
@@ -278,13 +295,14 @@ get_abrm_model <- function() {
     
     for (j in 1:p_x){
       for(i in 1:J_x) {
-        temp_x[i,j] <- x[i,j] / pop_atoms_x[i]
+        temp_x[i,j] <- x[i,j] / pop_atoms_x[i]  # Convert to per-capita
       }
       for(i in 1:(D-J_x)) {
-        temp_x[J_x+i,j] <- x_latent[i,j] / pop_atoms_x[J_x+i]
+        temp_x[J_x+i,j] <- x_latent[i,j] / pop_atoms_x[J_x+i]  # Convert to per-capita
       }
     }
     
+    # Reorder X matrices
     for(j in 1:p_x) {
       for(d in 1:D) {
         x_atomord[d,j] <- temp_x[x_reorder[d],j]
@@ -295,33 +313,42 @@ get_abrm_model <- function() {
     ## MODELING Y-GRID COVARIATES ##
     ################################
     
+    # Similar structure for Y covariates
     for(j in 1:p_y) {
       for(d in 1:D) {
+        # Linear predictor (common to all types)
         linear_pred_yx[d,j] <- beta_0_yx[j] + phi_yx[expand_y[d],j]
       }
     }
     
+    
     if (norm_n_y>0){
       for(j in 1:norm_n_y) {
         for(i in 1:J_y) {
+          # Normal
           yx_obs[i,norm_idx_y[j]] ~ dnorm(pop_atoms_y[i] * linear_pred_yx[i,norm_idx_y[j]],
-                                          sd = pop_atoms_y[i] * sqrt(sigma2_yx[norm_idx_y[j]]))
+                                          sd = pop_atoms_y[i] * sqrt(sigma2_yx[j]))
         }
         for(m in 1:(S_y-J_y)) {
-          nat_yx <- length(ylatent_ind[m,1]:ylatent_ind[m,2])
+          # Normal: Use Cong et al. algorithm
+          nat_yx[m,j] <- length(ylatent_ind[m,1]:ylatent_ind[m,2])
+          
           
           mu_norm_yx[(ylatent_ind[m,1]):(ylatent_ind[m,2]), j] <-  pop_atoms_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])] * linear_pred_yx[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2]), norm_idx_y[j]]
           
-          cov_norm_yx[(ylatent_ind[m,1]):(ylatent_ind[m,2]),(ylatent_ind[m,1]):(ylatent_ind[m,2]),j]<- sigma2_yx[norm_idx_y[j]] * diag(pop_atoms_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])]^2)
+          cov_norm_yx[(ylatent_ind[m,1]):(ylatent_ind[m,2]),(ylatent_ind[m,1]):(ylatent_ind[m,2]),j]<- sigma2_yx[j] * diag(pop_atoms_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])]^2)
           
+          # Sample from unconstrained multivariate normal
           w_yx[ylatent_ind[m,1]:ylatent_ind[m,2], j] ~ dmnorm(
             mu_norm_yx[(ylatent_ind[m,1]):(ylatent_ind[m,2]), j],
             cov = cov_norm_yx[(ylatent_ind[m,1]):(ylatent_ind[m,2]),(ylatent_ind[m,1]):(ylatent_ind[m,2]),j]
           )
           
+          # Project onto constraint hyperplane
           yx_latent[ylatent_ind[m,1]:ylatent_ind[m,2], norm_idx_y[j]] <-
             w_yx[ylatent_ind[m,1]:ylatent_ind[m,2],j] +
-            (1/nat_yx) * (yx_obs[J_y+m,norm_idx_y[j]] - sum(w_yx[ylatent_ind[m,1]:ylatent_ind[m,2], j])) * rep(1, nat_yx)
+            (1/nat_yx[m,j]) * (yx_obs[J_y+m,norm_idx_y[j]] - sum(w_yx[ylatent_ind[m,1]:ylatent_ind[m,2], j])) * rep(1, nat_yx[m,j])
+          
         }
       }
     }
@@ -329,9 +356,12 @@ get_abrm_model <- function() {
     if (pois_n_y>0){
       for(j in 1:pois_n_y) {
         for(i in 1:J_y) {
+          # Poisson
           yx_obs[i,pois_idx_y[j]] ~ dpois(pop_atoms_y[i]*exp(linear_pred_yx[i,pois_idx_y[j]]))
         }
         for(m in 1:(S_y-J_y)) {
+          # Poisson: Use multinomial
+          
           prob_pois_yx[(ylatent_ind[m,1]):(ylatent_ind[m,2]),j]<-(pop_atoms_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])] * exp(linear_pred_yx[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2]),pois_idx_y[j]])) /
             sum(pop_atoms_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])] * exp(linear_pred_yx[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2]),pois_idx_y[j]]))
           
@@ -345,10 +375,12 @@ get_abrm_model <- function() {
     if (binom_n_y>0){
       for(j in 1:binom_n_y) {
         for(i in 1:J_y) {
+          # Binomial
           yx_obs[i,binom_idx_y[j]] ~ dbinom(size = pop_atoms_y[i],
                                             prob = exp(linear_pred_yx[i,binom_idx_y[j]])/(1+exp(linear_pred_yx[i,binom_idx_y[j]])))
         }
         for(m in 1:(S_y-J_y)) {
+          # Binomial: Use multivariate non-central hypergeometric
           yx_latent[ylatent_ind[m,1]:ylatent_ind[m,2], binom_idx_y[j]] ~
             dmfnchypg(total = yx_obs[J_y+m,binom_idx_y[j]],
                       odds = exp(linear_pred_yx[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2]),binom_idx_y[j]]),
@@ -359,10 +391,10 @@ get_abrm_model <- function() {
     
     for (j in 1:p_y){
       for(i in 1:J_y) {
-        temp_yx[i,j] <- yx_obs[i,j] / pop_atoms_y[i]
+        temp_yx[i,j] <- yx_obs[i,j] / pop_atoms_y[i]  # Convert to per-capita
       }
       for(i in 1:(D-J_y)) {
-        temp_yx[J_y+i,j] <- yx_latent[i,j] / pop_atoms_y[J_y+i]
+        temp_yx[J_y+i,j] <- yx_latent[i,j] / pop_atoms_y[J_y+i]  # Convert to per-capita
       }
     }
     
@@ -370,17 +402,23 @@ get_abrm_model <- function() {
     ## MODELING Y OUTCOME ##
     #######################
     
+    # Calculate outcome parameters
     for(d in 1:D) {
+      # Linear predictor with covariate effects
       x_effect_sum[d] <- sum(x_atomord[y_to_atom[d], 1:p_x] * beta_y[1:p_x])
       y_effect_sum[d] <- sum(temp_yx[d, 1:p_y] * beta_y[(p_x+1):(p_x+p_y)])
+      
       linear_pred_y[d] <- beta_0_y + x_effect_sum[d] + y_effect_sum[d] + phi_y[expand_y[d]]
     }
     
+    # Observed Y outcome values
     for(i in 1:J_y) {
       if(vartype_y == 1) {
+        # Normal
         y_obs[i] ~ dnorm(pop_atoms_y[i] * linear_pred_y[i],
                          sd = pop_atoms_y[i] * sqrt(sigma2_y))
       } else if(vartype_y == 2) {
+        # Poisson
         y_obs[i] ~ dpois(pop_atoms_y[i]*exp(linear_pred_y[i]))
       } else if(vartype_y == 3) {
         y_obs[i] ~ dbinom(size = pop_atoms_y[i],
@@ -388,9 +426,11 @@ get_abrm_model <- function() {
       }
     }
     
+    # Latent Y outcome values
     for(m in 1:(S_y-J_y)) {
       if(vartype_y == 1) {
-        nat_y <- length(ylatent_ind[m,1]:ylatent_ind[m,2])
+        # Normal: Use Cong et al. algorithm
+        nat_y[m] <- length(ylatent_ind[m,1]:ylatent_ind[m,2])
         
         mu_norm_y[(ylatent_ind[m,1]):(ylatent_ind[m,2])]<- pop_atoms_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])] * linear_pred_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])]
         
@@ -403,9 +443,11 @@ get_abrm_model <- function() {
         
         y_latent[ylatent_ind[m,1]:ylatent_ind[m,2]] <-
           w_y[ylatent_ind[m,1]:ylatent_ind[m,2]] +
-          (1/nat_y) * (y_obs[J_y+m] - sum(w_y[ylatent_ind[m,1]:ylatent_ind[m,2]])) * rep(1, nat_y)
+          (1/nat_y[m]) * (y_obs[J_y+m] - sum(w_y[ylatent_ind[m,1]:ylatent_ind[m,2]])) * rep(1, nat_y[m])
         
       } else if(vartype_y == 2) {
+        # Poisson: Use multinomial
+        
         prob_pois_y[(ylatent_ind[m,1]):(ylatent_ind[m,2])]<-(pop_atoms_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])] * exp(linear_pred_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])])) /
           sum(pop_atoms_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])] * exp(linear_pred_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])]))
         
@@ -414,6 +456,7 @@ get_abrm_model <- function() {
                  prob =prob_pois_y[(ylatent_ind[m,1]):(ylatent_ind[m,2])])
         
       } else if(vartype_y == 3) {
+        # Binomial: Use multivariate non-central hypergeometric
         y_latent[ylatent_ind[m,1]:ylatent_ind[m,2]] ~
           dmfnchypg(total = y_obs[J_y+m],
                     odds = exp(linear_pred_y[(J_y+ylatent_ind[m,1]):(J_y+ylatent_ind[m,2])]),

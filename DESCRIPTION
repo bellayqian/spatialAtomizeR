@@ -1,7 +1,7 @@
 Package: spatialAtomizeR
 Type: Package
 Title: Spatial Analysis with Misaligned Data Using Atom-Based Regression Models
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
     person("Yunzhe", "Qian", email = "yqian@hsph.harvard.edu", role = c("aut", "cre")),
     person("Rachel", "Nethery", email = "rnethery@hsph.harvard.edu", role = "aut")
@@ -9,7 +9,8 @@ Authors@R: c(
 Description: Implements atom-based regression models (ABRM) for analyzing spatially 
     misaligned data. Provides functions for simulating misaligned spatial data, 
     preparing NIMBLE model inputs, running MCMC diagnostics, and comparing different 
-    spatial analysis methods including dasymetric mapping.
+    spatial analysis methods including dasymetric mapping. 
+    Oct 22 Updates: Updated codes for warnings
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -40,3 +41,4 @@ Suggests:
 VignetteBuilder: knitr
 URL: https://github.com/bellayqian/spatialAtomizeR
 BugReports: https://github.com/bellayqian/spatialAtomizeR/issues
+RoxygenNote: 7.3.3
