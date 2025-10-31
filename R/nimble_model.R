@@ -170,47 +170,73 @@ get_abrm_model <- function() {
       beta_y[j] ~ dnorm(0, sd = 1)
     }
     
-    for(j in 1:p_x) {
-      sigma2_x[j] ~ dinvgamma(2, 1)
+    if (norm_n_x>0){
+      for (j in 1:norm_n_x){
+        sigma2_x[j] ~ dinvgamma(2, 1)
+      }
     }
-    for(j in 1:p_y) {
-      sigma2_yx[j] ~ dinvgamma(2, 1)
+    
+    if (norm_n_y>0){
+      for(j in 1:norm_n_y) {
+        sigma2_yx[j] ~ dinvgamma(2, 1)
+      }
     }
     
     if(vartype_y == 1) {
       sigma2_y ~ dinvgamma(2, 1)
     }
     
+    # Spatial random effects for outcome Y
     tau_y ~ dgamma(2, 2)
     phi_y[1:S_y] ~ dcar_normal(adj_y[], weights_y[], num_y[], tau_y)
     
-    for (j in 1:p_x){
-      tau_x[j] ~ dgamma(2, 2)
-      psi_x[1:S_x,j] ~ dcar_normal(adj_x[], weights_x[], num_x[], tau_x[j])
-    }
-    
-    Prec_x[1:p_x,1:p_x] ~ dwish(R_x[1:p_x,1:p_x], df_x)
-    Achol_x[1:p_x,1:p_x] <- chol(inverse(Prec_x[1:p_x,1:p_x]))
-    
-    for(i in 1:S_x){
+    # Spatial random effects for X-grid covariates
+    if (p_x>1){
+      for (j in 1:p_x){
+        tau_x[j] ~ dgamma(2, 2)
+        psi_x[1:S_x,j] ~ dcar_normal(adj_x[], weights_x[], num_x[], tau_x[j])
+      }
+      
+      # Correlation in X spatial effects
+      Prec_x[1:p_x,1:p_x] ~ dwish(R_x[1:p_x,1:p_x], df_x)
+      Achol_x[1:p_x,1:p_x] <- chol(inverse(Prec_x[1:p_x,1:p_x]))
+      
+      for(i in 1:S_x){
+        for(j in 1:p_x) {
+          phi_x[i,j] <- inprod(Achol_x[j,1:p_x], psi_x[i,1:p_x])
+        }
+      }
+    } else{
       for(j in 1:p_x) {
-        phi_x[i,j] <- inprod(Achol_x[j,1:p_x], psi_x[i,1:p_x])
+        tau_x[j] ~ dgamma(2, 2)
+        phi_x[1:S_x,j] ~ dcar_normal(adj_x[], weights_x[], num_x[], tau_x[j])
       }
     }
     
-    for (j in 1:p_y){
-      tau_yx[j] ~ dgamma(2, 2)
-      psi_yx[1:S_y,j] ~ dcar_normal(adj_y[], weights_y[], num_y[], tau_yx[j])
-    }
     
-    Prec_yx[1:p_y,1:p_y] ~ dwish(R_yx[1:p_y,1:p_y], df_yx)
-    Achol_yx[1:p_y,1:p_y] <- chol(inverse(Prec_yx[1:p_y,1:p_y]))
-    
-    for(i in 1:S_y){
+    if (p_y>1){
+      # Spatial random effects for Y-grid covariates
+      for (j in 1:p_y){
+        tau_yx[j] ~ dgamma(2, 2)
+        psi_yx[1:S_y,j] ~ dcar_normal(adj_y[], weights_y[], num_y[], tau_yx[j])
+      }
+      
+      # Correlation in Y spatial effects
+      Prec_yx[1:p_y,1:p_y] ~ dwish(R_yx[1:p_y,1:p_y], df_yx)
+      Achol_yx[1:p_y,1:p_y] <- chol(inverse(Prec_yx[1:p_y,1:p_y]))
+      
+      for(i in 1:S_y){
+        for(j in 1:p_y) {
+          phi_yx[i,j] <- inprod(Achol_yx[j,1:p_y], psi_yx[i,1:p_y])
+        }
+      }
+    } else{
       for(j in 1:p_y) {
-        phi_yx[i,j] <- inprod(Achol_yx[j,1:p_y], psi_yx[i,1:p_y])
+        tau_yx[j] ~ dgamma(2, 2)
+        phi_yx[1:S_y,j] ~ dcar_normal(adj_y[], weights_y[], num_y[], tau_yx[j])
       }
     }
+    
     
     ################################
     ## MODELING X-GRID COVARIATES ##
@@ -405,8 +431,17 @@ get_abrm_model <- function() {
     # Calculate outcome parameters
     for(d in 1:D) {
       # Linear predictor with covariate effects
-      x_effect_sum[d] <- sum(x_atomord[y_to_atom[d], 1:p_x] * beta_y[1:p_x])
-      y_effect_sum[d] <- sum(temp_yx[d, 1:p_y] * beta_y[(p_x+1):(p_x+p_y)])
+      if (p_x==1){
+        x_effect_sum[d] <- x_atomord[y_to_atom[d], 1] * beta_y[1]
+      } else{
+        x_effect_sum[d] <- sum(x_atomord[y_to_atom[d], 1:p_x] * beta_y[1:p_x])
+      }
+      
+      if (p_y==1){
+        y_effect_sum[d] <- temp_yx[d, 1] * beta_y[(p_x+1)]
+      } else{
+        y_effect_sum[d] <- sum(temp_yx[d, 1:p_y] * beta_y[(p_x+1):(p_x+p_y)])
+      }
       
       linear_pred_y[d] <- beta_0_y + x_effect_sum[d] + y_effect_sum[d] + phi_y[expand_y[d]]
     }

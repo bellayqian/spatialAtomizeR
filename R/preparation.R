@@ -15,56 +15,66 @@ prepare_spatial_bookkeeping <- function(data) {
   S_x <- nrow(data$gridx)
   S_y <- nrow(data$gridy)
   
+  ## add an atom-order ID
+  atoms$ID_atomorder<-1:nrow(atoms)
+  
   # Ensure IDs are present
-  gridx$ID <- 1:nrow(gridx)
-  gridy$ID <- 1:nrow(gridy)
+  # gridx$ID <- 1:nrow(gridx)
+  # gridy$ID <- 1:nrow(gridy)
   
   # Identify non-atom grids
+  ## x grids that aren't atoms
+  # x_vars <- c("x", grep("covariate_x_", names(gridx), value = TRUE))
   x_vars <- c(grep("covariate_x_", names(gridx), value = TRUE))
-  x_nonatoms <- atoms$ID_x[which(duplicated(atoms$ID_x) == TRUE)]
+  x_nonatoms <- unique(atoms$ID_x[which(duplicated(atoms$ID_x)==T)])
   x_nonatoms <- x_nonatoms[order(x_nonatoms)]
   J_x <- nrow(gridx) - length(x_nonatoms)
   
+  ## y grids that aren't atoms
   y_vars <- c("y", grep("covariate_y_", names(gridy), value = TRUE))
-  y_nonatoms <- atoms$ID_y[which(duplicated(atoms$ID_y) == TRUE)]
+  y_nonatoms <- unique(atoms$ID_y[which(duplicated(atoms$ID_y)==T)])
   y_nonatoms <- y_nonatoms[order(y_nonatoms)]
   J_y <- nrow(gridy) - length(y_nonatoms)
   
-  # Re-order x and y
-  gridy_yorder <- gridy[c(gridy$ID[-y_nonatoms], y_nonatoms),]
-  names(gridy_yorder)[which(names(gridy_yorder) == 'ID')] <- 'ID_y'
+  # Re-order x and y so that first J_x/J_y units are atom-equivalents
+  y_nonatom_id <- sapply(y_nonatoms,FUN=function(j) which(gridy$ID==j))
+  gridy_yorder <- gridy[c((1:S_y)[-y_nonatom_id], y_nonatom_id),]
+  names(gridy_yorder)[which(names(gridy_yorder)=='ID')] <- 'ID_y'
   gridy_yorder$ID_yorder <- 1:nrow(gridy_yorder)
   
-  gridx_xorder <- gridx[c(gridx$ID[-x_nonatoms], x_nonatoms),]
-  names(gridx_xorder)[which(names(gridx_xorder) == 'ID')] <- 'ID_x'
+  x_nonatom_id <- sapply(x_nonatoms,FUN=function(j) which(gridx$ID==j))
+  gridx_xorder <- gridx[c((1:S_x)[-x_nonatom_id], x_nonatom_id),]
+  names(gridx_xorder)[which(names(gridx_xorder)=='ID')] <- 'ID_x'
   gridx_xorder$ID_xorder <- 1:nrow(gridx_xorder)
   
-  # Prepare ID crosswalk
-  IDxwalk <- merge(st_drop_geometry(atoms), st_drop_geometry(gridy_yorder), by = 'ID_y')
-  IDxwalk <- merge(IDxwalk, st_drop_geometry(gridx_xorder), by = 'ID_x')
+  # Prepare ID crosswalk. Link the new IDs into the atoms dataset so we can find
+  # correspondence between new Y grid ids and atoms
+  IDxwalk <- merge(st_drop_geometry(atoms), st_drop_geometry(gridy_yorder), by='ID_y')
+  IDxwalk <- merge(IDxwalk, st_drop_geometry(gridx_xorder), by='ID_x')
   
-  # Prepare mapping vectors
+  # Prepare mapping vectors, map atoms to grids
+  ## get x/y_to_atom
   x_to_atom <- IDxwalk$ID_atomorder[order(IDxwalk$ID_xorder, IDxwalk$ID_atomorder)]
   y_to_atom <- IDxwalk$ID_atomorder[order(IDxwalk$ID_yorder, IDxwalk$ID_atomorder)]
   
+  ## get expand_x/y
   expand_x <- IDxwalk$ID_xorder[order(IDxwalk$ID_xorder)]
   expand_y <- IDxwalk$ID_yorder[order(IDxwalk$ID_yorder)]
   
   # Prepare latent indices
+  ## get x/y_latentind
   IDxwalk <- IDxwalk[order(IDxwalk$ID_xorder, IDxwalk$ID_atomorder),]
-  x_nonatoms <- IDxwalk$ID_xorder[which(duplicated(IDxwalk$ID_xorder) == TRUE)]
+  x_nonatoms <- unique(IDxwalk$ID_xorder[which(duplicated(IDxwalk$ID_xorder)==T)])
   x_latentind <- matrix(0, length(x_nonatoms), 2)
   for (i in 1:length(x_nonatoms)) {
-    x_latentind[i,] <- c(min(which(IDxwalk$ID_xorder == x_nonatoms[i])), 
-                         max(which(IDxwalk$ID_xorder == x_nonatoms[i]))) - J_x
+    x_latentind[i,] <- c(min(which(IDxwalk$ID_xorder==x_nonatoms[i])), max(which(IDxwalk$ID_xorder==x_nonatoms[i]))) - J_x
   }
   
   IDxwalk <- IDxwalk[order(IDxwalk$ID_yorder, IDxwalk$ID_atomorder),]
-  y_nonatoms <- IDxwalk$ID_yorder[which(duplicated(IDxwalk$ID_yorder) == TRUE)]
+  y_nonatoms <- unique(IDxwalk$ID_yorder[which(duplicated(IDxwalk$ID_yorder)==T)])
   y_latentind <- matrix(0, length(y_nonatoms), 2)
   for (i in 1:length(y_nonatoms)) {
-    y_latentind[i,] <- c(min(which(IDxwalk$ID_yorder == y_nonatoms[i])), 
-                         max(which(IDxwalk$ID_yorder == y_nonatoms[i]))) - J_y
+    y_latentind[i,] <- c(min(which(IDxwalk$ID_yorder==y_nonatoms[i])), max(which(IDxwalk$ID_yorder==y_nonatoms[i]))) - J_y
   }
   
   # Prepare x_reorder
@@ -73,15 +83,13 @@ prepare_spatial_bookkeeping <- function(data) {
   IDxwalk <- IDxwalk[order(IDxwalk$ID_atomorder),]
   x_reorder <- IDxwalk$xro
   
-  return(list(
-    J_x = J_x, J_y = J_y, 
-    x_to_atom = x_to_atom, y_to_atom = y_to_atom,
-    expand_x = expand_x, expand_y = expand_y, 
-    x_latentind = x_latentind, y_latentind = y_latentind, 
-    x_reorder = x_reorder,
-    gridy_yorder = gridy_yorder, gridx_xorder = gridx_xorder,
-    x_vars = x_vars, y_vars = y_vars
-  ))
+  return(list(J_x = J_x, J_y = J_y, 
+              x_to_atom = x_to_atom, y_to_atom = y_to_atom,
+              expand_x = expand_x, expand_y = expand_y, 
+              x_latentind = x_latentind, y_latentind = y_latentind, 
+              x_reorder = x_reorder,
+              gridy_yorder = gridy_yorder, gridx_xorder = gridx_xorder,
+              x_vars = x_vars, y_vars = y_vars))
 }
 
 #' Prepare Adjacency Matrices
@@ -122,8 +130,8 @@ prepare_adjacency_matrices <- function(gridy_yorder, gridx_xorder) {
 #' @importFrom stats rWishart rnorm
 #' @importFrom nimble as.carAdjacency
 prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
-                                  norm_idx_x = 1, pois_idx_x = 2, binom_idx_x = 3,
-                                  norm_idx_y = 1, pois_idx_y = 2, binom_idx_y = 3,
+                                  norm_idx_x = NULL, pois_idx_x = NULL, binom_idx_x = NULL,
+                                  norm_idx_y = NULL, pois_idx_y = NULL, binom_idx_y = NULL,
                                   dist_y = 2) {
   # Basic dimensions
   gridy_yorder <- bookkeeping$gridy_yorder
@@ -261,7 +269,7 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
   
   data <- list(
     x = covar_x,     # X covariates
-    yx_obs = covar_y[, 1:p_y],  # Add explicit variables
+    yx_obs = covar_y[, 1:p_y, drop=F],  # Add explicit variables
     y_obs = covar_y[, p_y + 1]  # Y outcome
   )
   
@@ -278,12 +286,12 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     tau_yx = rep(1, p_y),
     
     # Matrices for spatial correlation
-    Prec_x = initialize_precision(p_x),
-    Prec_yx = initialize_precision(p_y),
+    # Prec_x = initialize_precision(p_x),
+    # Prec_yx = initialize_precision(p_y),
     
     # Spatial random effects
-    psi_x = matrix(rnorm(S_x * p_x, 0, 0.1), nrow = S_x, ncol = p_x),
-    psi_yx = matrix(rnorm(S_y * p_y, 0, 0.1), nrow = S_y, ncol = p_y),
+    # psi_x = matrix(rnorm(S_x * p_x, 0, 0.1), nrow = S_x, ncol = p_x),
+    # psi_yx = matrix(rnorm(S_y * p_y, 0, 0.1), nrow = S_y, ncol = p_y),
     phi_y = rnorm(S_y, 0, 0.1),
     phi_yx = matrix(rnorm(S_y * p_y, 0, 0.1), nrow = S_y, ncol = p_y),
     phi_x = matrix(rnorm(S_x * p_x, 0, 0.1), nrow = S_x, ncol = p_x),
@@ -294,6 +302,16 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     yx_latent = matrix(1, nrow = D - constants$J_y, ncol = p_y)
     
   )
+  
+  if (p_x>1){
+    inits$psi_x <- matrix(rnorm(S_x * p_x, 0, 0.1), nrow = S_x, ncol = p_x)
+    inits$Prec_x <- initialize_precision(p_x)
+  }
+  
+  if (p_y>1){
+    inits$psi_yx <- matrix(rnorm(S_y * p_y, 0, 0.1), nrow = S_y, ncol = p_y)
+    inits$Prec_yx <- initialize_precision(p_y)
+  }
   
   if (length(norm_idx_x)>0){
     inits$sigma2_x<-rep(1,length(norm_idx_x))
@@ -359,13 +377,14 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     for(m in 1:(S_x-constants$J_x)) {
       total <- data$x[constants$J_x + m, j]
       n_atoms <- diff(constants$xlatent_ind[m,]) + 1
+      pops_atoms<-constants$pop_atoms_x[constants$J_x+(constants$xlatent_ind[m,1]:constants$xlatent_ind[m,2])]
       
       if (j %in% constants$norm_idx_x){
         ## if variable is normal, divide grid total evenly between atoms
         inits$x_latent[constants$xlatent_ind[m,1]:constants$xlatent_ind[m,2], j] <- total/n_atoms
       } else{
         ## if variable is count, divide grid total using multinomial
-        inits$x_latent[constants$xlatent_ind[m,1]:constants$xlatent_ind[m,2], j] <- rmultinom(n=1,size=total,prob=rep(1/n_atoms,n_atoms))
+        inits$x_latent[constants$xlatent_ind[m,1]:constants$xlatent_ind[m,2], j] <- rmultinom(n=1,size=total,prob=pops_atoms/sum(pops_atoms))
       }
     }
   }
@@ -374,10 +393,12 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
   for(m in 1:(S_y-constants$J_y)) {
     total<- data$y_obs[constants$J_y + m]
     n_atoms <- diff(constants$ylatent_ind[m,]) + 1
+    pops_atoms<-constants$pop_atoms_y[constants$J_y+(constants$ylatent_ind[m,1]:constants$ylatent_ind[m,2])]
+    
     if (dist_y==1){
       inits$y_latent[constants$ylatent_ind[m,1]:constants$ylatent_ind[m,2]] <- total/n_atoms
     } else{
-      inits$y_latent[constants$ylatent_ind[m,1]:constants$ylatent_ind[m,2]] <- rmultinom(n=1,size=total,prob=rep(1/n_atoms,n_atoms))
+      inits$y_latent[constants$ylatent_ind[m,1]:constants$ylatent_ind[m,2]] <- rmultinom(n=1,size=total,prob=pops_atoms/sum(pops_atoms))
     }
   }
   
@@ -386,13 +407,16 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     for(m in 1:(S_y-constants$J_y)) {
       total <- data$yx_obs[constants$J_y + m, j]
       n_atoms <- diff(constants$ylatent_ind[m,]) + 1
-      if (j %in% norm_idx_y){
+      pops_atoms<-constants$pop_atoms_y[constants$J_y+(constants$ylatent_ind[m,1]:constants$ylatent_ind[m,2])]
+      
+      if (j %in% constants$norm_idx_y){
         inits$yx_latent[constants$ylatent_ind[m,1]:constants$ylatent_ind[m,2], j] <- total/n_atoms
       } else{
-        inits$yx_latent[constants$ylatent_ind[m,1]:constants$ylatent_ind[m,2], j] <- rmultinom(n=1,size=total,prob=rep(1/n_atoms,n_atoms))
+        inits$yx_latent[constants$ylatent_ind[m,1]:constants$ylatent_ind[m,2], j] <- rmultinom(n=1,size=total,prob=pops_atoms/sum(pops_atoms))
       }
     }
   }
+  
   
   return(list(
     constants = constants,
