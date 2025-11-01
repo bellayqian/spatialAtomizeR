@@ -6,6 +6,8 @@
 \alias{spatialAtomizeR}
 \title{spatialAtomizeR: Spatial Analysis with Misaligned Data Using Atom-Based Regression Models}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Implements atom-based regression models (ABRM) for analyzing spatially misaligned data. Provides functions for simulating misaligned spatial data, preparing NIMBLE model inputs, running MCMC diagnostics, and comparing different spatial analysis methods including dasymetric mapping. Oct 22 Updates: Updated codes for warnings
 
 Implements atom-based Bayesian regression methods (ABRM) for spatial data 
@@ -29,7 +31,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Yunzhe Qian \email{yqian@hsph.harvard.edu}
+\strong{Maintainer}: Yunzhe Qian \email{qyzanemos@gmail.com}
 
 Authors:
 \itemize{

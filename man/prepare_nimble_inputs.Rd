@@ -8,12 +8,12 @@ prepare_nimble_inputs(
   bookkeeping,
   adjacency,
   data,
-  norm_idx_x = 1,
-  pois_idx_x = 2,
-  binom_idx_x = 3,
-  norm_idx_y = 1,
-  pois_idx_y = 2,
-  binom_idx_y = 3,
+  norm_idx_x = NULL,
+  pois_idx_x = NULL,
+  binom_idx_x = NULL,
+  norm_idx_y = NULL,
+  pois_idx_y = NULL,
+  binom_idx_y = NULL,
   dist_y = 2
 )
 }
