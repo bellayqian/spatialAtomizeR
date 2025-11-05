@@ -349,11 +349,6 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     cat("Length of pop_atoms:", length(constants$pop_atoms), "\n")
     
     # Check population alignment
-    if(length(constants$pop_atoms) != D) {
-      cat("Warning: pop_atoms length doesn't match D!\n")
-      return(FALSE)
-    }
-    
     # Check y_to_atom mapping
     if(any(constants$y_to_atom > D) || any(constants$y_to_atom < 1)) {
       cat("Warning: y_to_atom contains invalid indices!\n")

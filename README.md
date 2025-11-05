@@ -21,40 +21,46 @@ devtools::install_github("bellayqian/spatialAtomizeR")
 
 ## Quick Start
 
+### Basic Workflow
+
 ```r
 library(spatialAtomizeR)
+library(nimble)  # Required for ABRM models
 
-# 1. Simulate misaligned spatial data
+# 1. Simulate misaligned spatial data with full parameter specification
 sim_data <- simulate_misaligned_data(
   seed = 42,
-  res1 = c(5, 5),  # Y grid resolution
-  res2 = c(10, 10), # X grid resolution
+  res1 = c(5, 5),    # Y grid resolution (coarser)
+  res2 = c(10, 10),  # X grid resolution (finer)
   dist_covariates_x = c('normal', 'poisson', 'binomial'),
   dist_covariates_y = c('normal', 'poisson', 'binomial'),
   dist_y = 'poisson',
-  x_correlation = 0.5,
-  y_correlation = 0.5,
-  beta_x = c(-0.03, 0.1, -0.2),
-  beta_y = c(0.03, -0.1, 0.2)
+  x_intercepts = c(4, -1, -1),      # Intercepts for X covariates
+  y_intercepts = c(4, -1, -1),      # Intercepts for Y covariates
+  x_correlation = 0.5,              # Spatial correlation for X
+  y_correlation = 0.5,              # Spatial correlation for Y
+  beta0_y = -1,                     # Outcome intercept
+  beta_x = c(-0.03, 0.1, -0.2),    # Coefficients for X covariates
+  beta_y = c(0.03, -0.1, 0.2)      # Coefficients for Y covariates
 )
 
 # 2. Get NIMBLE model code
 model_code <- get_abrm_model()
 
-# 3. Run ABRM
+# 3. Run ABRM analysis
 results <- run_abrm(
   sim_data = sim_data,
   model_code = model_code,
-  norm_idx_x = 1,
-  pois_idx_x = 2,
-  binom_idx_x = 3,
-  norm_idx_y = 1,
-  pois_idx_y = 2,
-  binom_idx_y = 3,
-  dist_y = 2,  # 1=normal, 2=poisson, 3=binomial
-  niter = 50000,
-  nburnin = 30000,
-  nchains = 2
+  norm_idx_x = 1,   # Index of normal-distributed X covariate
+  pois_idx_x = 2,   # Index of Poisson-distributed X covariate
+  binom_idx_x = 3,  # Index of binomial-distributed X covariate
+  norm_idx_y = 1,   # Index of normal-distributed Y covariate
+  pois_idx_y = 2,   # Index of Poisson-distributed Y covariate
+  binom_idx_y = 3,  # Index of binomial-distributed Y covariate
+  dist_y = 2,       # Outcome distribution: 1=normal, 2=poisson, 3=binomial
+  niter = 50000,    # MCMC iterations
+  nburnin = 30000,  # Burn-in iterations
+  nchains = 2       # Number of chains
 )
 
 # 4. View results
@@ -67,6 +73,7 @@ print(results$parameter_estimates)
 - Generate spatially correlated variables with customizable distributions
 - Create non-nested misaligned spatial grids
 - Specify true parameter values for validation
+- Control intercepts and correlations independently
 
 ### Model Fitting
 - Atom-based Bayesian regression with NIMBLE
@@ -88,35 +95,105 @@ print(results$parameter_estimates)
 
 | Function | Description |
 |----------|-------------|
-| `simulate_misaligned_data()` | Generate simulated spatial data |
+| `simulate_misaligned_data()` | Generate simulated spatial data with full parameter control |
 | `get_abrm_model()` | Get NIMBLE model specification |
-| `run_abrm()` | Run ABRM analysis |
+| `run_abrm()` | Run ABRM analysis (wrapper function) |
+| `run_nimble_model()` | Run NIMBLE MCMC with diagnostics |
 | `run_both_methods()` | Compare ABRM and dasymetric mapping |
 | `run_sensitivity_analysis()` | Conduct sensitivity analysis |
 | `prepare_spatial_bookkeeping()` | Prepare spatial indices |
+| `prepare_adjacency_matrices()` | Create spatial adjacency structures |
 | `prepare_nimble_inputs()` | Prepare NIMBLE model inputs |
 
-## Example Workflow
+## Data Simulation Parameters
+
+The `simulate_misaligned_data()` function accepts the following parameters:
+
+**Grid Specifications:**
+- `res1`: Resolution for Y grid (coarser grid), e.g., `c(5, 5)`
+- `res2`: Resolution for X grid (finer grid), e.g., `c(10, 10)`
+- `seed`: Random seed for reproducibility
+
+**Covariate Distributions:**
+- `dist_covariates_x`: Vector of distribution types for X covariates (e.g., `c('normal', 'poisson', 'binomial')`)
+- `dist_covariates_y`: Vector of distribution types for Y covariates
+- `dist_y`: Distribution type for outcome variable (`'normal'`, `'poisson'`, or `'binomial'`)
+
+**Critical Parameters (Often Overlooked):**
+- `x_intercepts`: Intercepts for X covariates (length must match `dist_covariates_x`)
+- `y_intercepts`: Intercepts for Y covariates (length must match `dist_covariates_y`)
+- `beta0_y`: Intercept for the outcome model
+- `beta_x`: True coefficients for X covariates in outcome model
+- `beta_y`: True coefficients for Y covariates in outcome model
+
+**Spatial Correlation:**
+- `x_correlation`: Correlation parameter for X-grid spatial effects (0 to 1)
+- `y_correlation`: Correlation parameter for Y-grid spatial effects (0 to 1)
+
+## Distribution Type Indices
+
+When running models, you need to specify which covariates follow which distributions:
+
+- `norm_idx_x`, `norm_idx_y`: Indices of normally-distributed covariates
+- `pois_idx_x`, `pois_idx_y`: Indices of Poisson-distributed covariates
+- `binom_idx_x`, `binom_idx_y`: Indices of binomially-distributed covariates
+- `dist_y`: Outcome distribution type (1=normal, 2=poisson, 3=binomial)
+
+**Example:** If `dist_covariates_x = c('normal', 'poisson', 'binomial')`, then:
+- `norm_idx_x = 1` (first covariate)
+- `pois_idx_x = 2` (second covariate)
+- `binom_idx_x = 3` (third covariate)
+
+## Example: Comprehensive Sensitivity Analysis
 
 ```r
-# Sensitivity analysis across correlation structures
+library(spatialAtomizeR)
+library(nimble)
+
+# Define base parameters
+base_params <- list(
+  res1 = c(5, 5),
+  res2 = c(10, 10),
+  dist_covariates_x = c('normal','poisson','binomial'),
+  dist_covariates_y = c('normal','poisson','binomial'),
+  dist_y = 'poisson',
+  x_intercepts = c(4, -1, -1),
+  y_intercepts = c(4, -1, -1),
+  beta0_y = -1,
+  beta_x = c(-0.03, 0.1, -0.2),
+  beta_y = c(0.03, -0.1, 0.2)
+)
+
+# Get model code
+model_code <- get_abrm_model()
+
+# Run sensitivity analysis across correlation structures
 sensitivity_results <- run_sensitivity_analysis(
   correlation_grid = c(0.2, 0.6),
   n_sims_per_setting = 3,
-  model_code = get_abrm_model(),
+  base_params = base_params,
+  model_code = model_code,
   base_seed = 123
 )
 
-# View summary
+# View summary by correlation
 print(sensitivity_results$summary_by_correlation)
+
+# Access detailed results
+write.csv(
+  sensitivity_results$combined_results,
+  "sensitivity_analysis_full_results.csv"
+)
 ```
 
 ## Requirements
 
 - R >= 4.0.0
-- NIMBLE for MCMC sampling
-- Spatial packages: sp, sf, spdep
-- BiasedUrn for multivariate hypergeometric sampling
+- **nimble** for MCMC sampling (must be loaded)
+- Spatial packages: **sp**, **sf**, **spdep**, **raster**
+- **BiasedUrn** for multivariate hypergeometric sampling
+- MASS for multivariate normal generation
+- dplyr, tidyr for data manipulation
 
 ## Funding and Project Information
 
@@ -130,7 +207,7 @@ This work was funded by the Robert Wood Johnson Foundation, Grant 81746. Project
 
 **Project Team and Collaborators:**
 - Yunzhe Qian (Bella), MS (Research Assistant, Dept of Biostatistics, HSPH)
-- Rachel Nethery, PhD (Assistant Professor, Dept of Biostatistics, HSPH)
+- Rachel Nethery, PhD (Associate Professor, Dept of Biostatistics, HSPH)
 - Nancy Krieger, PhD (Professor, Department of Social and Behavioral Sciences (SBS), HSPH)
 - Nykesha Johnson, MPH (Statistical Data Analyst/Data Manager, SBS, HSPH)
 
@@ -138,7 +215,7 @@ This work was funded by the Robert Wood Johnson Foundation, Grant 81746. Project
 
 If you use this package, please cite:
 
-Qian, Y., & Nethery, R. (2025). spatialAtomizeR: Atom-Based Regression Models for Misaligned Spatial Data. R package version 0.2.0.
+Qian, Y., & Nethery, R. (2025). spatialAtomizeR: Atom-Based Regression Models for Misaligned Spatial Data. R package version 0.2.1.
 
 ## About
 
@@ -146,15 +223,16 @@ This work is an extension of:
 
 Nethery, R. C., Testa, C., Tabb, L. P., Hanage, W. P., Chen, J. T., & Krieger, N. (2023). Addressing spatial misalignment in population health research: a case study of US congressional district political metrics and county health data. MedRxiv.
 
-Spatial misalignment—which occurs when data on multiple variables are collected using mismatched geographic boundary definitions—is a longstanding challenge in public health research. For instance, congressional districts can cut across multiple counties, and environmental hazard zones may cross census tract boundaries, in both cases creating intersecting areas that complicate efforts to study the relationships between health outcomes and their social, political, and environmental determinants.
+**Spatial misalignment**—which occurs when data on multiple variables are collected using mismatched geographic boundary definitions—is a longstanding challenge in public health research. For instance, congressional districts can cut across multiple counties, and environmental hazard zones may cross census tract boundaries, in both cases creating intersecting areas that complicate efforts to study the relationships between health outcomes and their social, political, and environmental determinants.
 
-Atom-based regression models (ABRM) offer a promising alternative by using atoms, the intersecting areas of all relevant units, as the fundamental units of analysis. By preserving the original spatial resolution of the data, ABRM account for uncertainty in statistical relationships while offering a robust method for handling misaligned data.
+**Atom-based regression models (ABRM)** offer a promising alternative by using atoms—the intersecting areas of all relevant units—as the fundamental units of analysis. By preserving the original spatial resolution of the data, ABRM account for uncertainty in statistical relationships while offering a robust method for handling misaligned data.
 
 ## Getting Help
 
-- Report bugs at: https://github.com/bellayqian/spatialAtomizeR/issues
-- Check documentation: `?spatialAtomizeR`
-- See vignette: `vignette("getting-started", package = "spatialAtomizeR")`
+- **Report bugs**: https://github.com/bellayqian/spatialAtomizeR/issues
+- **Documentation**: `?spatialAtomizeR`
+- **Vignette**: `vignette("getting-started", package = "spatialAtomizeR")`
+- **Function help**: `?simulate_misaligned_data`, `?run_abrm`, etc.
 
 ## License
 
