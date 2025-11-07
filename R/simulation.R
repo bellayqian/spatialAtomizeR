@@ -35,8 +35,6 @@ gen_correlated_spat <- function(W, n_vars, rho = 0.6, var_spat = 1, correlation 
 
 #' Simulate Misaligned Spatial Data
 #'
-#' @param res1 Resolution for coarser grid (default = c(5, 5))
-#' @param res2 Resolution for finer grid (default = c(10, 10))
 #' @param seed Random seed (default = 2)
 #' @param dist_covariates_x Distribution types for X covariates
 #' @param dist_covariates_y Distribution types for Y covariates
@@ -55,8 +53,7 @@ gen_correlated_spat <- function(W, n_vars, rho = 0.6, var_spat = 1, correlation 
 #' @importFrom spdep poly2nb nb2mat
 #' @importFrom raster intersect
 #' @export
-simulate_misaligned_data <- function(res1 = c(5, 5), res2 = c(10, 10),
-                                     seed = 2,
+simulate_misaligned_data <- function(seed = 2,
                                      dist_covariates_x = c('normal','poisson','binomial'),
                                      dist_covariates_y = c('normal','poisson','binomial'),
                                      dist_y = 'poisson',
@@ -71,6 +68,9 @@ simulate_misaligned_data <- function(res1 = c(5, 5), res2 = c(10, 10),
   
   n_covariates_x <- length(dist_covariates_x)
   n_covariates_y <- length(dist_covariates_y)
+  
+  res1 <- c(5, 5)    # Y grid resolution (coarser)
+  res2 <- c(10, 10)  # X grid resolution (finer)
   
   # Create spatial grids
   grid1 <- sp::GridTopology(cellcentre.offset = c(0.5, 0.5),

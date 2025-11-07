@@ -4,10 +4,10 @@ Bayesian Spatial Regression with Misaligned Data
 
 ## Overview
 
-`spatialAtomizeR` implements atom-based Bayesian regression methods (ABRM) for spatial data with misaligned grids. The package handles situations where:
+`spatialAtomizeR` implements Bayesian atom-based regression methods (ABRM) for assessing associations between spatially-misaligned variables, i.e., variables measured over two distinct and non-nested sets of spatial areas. The ABRM approach does not require any a priori re-alignment of the variables. This package uses Nimble under the hood for flexible and efficient Bayesian implementation. The package handles situations where:
 
-- Outcome data and covariates are available on different spatial grids
-- The spatial grids are non-nested (misaligned)
+- Outcome data and some covariates are measured on one spatial scale (called the "Y-grid"), while the remaining covariates are measured on a different spatial scale (called the "X-grid")
+- The areas comprising the two spatial scales are misaligned, i.e., have mismatched boundaries, and neither scale is fully nested within the other
 - Variables follow different distributions (normal, Poisson, binomial)
 
 ## Installation
@@ -30,8 +30,6 @@ library(nimble)  # Required for ABRM models
 # 1. Simulate misaligned spatial data with full parameter specification
 sim_data <- simulate_misaligned_data(
   seed = 42,
-  res1 = c(5, 5),    # Y grid resolution (coarser)
-  res2 = c(10, 10),  # X grid resolution (finer)
   dist_covariates_x = c('normal', 'poisson', 'binomial'),
   dist_covariates_y = c('normal', 'poisson', 'binomial'),
   dist_y = 'poisson',
@@ -70,15 +68,14 @@ print(results$parameter_estimates)
 ## Main Features
 
 ### Data Simulation
-- Generate spatially correlated variables with customizable distributions
-- Create non-nested misaligned spatial grids
+- Create two spatial grids ("X-grid" and "Y-grid") with non-nested spatial misalignment
+- Generate synthetic spatially correlated variables with customizable distributions over each spatial grid
 - Specify true parameter values for validation
-- Control intercepts and correlations independently
 
 ### Model Fitting
 - Atom-based Bayesian regression with NIMBLE
 - Support for mixed-type variables (normal, Poisson, binomial)
-- Multivariate CAR models for spatial correlation
+- Multivariate CAR models to allow for information-sharing over space and across variables
 - Automatic convergence diagnostics
 
 ### Method Comparison
@@ -109,22 +106,20 @@ print(results$parameter_estimates)
 
 The `simulate_misaligned_data()` function accepts the following parameters:
 
-**Grid Specifications:**
-- `res1`: Resolution for Y grid (coarser grid), e.g., `c(5, 5)`
-- `res2`: Resolution for X grid (finer grid), e.g., `c(10, 10)`
+**Reproducibility Parameters:**
 - `seed`: Random seed for reproducibility
 
 **Covariate Distributions:**
-- `dist_covariates_x`: Vector of distribution types for X covariates (e.g., `c('normal', 'poisson', 'binomial')`)
-- `dist_covariates_y`: Vector of distribution types for Y covariates
+- `dist_covariates_x`: Vector of distribution types for X-grid covariates (e.g., `c('normal', 'poisson', 'binomial')`)
+- `dist_covariates_y`: Vector of distribution types for Y-grid covariates
 - `dist_y`: Distribution type for outcome variable (`'normal'`, `'poisson'`, or `'binomial'`)
 
 **Critical Parameters (Often Overlooked):**
-- `x_intercepts`: Intercepts for X covariates (length must match `dist_covariates_x`)
-- `y_intercepts`: Intercepts for Y covariates (length must match `dist_covariates_y`)
+- `x_intercepts`: Intercepts for X-grid covariates (length must match `dist_covariates_x`)
+- `y_intercepts`: Intercepts for Y-grid covariates (length must match `dist_covariates_y`)
 - `beta0_y`: Intercept for the outcome model
-- `beta_x`: True coefficients for X covariates in outcome model
-- `beta_y`: True coefficients for Y covariates in outcome model
+- `beta_x`: True coefficients for X-grid covariates in outcome model
+- `beta_y`: True coefficients for Y-grid covariates in outcome model
 
 **Spatial Correlation:**
 - `x_correlation`: Correlation parameter for X-grid spatial effects (0 to 1)
@@ -132,7 +127,7 @@ The `simulate_misaligned_data()` function accepts the following parameters:
 
 ## Distribution Type Indices
 
-When running models, you need to specify which covariates follow which distributions:
+When running ABRM models, you need to specify which covariates follow which distributions:
 
 - `norm_idx_x`, `norm_idx_y`: Indices of normally-distributed covariates
 - `pois_idx_x`, `pois_idx_y`: Indices of Poisson-distributed covariates
@@ -152,8 +147,6 @@ library(nimble)
 
 # Define base parameters
 base_params <- list(
-  res1 = c(5, 5),
-  res2 = c(10, 10),
   dist_covariates_x = c('normal','poisson','binomial'),
   dist_covariates_y = c('normal','poisson','binomial'),
   dist_y = 'poisson',
