@@ -5,8 +5,6 @@
 \title{Simulate Misaligned Spatial Data}
 \usage{
 simulate_misaligned_data(
-  res1 = c(5, 5),
-  res2 = c(10, 10),
   seed = 2,
   dist_covariates_x = c("normal", "poisson", "binomial"),
   dist_covariates_y = c("normal", "poisson", "binomial"),
@@ -21,10 +19,6 @@ simulate_misaligned_data(
 )
 }
 \arguments{
-\item{res1}{Resolution for coarser grid (default = c(5, 5))}
-
-\item{res2}{Resolution for finer grid (default = c(10, 10))}
-
 \item{seed}{Random seed (default = 2)}
 
 \item{dist_covariates_x}{Distribution types for X covariates}
