@@ -36,16 +36,18 @@ gen_correlated_spat <- function(W, n_vars, rho = 0.6, var_spat = 1, correlation 
 #' Simulate Misaligned Spatial Data
 #'
 #' @param seed Random seed (default = 2)
-#' @param dist_covariates_x Distribution types for X covariates
-#' @param dist_covariates_y Distribution types for Y covariates
-#' @param dist_y Distribution type for outcome
+#' @param dist_covariates_x Vector specifying distribution type for each synthetic X-grid covariate ('poisson', 'binomial', or 'normal')
+#' @param dist_covariates_y Vector specifying distribution type for each synthetic Y-grid covariate ('poisson', 'binomial', or 'normal')
+#' @param dist_y Distribution type for synthetic outcome variable (one of 'poisson', 'binomial', or 'normal')
 #' @param x_intercepts Intercepts for X covariates
 #' @param y_intercepts Intercepts for Y covariates
-#' @param x_correlation Correlation structure for X (default = 0.5)
-#' @param y_correlation Correlation structure for Y (default = 0.5)
+#' @param rho_x Spatial correlation parameter for X-grid covariates (0 to 1 with higher values yielding more spatial correlation, default = 0.6)
+#' @param rho_y Spatial correlation parameter for Y-grid covariates and outcome (0 to 1 with higher values yielding more spatial correlation, default = 0.6)
+#' @param x_correlation Between-variable correlation for all pairs of X-grid covariates (default = 0.5)
+#' @param y_correlation Between-variable correlation for all pairs of Y-grid covariates (default = 0.5)
 #' @param beta0_y Intercept for outcome model
-#' @param beta_x Coefficients for X covariates
-#' @param beta_y Coefficients for Y covariates
+#' @param beta_x Outcome model coefficients for X-grid covariates
+#' @param beta_y Outcome model coefficients for Y-grid covariates
 #'
 #' @return List containing gridy, gridx, atoms, and true_params
 #' @importFrom sp GridTopology SpatialGrid
@@ -59,6 +61,8 @@ simulate_misaligned_data <- function(seed = 2,
                                      dist_y = 'poisson',
                                      x_intercepts = rep(0, 3),
                                      y_intercepts = rep(0, 3),
+                                     rho_x = 0.6,
+                                     rho_y = 0.6,
                                      x_correlation = 0.5, 
                                      y_correlation = 0.5,
                                      beta0_y = NULL,
@@ -140,7 +144,7 @@ simulate_misaligned_data <- function(seed = 2,
   W_atoms <- spdep::nb2mat(neighbors_atoms, style = "B", zero.policy = TRUE)
   
   # Generate X covariates at atom level
-  x_atom_results <- gen_correlated_spat(W_atoms, n_covariates_x, correlation = x_correlation)
+  x_atom_results <- gen_correlated_spat(W_atoms, n_covariates_x, correlation = x_correlation, rho=rho_x)
   
   for(i in 1:n_covariates_x) {
     if (dist_covariates_x[i] == 'poisson') {
@@ -162,7 +166,7 @@ simulate_misaligned_data <- function(seed = 2,
   }
   
   # Generate Y covariates at atom level
-  y_atom_results <- gen_correlated_spat(W_atoms, n_covariates_y + 1, correlation = y_correlation)
+  y_atom_results <- gen_correlated_spat(W_atoms, n_covariates_y + 1, correlation = y_correlation, rho = rho_y)
   
   for(i in 1:n_covariates_y) {
     if (dist_covariates_y[i] == 'poisson') {
@@ -184,7 +188,7 @@ simulate_misaligned_data <- function(seed = 2,
   }
   
   # Generate atom-level outcome
-  outcome_re <- gen_correlated_spat(W_atoms, 1, correlation = 1)
+  outcome_re <- gen_correlated_spat(W_atoms, 1, correlation = 1, rho = rho_y)
   linear_pred_y_atom <- rep(beta0_y, nrow(atoms))
   
   # Add X covariate effects

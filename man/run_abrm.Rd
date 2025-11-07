@@ -5,8 +5,11 @@
 \title{Run ABRM Analysis}
 \usage{
 run_abrm(
-  sim_data,
+  gridx,
+  gridy,
+  atoms,
   model_code,
+  true_params = NULL,
   norm_idx_x = NULL,
   pois_idx_x = NULL,
   binom_idx_x = NULL,
@@ -24,9 +27,15 @@ run_abrm(
 )
 }
 \arguments{
-\item{sim_data}{List of data elements to be used in the ABRM, structured like the output from the simulate_misaligned_data() function. The first element of this list is the Y-grid sf dataframe (named 'gridy'), containing a numeric area ID variable named 'ID_y', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'. The second element of this list is the X-grid sf dataframe (named 'gridx'), containing a numeric area ID variable named 'ID_x' and covariates named 'covariate_x_1','covariate_x_2',... The third element of the list is the atom sf dataframe (named 'atoms'), which should contain variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.}
+\item{gridx}{The X-grid sf dataframe, containing a numeric area ID variable named 'ID_x' and covariates named 'covariate_x_1','covariate_x_2',...}
+
+\item{gridy}{The Y-grid sf dataframe, containing a numeric area ID variable named 'ID_y', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'.}
+
+\item{atoms}{The atom sf dataframe, which should contain numeric variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.}
 
 \item{model_code}{NIMBLE model code from get_abrm_model()}
+
+\item{true_params}{The true outcome model regression coefficient parameters, if known (e.g., from simulate_misaligned_data())}
 
 \item{norm_idx_x}{Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as normally-distributed}
 

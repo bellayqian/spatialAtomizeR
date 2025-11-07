@@ -47,8 +47,11 @@ model_code <- get_abrm_model()
 
 # 3. Run ABRM analysis
 results <- run_abrm(
-  sim_data = sim_data,
+  gridx = sim_data$gridx,
+  gridy = sim_data$gridy,
+  atoms = sim_data$atoms,
   model_code = model_code,
+  true_params = sim_data$true_params, # optional vector of true outcome model coefficient parameters
   norm_idx_x = 1,   # Index of normal-distributed X covariate
   pois_idx_x = 2,   # Index of Poisson-distributed X covariate
   binom_idx_x = 3,  # Index of binomial-distributed X covariate
@@ -114,16 +117,16 @@ The `simulate_misaligned_data()` function accepts the following parameters:
 - `dist_covariates_y`: Vector of distribution types for Y-grid covariates
 - `dist_y`: Distribution type for outcome variable (`'normal'`, `'poisson'`, or `'binomial'`)
 
-**Critical Parameters (Often Overlooked):**
+**Data Generation Parameters:**
 - `x_intercepts`: Intercepts for X-grid covariates (length must match `dist_covariates_x`)
 - `y_intercepts`: Intercepts for Y-grid covariates (length must match `dist_covariates_y`)
 - `beta0_y`: Intercept for the outcome model
 - `beta_x`: True coefficients for X-grid covariates in outcome model
 - `beta_y`: True coefficients for Y-grid covariates in outcome model
 
-**Spatial Correlation:**
-- `x_correlation`: Correlation parameter for X-grid spatial effects (0 to 1)
-- `y_correlation`: Correlation parameter for Y-grid spatial effects (0 to 1)
+**Between-Variable Correlation:**
+- `x_correlation`: Correlation between X-grid covariates (0 to 1)
+- `y_correlation`: Correlation between Y-grid covariates (0 to 1)
 
 ## Distribution Type Indices
 

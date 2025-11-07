@@ -2,8 +2,11 @@
 #'
 #' Runs the Atom-Based Regression Model on simulated data
 #'
-#' @param sim_data List of data elements to be used in the ABRM, structured like the output from the simulate_misaligned_data() function. The first element of this list is the Y-grid sf dataframe (named 'gridy'), containing a numeric area ID variable named 'ID_y', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'. The second element of this list is the X-grid sf dataframe (named 'gridx'), containing a numeric area ID variable named 'ID_x' and covariates named 'covariate_x_1','covariate_x_2',... The third element of the list is the atom sf dataframe (named 'atoms'), which should contain variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.
+#' @param gridx The X-grid sf dataframe, containing a numeric area ID variable named 'ID_x' and covariates named 'covariate_x_1','covariate_x_2',... 
+#' @param gridy The Y-grid sf dataframe, containing a numeric area ID variable named 'ID_y', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'. 
+#' @param atoms The atom sf dataframe, which should contain numeric variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.
 #' @param model_code NIMBLE model code from get_abrm_model()
+#' @param true_params The true outcome model regression coefficient parameters, if known (e.g., from simulate_misaligned_data())
 #' @param norm_idx_x Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as normally-distributed
 #' @param pois_idx_x Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as Poisson-distributed
 #' @param binom_idx_x Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as binomial-distributed
@@ -23,8 +26,11 @@
 #' @export
 #' @importFrom dplyr %>% group_by summarize select mutate
 #' @importFrom tidyr pivot_wider
-run_abrm <- function(sim_data, 
+run_abrm <- function(gridx,
+                     gridy,
+                     atoms,
                      model_code,
+                     true_params=NULL,
                      norm_idx_x = NULL, 
                      pois_idx_x = NULL, 
                      binom_idx_x = NULL,
@@ -40,25 +46,21 @@ run_abrm <- function(sim_data,
                      save_plots = TRUE,
                      output_dir = NULL) {
   
-  if (!('gridx' %in% names(sim_data))) stop("sim_data must contain the X-grid data in an element named 'gridx'")
+  if (!('ID_x' %in% names(gridx))) stop("gridx must contain an area ID variable named 'ID_x'")
   
-  if (!('gridy' %in% names(sim_data))) stop("sim_data must contain the Y-grid data in an element named 'gridy'")
+  if (!('ID_y' %in% names(gridy))) stop("gridy must contain an area ID variable named 'ID_y'")
   
-  if (!('atoms' %in% names(sim_data))) stop("sim_data must contain the atom data in an element named 'atoms'")
-
-  if (!('ID_x' %in% names(sim_data$gridx))) stop("gridx must contain an area ID variable named 'ID_x'")
+  if (!('ID_y' %in% names(atoms) & 'ID_x' %in% names(atoms))) stop("atoms must contain an X-grid ID variable named 'ID_x' and a Y-grid ID variable named 'ID_y'")
   
-  if (!('ID_y' %in% names(sim_data$gridy))) stop("gridy must contain an area ID variable named 'ID_y'")
+  if (!('covariate_x_1' %in% names(gridx))) stop("gridx must contain at least 1 covariate named 'covariate_x_1'")
   
-  if (!('ID_y' %in% names(sim_data$atoms) & 'ID_x' %in% names(sim_data$atoms))) stop("atoms must contain an X-grid ID variable named 'ID_x' and a Y-grid ID variable named 'ID_y'")
-    
-  if (!('covariate_x_1' %in% names(sim_data$gridx))) stop("gridx must contain at least 1 covariate named 'covariate_x_1'")
+  if (!('covariate_y_1' %in% names(gridy))) stop("gridy must contain at least 1 covariate named 'covariate_y_1'") 
   
-  if (!('covariate_y_1' %in% names(sim_data$gridy))) stop("gridy must contain at least 1 covariate named 'covariate_y_1'") 
+  if (!('y' %in% names(gridy))) stop("gridy must contain an outcome named 'y'")
   
-  if (!('y' %in% names(sim_data$gridy))) stop("gridy must contain an outcome named 'y'")
+  if (!('population' %in% names(atoms))) stop("atoms must contain a population count named 'population'")  
   
-  if (!('population' %in% names(sim_data$atoms))) stop("atoms must contain a population count named 'population'")  
+  sim_data<-list('gridx'=gridx,'gridy'=gridy,'atoms'=atoms,'true_params'=true_params)
   
   cat("Preparing ABRM inputs...\n")
   

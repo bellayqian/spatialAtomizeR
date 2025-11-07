@@ -11,6 +11,8 @@ simulate_misaligned_data(
   dist_y = "poisson",
   x_intercepts = rep(0, 3),
   y_intercepts = rep(0, 3),
+  rho_x = 0.6,
+  rho_y = 0.6,
   x_correlation = 0.5,
   y_correlation = 0.5,
   beta0_y = NULL,
@@ -21,25 +23,29 @@ simulate_misaligned_data(
 \arguments{
 \item{seed}{Random seed (default = 2)}
 
-\item{dist_covariates_x}{Distribution types for X covariates}
+\item{dist_covariates_x}{Vector specifying distribution type for each synthetic X-grid covariate ('poisson', 'binomial', or 'normal')}
 
-\item{dist_covariates_y}{Distribution types for Y covariates}
+\item{dist_covariates_y}{Vector specifying distribution type for each synthetic Y-grid covariate ('poisson', 'binomial', or 'normal')}
 
-\item{dist_y}{Distribution type for outcome}
+\item{dist_y}{Distribution type for synthetic outcome variable (one of 'poisson', 'binomial', or 'normal')}
 
 \item{x_intercepts}{Intercepts for X covariates}
 
 \item{y_intercepts}{Intercepts for Y covariates}
 
-\item{x_correlation}{Correlation structure for X (default = 0.5)}
+\item{rho_x}{Spatial correlation parameter for X-grid covariates (0 to 1 with higher values yielding more spatial correlation, default = 0.6)}
 
-\item{y_correlation}{Correlation structure for Y (default = 0.5)}
+\item{rho_y}{Spatial correlation parameter for Y-grid covariates and outcome (0 to 1 with higher values yielding more spatial correlation, default = 0.6)}
+
+\item{x_correlation}{Between-variable correlation for all pairs of X-grid covariates (default = 0.5)}
+
+\item{y_correlation}{Between-variable correlation for all pairs of Y-grid covariates (default = 0.5)}
 
 \item{beta0_y}{Intercept for outcome model}
 
-\item{beta_x}{Coefficients for X covariates}
+\item{beta_x}{Outcome model coefficients for X-grid covariates}
 
-\item{beta_y}{Coefficients for Y covariates}
+\item{beta_y}{Outcome model coefficients for Y-grid covariates}
 }
 \value{
 List containing gridy, gridx, atoms, and true_params
