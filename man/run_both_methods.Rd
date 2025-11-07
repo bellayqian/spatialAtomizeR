@@ -21,7 +21,7 @@ run_both_methods(
 )
 }
 \arguments{
-\item{sim_data}{Simulated data from simulate_misaligned_data}
+\item{sim_data}{List of data elements to be used in the ABRM, structured like the output from the simulate_misaligned_data() function. The first element of this list is the Y-grid sf dataframe (named 'gridy'), containing a numeric area ID variable named 'ID_y', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'. The second element of this list is the X-grid sf dataframe (named 'gridx'), containing a numeric area ID variable named 'ID_x' and covariates named 'covariate_x_1','covariate_x_2',... The third element of the list is the atom sf dataframe (named 'atoms'), which should contain variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.}
 
 \item{sim_metadata}{Simulation metadata}
 
@@ -43,7 +43,7 @@ run_both_methods(
 
 \item{binom_idx_y}{Indices of binomial Y covariates}
 
-\item{dist_y}{Distribution type for outcome}
+\item{dist_y}{Distribution type for outcome (1=normal, 2=poisson, 3=binomial)}
 
 \item{outcome_type}{Outcome distribution name}
 }

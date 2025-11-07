@@ -7,12 +7,12 @@
 run_abrm(
   sim_data,
   model_code,
-  norm_idx_x = 1,
-  pois_idx_x = 2,
-  binom_idx_x = 3,
-  norm_idx_y = 1,
-  pois_idx_y = 2,
-  binom_idx_y = 3,
+  norm_idx_x = NULL,
+  pois_idx_x = NULL,
+  binom_idx_x = NULL,
+  norm_idx_y = NULL,
+  pois_idx_y = NULL,
+  binom_idx_y = NULL,
   dist_y = 2,
   niter = 50000,
   nburnin = 30000,
@@ -24,21 +24,21 @@ run_abrm(
 )
 }
 \arguments{
-\item{sim_data}{Simulated data from simulate_misaligned_data}
+\item{sim_data}{List of data elements to be used in the ABRM, structured like the output from the simulate_misaligned_data() function. The first element of this list is the Y-grid sf dataframe (named 'gridy'), containing a numeric area ID variable named 'ID_y', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'. The second element of this list is the X-grid sf dataframe (named 'gridx'), containing a numeric area ID variable named 'ID_x' and covariates named 'covariate_x_1','covariate_x_2',... The third element of the list is the atom sf dataframe (named 'atoms'), which should contain variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.}
 
 \item{model_code}{NIMBLE model code from get_abrm_model()}
 
-\item{norm_idx_x}{Indices of normal-distributed X covariates}
+\item{norm_idx_x}{Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as normally-distributed}
 
-\item{pois_idx_x}{Indices of Poisson-distributed X covariates}
+\item{pois_idx_x}{Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as Poisson-distributed}
 
-\item{binom_idx_x}{Indices of binomial-distributed X covariates}
+\item{binom_idx_x}{Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as binomial-distributed}
 
-\item{norm_idx_y}{Indices of normal-distributed Y covariates}
+\item{norm_idx_y}{Vector of numeric indices of Y-grid covariates (ordered as 'covariate_y_1','covariate_y_2',...) that should be treated as normally-distributed}
 
-\item{pois_idx_y}{Indices of Poisson-distributed Y covariates}
+\item{pois_idx_y}{Vector of numeric indices of Y-grid covariates (ordered as 'covariate_y_1','covariate_y_2',...) that should be treated as Poisson-distributed}
 
-\item{binom_idx_y}{Indices of binomial-distributed Y covariates}
+\item{binom_idx_y}{Vector of numeric indices of Y-grid covariates (ordered as 'covariate_y_1','covariate_y_2',...) that should be treated as binomial-distributed}
 
 \item{dist_y}{Distribution type for outcome (1=normal, 2=poisson, 3=binomial)}
 

@@ -2,14 +2,14 @@
 #'
 #' Runs the Atom-Based Regression Model on simulated data
 #'
-#' @param sim_data Simulated data from simulate_misaligned_data
+#' @param sim_data List of data elements to be used in the ABRM, structured like the output from the simulate_misaligned_data() function. The first element of this list is the Y-grid sf dataframe (named 'gridy'), containing a numeric area ID variable named 'ID_y', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'. The second element of this list is the X-grid sf dataframe (named 'gridx'), containing a numeric area ID variable named 'ID_x' and covariates named 'covariate_x_1','covariate_x_2',... The third element of the list is the atom sf dataframe (named 'atoms'), which should contain variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.
 #' @param model_code NIMBLE model code from get_abrm_model()
-#' @param norm_idx_x Indices of normal-distributed X covariates
-#' @param pois_idx_x Indices of Poisson-distributed X covariates
-#' @param binom_idx_x Indices of binomial-distributed X covariates
-#' @param norm_idx_y Indices of normal-distributed Y covariates
-#' @param pois_idx_y Indices of Poisson-distributed Y covariates
-#' @param binom_idx_y Indices of binomial-distributed Y covariates
+#' @param norm_idx_x Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as normally-distributed
+#' @param pois_idx_x Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as Poisson-distributed
+#' @param binom_idx_x Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as binomial-distributed
+#' @param norm_idx_y Vector of numeric indices of Y-grid covariates (ordered as 'covariate_y_1','covariate_y_2',...) that should be treated as normally-distributed
+#' @param pois_idx_y Vector of numeric indices of Y-grid covariates (ordered as 'covariate_y_1','covariate_y_2',...) that should be treated as Poisson-distributed
+#' @param binom_idx_y Vector of numeric indices of Y-grid covariates (ordered as 'covariate_y_1','covariate_y_2',...) that should be treated as binomial-distributed
 #' @param dist_y Distribution type for outcome (1=normal, 2=poisson, 3=binomial)
 #' @param niter Number of MCMC iterations (default: 50000)
 #' @param nburnin Number of burn-in iterations (default: 30000)
@@ -25,12 +25,12 @@
 #' @importFrom tidyr pivot_wider
 run_abrm <- function(sim_data, 
                      model_code,
-                     norm_idx_x = 1, 
-                     pois_idx_x = 2, 
-                     binom_idx_x = 3,
-                     norm_idx_y = 1, 
-                     pois_idx_y = 2, 
-                     binom_idx_y = 3,
+                     norm_idx_x = NULL, 
+                     pois_idx_x = NULL, 
+                     binom_idx_x = NULL,
+                     norm_idx_y = NULL, 
+                     pois_idx_y = NULL, 
+                     binom_idx_y = NULL,
                      dist_y = 2,
                      niter = 50000,
                      nburnin = 30000,
@@ -39,6 +39,26 @@ run_abrm <- function(sim_data,
                      sim_metadata = NULL,
                      save_plots = TRUE,
                      output_dir = NULL) {
+  
+  if (!('gridx' %in% names(sim_data))) stop("sim_data must contain the X-grid data in an element named 'gridx'")
+  
+  if (!('gridy' %in% names(sim_data))) stop("sim_data must contain the Y-grid data in an element named 'gridy'")
+  
+  if (!('atoms' %in% names(sim_data))) stop("sim_data must contain the atom data in an element named 'atoms'")
+
+  if (!('ID_x' %in% names(sim_data$gridx))) stop("gridx must contain an area ID variable named 'ID_x'")
+  
+  if (!('ID_y' %in% names(sim_data$gridy))) stop("gridy must contain an area ID variable named 'ID_y'")
+  
+  if (!('ID_y' %in% names(sim_data$atoms) & 'ID_x' %in% names(sim_data$atoms))) stop("atoms must contain an X-grid ID variable named 'ID_x' and a Y-grid ID variable named 'ID_y'")
+    
+  if (!('covariate_x_1' %in% names(sim_data$gridx))) stop("gridx must contain at least 1 covariate named 'covariate_x_1'")
+  
+  if (!('covariate_y_1' %in% names(sim_data$gridy))) stop("gridy must contain at least 1 covariate named 'covariate_y_1'") 
+  
+  if (!('y' %in% names(sim_data$gridy))) stop("gridy must contain an outcome named 'y'")
+  
+  if (!('population' %in% names(sim_data$atoms))) stop("atoms must contain a population count named 'population'")  
   
   cat("Preparing ABRM inputs...\n")
   
@@ -126,7 +146,7 @@ run_abrm <- function(sim_data,
 #'
 #' Runs both ABRM and dasymetric mapping methods and compares results
 #'
-#' @param sim_data Simulated data from simulate_misaligned_data
+#' @param sim_data List of data elements to be used in the ABRM, structured like the output from the simulate_misaligned_data() function. The first element of this list is the Y-grid sf dataframe (named 'gridy'), containing a numeric area ID variable named 'ID_y', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'. The second element of this list is the X-grid sf dataframe (named 'gridx'), containing a numeric area ID variable named 'ID_x' and covariates named 'covariate_x_1','covariate_x_2',... The third element of the list is the atom sf dataframe (named 'atoms'), which should contain variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.
 #' @param sim_metadata Simulation metadata
 #' @param model_code NIMBLE model code
 #' @param nimble_params List of NIMBLE parameters (niter, nburnin, thin, nchains)
@@ -137,7 +157,7 @@ run_abrm <- function(sim_data,
 #' @param norm_idx_y Indices of normal Y covariates
 #' @param pois_idx_y Indices of Poisson Y covariates
 #' @param binom_idx_y Indices of binomial Y covariates
-#' @param dist_y Distribution type for outcome
+#' @param dist_y Distribution type for outcome (1=normal, 2=poisson, 3=binomial)
 #' @param outcome_type Outcome distribution name
 #'
 #' @return List with combined comparison, ABRM results, and dasymetric results

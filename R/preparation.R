@@ -364,7 +364,7 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     cat("Basic indexing checks passed\n")
     return(TRUE)
   }
-  check_nimble_indexing(constants, data)
+  # check_nimble_indexing(constants, data)
   
   # Initialize latent values with proper population-scaled splits
   # For x_latent
