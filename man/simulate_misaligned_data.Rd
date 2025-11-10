@@ -17,7 +17,8 @@ simulate_misaligned_data(
   y_correlation = 0.5,
   beta0_y = NULL,
   beta_x = NULL,
-  beta_y = NULL
+  beta_y = NULL,
+  diff_pops = T
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ simulate_misaligned_data(
 \item{beta_x}{Outcome model coefficients for X-grid covariates}
 
 \item{beta_y}{Outcome model coefficients for Y-grid covariates}
+
+\item{diff_pops}{Logical, indicating whether the atoms should be generated with different population sizes (diff_pops=T) or a common population size (diff_pops=F)}
 }
 \value{
 List containing gridy, gridx, atoms, and true_params

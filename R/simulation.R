@@ -48,6 +48,7 @@ gen_correlated_spat <- function(W, n_vars, rho = 0.6, var_spat = 1, correlation 
 #' @param beta0_y Intercept for outcome model
 #' @param beta_x Outcome model coefficients for X-grid covariates
 #' @param beta_y Outcome model coefficients for Y-grid covariates
+#' @param diff_pops Logical, indicating whether the atoms should be generated with different population sizes (diff_pops=T) or a common population size (diff_pops=F)
 #'
 #' @return List containing gridy, gridx, atoms, and true_params
 #' @importFrom sp GridTopology SpatialGrid
@@ -67,7 +68,8 @@ simulate_misaligned_data <- function(seed = 2,
                                      y_correlation = 0.5,
                                      beta0_y = NULL,
                                      beta_x = NULL, 
-                                     beta_y = NULL) {
+                                     beta_y = NULL,
+                                     diff_pops=T) {
   set.seed(seed)
   
   n_covariates_x <- length(dist_covariates_x)
@@ -136,7 +138,11 @@ simulate_misaligned_data <- function(seed = 2,
   atoms$ID_atomorder <- 1:nrow(atoms)
   
   # Generate atom-level population
-  atoms$population <- rpois(nrow(atoms), lambda = 50) + 10
+  if (diff_pops==T){
+    atoms$population <- rpois(nrow(atoms), lambda = 50) + 10
+  } else{
+    atoms$population <- 1
+  }
   
   # Create spatial adjacency matrix for atoms
   atoms_sp <- as(atoms, "Spatial")
