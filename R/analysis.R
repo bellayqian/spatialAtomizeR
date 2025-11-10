@@ -2,8 +2,8 @@
 #'
 #' Runs the Atom-Based Regression Model on simulated data
 #'
-#' @param gridx The X-grid sf dataframe, containing a numeric area ID variable named 'ID_x' and covariates named 'covariate_x_1','covariate_x_2',... 
-#' @param gridy The Y-grid sf dataframe, containing a numeric area ID variable named 'ID_y', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'. 
+#' @param gridx The X-grid sf dataframe, containing a numeric area ID variable named 'ID' and covariates named 'covariate_x_1','covariate_x_2',... 
+#' @param gridy The Y-grid sf dataframe, containing a numeric area ID variable named 'ID', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'. 
 #' @param atoms The atom sf dataframe, which should contain numeric variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.
 #' @param model_code NIMBLE model code from get_abrm_model()
 #' @param true_params The true outcome model regression coefficient parameters, if known (e.g., from simulate_misaligned_data())
@@ -46,9 +46,9 @@ run_abrm <- function(gridx,
                      save_plots = TRUE,
                      output_dir = NULL) {
   
-  if (!('ID_x' %in% names(gridx))) stop("gridx must contain an area ID variable named 'ID_x'")
+  if (!('ID' %in% names(gridx))) stop("gridx must contain an area ID variable named 'ID'")
   
-  if (!('ID_y' %in% names(gridy))) stop("gridy must contain an area ID variable named 'ID_y'")
+  if (!('ID' %in% names(gridy))) stop("gridy must contain an area ID variable named 'ID'")
   
   if (!('ID_y' %in% names(atoms) & 'ID_x' %in% names(atoms))) stop("atoms must contain an X-grid ID variable named 'ID_x' and a Y-grid ID variable named 'ID_y'")
   
@@ -178,7 +178,9 @@ run_both_methods <- function(sim_data, sim_metadata, model_code,
   # Run ABRM method
   cat("  Running ABRM method...\n")
   abrm_full_results <- run_abrm(
-    sim_data = sim_data,
+    gridx = sim_data$gridx,
+    gridy = sim_data$gridy,
+    atoms = sim_data$atoms,
     model_code = model_code,
     norm_idx_x = norm_idx_x,
     pois_idx_x = pois_idx_x,
@@ -251,8 +253,6 @@ run_sensitivity_analysis <- function(
     correlation_grid = c(0.2, 0.6),
     n_sims_per_setting = 3,
     base_params = list(
-      res1 = c(5, 5),
-      res2 = c(10, 10),
       dist_covariates_x = c('normal','poisson','binomial'),
       dist_covariates_y = c('normal','poisson','binomial'),
       dist_y = 'poisson',
@@ -301,8 +301,6 @@ run_sensitivity_analysis <- function(
         # Generate simulated data
         cat("  Generating data...\n")
         sim_data <- simulate_misaligned_data(
-          res1 = base_params$res1,
-          res2 = base_params$res2,
           seed = sim_seed,
           dist_covariates_x = base_params$dist_covariates_x,
           dist_covariates_y = base_params$dist_covariates_y,

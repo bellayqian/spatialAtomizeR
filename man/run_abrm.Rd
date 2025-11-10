@@ -27,9 +27,9 @@ run_abrm(
 )
 }
 \arguments{
-\item{gridx}{The X-grid sf dataframe, containing a numeric area ID variable named 'ID_x' and covariates named 'covariate_x_1','covariate_x_2',...}
+\item{gridx}{The X-grid sf dataframe, containing a numeric area ID variable named 'ID' and covariates named 'covariate_x_1','covariate_x_2',...}
 
-\item{gridy}{The Y-grid sf dataframe, containing a numeric area ID variable named 'ID_y', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'.}
+\item{gridy}{The Y-grid sf dataframe, containing a numeric area ID variable named 'ID', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'.}
 
 \item{atoms}{The atom sf dataframe, which should contain numeric variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.}
 

@@ -7,10 +7,10 @@
 run_sensitivity_analysis(
   correlation_grid = c(0.2, 0.6),
   n_sims_per_setting = 3,
-  base_params = list(res1 = c(5, 5), res2 = c(10, 10), dist_covariates_x = c("normal",
-    "poisson", "binomial"), dist_covariates_y = c("normal", "poisson", "binomial"),
-    dist_y = "poisson", x_intercepts = c(4, -1, -1), y_intercepts = c(4, -1, -1), beta0_y
-    = -1, beta_x = c(-0.03, 0.1, -0.2), beta_y = c(0.03, -0.1, 0.2)),
+  base_params = list(dist_covariates_x = c("normal", "poisson", "binomial"),
+    dist_covariates_y = c("normal", "poisson", "binomial"), dist_y = "poisson",
+    x_intercepts = c(4, -1, -1), y_intercepts = c(4, -1, -1), beta0_y = -1, beta_x =
+    c(-0.03, 0.1, -0.2), beta_y = c(0.03, -0.1, 0.2)),
   mcmc_params = list(niter = 50000, nburnin = 30000, thin = 10, nchains = 2),
   model_code,
   base_seed = 123
