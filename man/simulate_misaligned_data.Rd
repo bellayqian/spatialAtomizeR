@@ -18,7 +18,8 @@ simulate_misaligned_data(
   beta0_y = NULL,
   beta_x = NULL,
   beta_y = NULL,
-  diff_pops = T
+  diff_pops = T,
+  xy_cov_cor = F
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ simulate_misaligned_data(
 \item{beta_y}{Outcome model coefficients for Y-grid covariates}
 
 \item{diff_pops}{Logical, indicating whether the atoms should be generated with different population sizes (diff_pops=T) or a common population size (diff_pops=F)}
+
+\item{xy_cov_cor}{Logical, indicating whether the atom-level spatial random effects for X-grid and Y-grid covariates should be correlated (xy_cov_cor=T) or not. When set to TRUE, the x_correlation and rho_x parameters are used to generate all covariates (separate correlation parameters are not allowed for X-grid and Y-grid covariates).}
 }
 \value{
 List containing gridy, gridx, atoms, and true_params

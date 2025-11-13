@@ -49,6 +49,7 @@ gen_correlated_spat <- function(W, n_vars, rho = 0.6, var_spat = 1, correlation 
 #' @param beta_x Outcome model coefficients for X-grid covariates
 #' @param beta_y Outcome model coefficients for Y-grid covariates
 #' @param diff_pops Logical, indicating whether the atoms should be generated with different population sizes (diff_pops=T) or a common population size (diff_pops=F)
+#' @param xy_cov_cor Logical, indicating whether the atom-level spatial random effects for X-grid and Y-grid covariates should be correlated (xy_cov_cor=T) or not. When set to TRUE, the x_correlation and rho_x parameters are used to generate all covariates (separate correlation parameters are not allowed for X-grid and Y-grid covariates).
 #'
 #' @return List containing gridy, gridx, atoms, and true_params
 #' @importFrom sp GridTopology SpatialGrid
@@ -69,7 +70,8 @@ simulate_misaligned_data <- function(seed = 2,
                                      beta0_y = NULL,
                                      beta_x = NULL, 
                                      beta_y = NULL,
-                                     diff_pops=T) {
+                                     diff_pops=T,
+                                     xy_cov_cor=F) {
   set.seed(seed)
   
   n_covariates_x <- length(dist_covariates_x)
@@ -149,9 +151,17 @@ simulate_misaligned_data <- function(seed = 2,
   neighbors_atoms <- spdep::poly2nb(atoms_sp, queen = TRUE)
   W_atoms <- spdep::nb2mat(neighbors_atoms, style = "B", zero.policy = TRUE)
   
-  # Generate X covariates at atom level
-  x_atom_results <- gen_correlated_spat(W_atoms, n_covariates_x, correlation = x_correlation, rho=rho_x)
+  ## generate atom level spatial random effects for covariates
+  if (xy_cov_cor==F){
+    x_atom_results <- gen_correlated_spat(W_atoms, n_covariates_x, correlation = x_correlation, rho=rho_x)
+    y_atom_results <- gen_correlated_spat(W_atoms, n_covariates_y , correlation = y_correlation, rho = rho_y)
+  } else{
+    xy_atom_results <- gen_correlated_spat(W_atoms, n_covariates_x + n_covariates_y, correlation = x_correlation, rho=rho_x)
+    x_atom_results <-  xy_atom_results[,1:n_covariates_x]
+    y_atom_results <- xy_atom_results[,(n_covariates_x+1):ncol(xy_atom_results)]
+  }
   
+  # Generate X covariates at atom level
   for(i in 1:n_covariates_x) {
     if (dist_covariates_x[i] == 'poisson') {
       log_rate_percapita <- x_intercepts[i] + x_atom_results[,i]
@@ -172,7 +182,6 @@ simulate_misaligned_data <- function(seed = 2,
   }
   
   # Generate Y covariates at atom level
-  y_atom_results <- gen_correlated_spat(W_atoms, n_covariates_y + 1, correlation = y_correlation, rho = rho_y)
   
   for(i in 1:n_covariates_y) {
     if (dist_covariates_y[i] == 'poisson') {
