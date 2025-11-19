@@ -56,6 +56,7 @@ gen_correlated_spat <- function(W, n_vars, rho = 0.6, var_spat = 1, correlation 
 #' @importFrom sf st_as_sf st_union st_sf st_contains
 #' @importFrom spdep poly2nb nb2mat
 #' @importFrom raster intersect
+#' @importFrom stats plogis
 #' @export
 simulate_misaligned_data <- function(seed = 2,
                                      dist_covariates_x = c('normal','poisson','binomial'),
@@ -271,10 +272,12 @@ simulate_misaligned_data <- function(seed = 2,
     y_correlation = y_correlation
   )
   
-  return(list(
+  result <- list(
     gridy = gridy,
     gridx = gridx,
     atoms = atoms,
     true_params = true_params
-  ))
+  )
+  class(result) <- "misaligned_data"
+  return(result)
 }

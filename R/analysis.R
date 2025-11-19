@@ -131,16 +131,21 @@ run_abrm <- function(gridx,
     abrm_betas$within_ci <- (abrm_betas$true_beta >= abrm_betas$ci_lower & 
                                abrm_betas$true_beta <= abrm_betas$ci_upper)
     
-    return(list(
+    result <- list(
       mcmc_results = abrm_results,
       parameter_estimates = abrm_betas,
       all_parameters = abrm_parameters
-    ))
+    )
+    class(result) <- "abrm"
+    return(result)
   } else {
-    return(list(
+    result <- list(
       mcmc_results = abrm_results,
-      parameter_estimates = abrm_parameters
-    ))
+      parameter_estimates = abrm_parameters,
+      all_parameters = abrm_parameters
+    )
+    class(result) <- "abrm"
+    return(result)
   }
 }
 
@@ -182,6 +187,7 @@ run_both_methods <- function(sim_data, sim_metadata, model_code,
     gridy = sim_data$gridy,
     atoms = sim_data$atoms,
     model_code = model_code,
+    true_params = sim_data$true_params,
     norm_idx_x = norm_idx_x,
     pois_idx_x = pois_idx_x,
     binom_idx_x = binom_idx_x,
@@ -228,11 +234,14 @@ run_both_methods <- function(sim_data, sim_metadata, model_code,
   # Combine results
   combined_comparison <- rbind(abrm_betas, dasy_betas)
   
-  return(list(
+  # Create result with S3 class
+  result <- list(
     combined_comparison = combined_comparison,
-    abrm_results = abrm_results,
+    abrm_results = abrm_full_results,
     dasymetric_results = dasymetric_results
-  ))
+  )
+  class(result) <- "abrm_comparison"
+  return(result)
 }
 
 #' Run Sensitivity Analysis
@@ -399,10 +408,12 @@ run_sensitivity_analysis <- function(
   cat("\n=== SENSITIVITY ANALYSIS COMPLETE ===\n")
   cat("Results saved to:", output_dir, "\n")
   
-  return(list(
+  result <- list(
     combined_results = combined_results,
     summary_stats = summary_stats,
     summary_by_correlation = summary_by_correlation,
     output_dir = output_dir
-  ))
+  )
+  class(result) <- "sensitivity_analysis"
+  return(result)
 }

@@ -40,6 +40,9 @@ biasedUrn_rmfnc <- function(total, odds, ni) {
 #'
 #' Registers the custom multivariate non-central hypergeometric distribution
 #' for use in NIMBLE models. This function is called automatically when needed.
+#' 
+#' @note The <<- operator is used intentionally to create package-level 
+#' nimbleFunctions accessible across the package environment.
 #'
 #' @return Invisible TRUE if successful
 #' @export

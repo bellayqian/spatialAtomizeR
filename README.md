@@ -91,6 +91,63 @@ print(results$parameter_estimates)
 - Multiple simulations per setting
 - Automated result summarization
 
+### S3 Object System
+
+All main functions return S3 objects with dedicated print, summary, and plot methods:
+```r
+# Create simulated data
+sim_data <- simulate_misaligned_data(...)
+class(sim_data)  # "misaligned_data"
+
+# View results with clean formatting
+print(sim_data)   # Clean overview
+summary(sim_data) # Detailed information
+
+# Run ABRM analysis
+results <- run_abrm(...)
+class(results)    # "abrm"
+
+print(results)    # Shows parameter count, bias, coverage
+summary(results)  # Shows full parameter table
+plot(results)     # Shows MCMC diagnostic plots
+
+# Compare methods
+comparison <- run_both_methods(...)
+class(comparison) # "abrm_comparison"
+
+print(comparison)   # Shows method comparison summary
+summary(comparison) # Shows detailed metrics by method
+```
+
+## S3 Methods Examples
+
+The package provides intuitive S3 methods for all major output types:
+```r
+# Simulated data
+sim_data <- simulate_misaligned_data(seed = 123, ...)
+print(sim_data)
+# Output:
+# Simulated Misaligned Spatial Data
+# ==================================
+# Y-grid cells: 25
+# X-grid cells: 100
+# Atoms: 200
+# ...
+
+# ABRM results
+results <- run_abrm(...)
+print(results)
+# Output:
+# ABRM Model Results
+# ==================
+# Number of parameters estimated: 6
+# Mean absolute bias: 0.0234
+# Coverage rate: 95.00%
+# Use summary() for detailed parameter estimates
+
+summary(results)  # Shows full parameter table
+```
+
 ## Key Functions
 
 | Function | Description |

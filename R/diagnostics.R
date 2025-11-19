@@ -4,7 +4,7 @@ utils::globalVariables(c(
   "ci_lower", "ci_upper", "true_beta", "sim_number", "relative_bias",
   "within_ci", "covered", "bias", "x_correlation", "y_correlation",
   "mean_estimate", "mean_lower", "mean_upper", "true_value", "mean_rel_bias",
-  "coverage_rate", "converged"
+  "coverage_rate", "converged", "mean_estimated_beta", "mean_bias", "mean_relative_bias"
 ))
 
 #' Check MCMC Diagnostics
