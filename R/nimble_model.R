@@ -57,9 +57,9 @@ register_nimble_distributions <- function() {
   }
   
   # Define the dmfnchypg density function
-  dmfnchypg <<- nimble::nimbleFunction(
+  .pkg_env$dmfnchypg <- nimble::nimbleFunction(
     run = function(x = double(1), total = double(0), odds = double(1), ni = double(1),
-                   log = integer(0, default = 0)) {
+                   log = integer(0)) {
       returnType(double(0))
       
       x_round <- round(x)
@@ -107,17 +107,17 @@ register_nimble_distributions <- function() {
   )
   
   # Create nimbleRcall wrapper
-  Rmfnchypg <<- nimble::nimbleRcall(
+  .pkg_env$Rmfnchypg <- nimble::nimbleRcall(
     prototype = function(total = double(0), odds = double(1), ni = double(1)) {},
     returnType = double(1),
     Rfun = "biasedUrn_rmfnc"
   )
   
   # Create the nimbleFunction wrapper for random generation
-  rmfnchypg <<- nimble::nimbleFunction(
+  .pkg_env$rmfnchypg <- nimble::nimbleFunction(
     run = function(n = integer(0), total = double(0), odds = double(1), ni = double(1)) {
       returnType(double(1))
-      return(Rmfnchypg(total, odds, ni))
+      return(.pkg_env$Rmfnchypg(total, odds, ni))
     }
   )
   
