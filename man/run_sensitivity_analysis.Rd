@@ -13,7 +13,8 @@ run_sensitivity_analysis(
     c(-0.03, 0.1, -0.2), beta_y = c(0.03, -0.1, 0.2)),
   mcmc_params = list(niter = 50000, nburnin = 30000, thin = 10, nchains = 2),
   model_code,
-  base_seed = 123
+  base_seed = 123,
+  output_dir = NULL
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ run_sensitivity_analysis(
 \item{model_code}{NIMBLE model code}
 
 \item{base_seed}{Base random seed}
+
+\item{output_dir}{Output directory for results (default: NULL, uses tempdir())}
 }
 \value{
 List with combined results, summary statistics, and output directory

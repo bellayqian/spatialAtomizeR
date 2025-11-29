@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Implements atom-based regression models (`ABRM`) for analyzing spatially misaligned data. Provides functions for simulating misaligned spatial data, preparing NIMBLE model inputs, running MCMC diagnostics, and comparing different spatial analysis methods including `dasymetric` mapping. All main functions return S3 objects with print(), summary(), and plot() methods for intuitive result exploration.
+Implements atom-based regression models (ABRM) for analyzing spatially misaligned data. Provides functions for simulating misaligned spatial data, preparing NIMBLE model inputs, running MCMC diagnostics, and comparing different spatial analysis methods including dasymetric mapping. All main functions return S3 objects with print(), summary(), and plot() methods for intuitive result exploration. Methods are described in Nethery et al. (2023) \doi{10.1101/2023.01.10.23284410}. Further methodological details and software implementation are described in Qian et al. (in review).
 
 Implements atom-based Bayesian regression methods (ABRM) for spatial data 
 with misaligned grids.
@@ -36,6 +36,12 @@ Useful links:
 Authors:
 \itemize{
   \item Rachel Nethery \email{rnethery@hsph.harvard.edu}
+}
+
+Other contributors:
+\itemize{
+  \item Nancy Krieger (Contributed to the project conceptualization and manuscript) [contributor]
+  \item Nykesha Johnson (Contributed to the project conceptualization and manuscript) [contributor]
 }
 
 }

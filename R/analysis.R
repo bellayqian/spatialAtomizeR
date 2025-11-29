@@ -62,7 +62,7 @@ run_abrm <- function(gridx,
   
   sim_data<-list('gridx'=gridx,'gridy'=gridy,'atoms'=atoms,'true_params'=true_params)
   
-  cat("Preparing ABRM inputs...\n")
+  message("Preparing ABRM inputs...\n")
   
   # Prepare spatial bookkeeping
   bookkeeping <- prepare_spatial_bookkeeping(sim_data)
@@ -83,7 +83,7 @@ run_abrm <- function(gridx,
   )
   
   # Run NIMBLE model
-  cat("Running NIMBLE MCMC...\n")
+  message("Running NIMBLE MCMC...\n")
   abrm_results <- run_nimble_model(
     constants = nimble_inputs$constants,
     data = nimble_inputs$data,
@@ -181,7 +181,7 @@ run_both_methods <- function(sim_data, sim_metadata, model_code,
   true_beta_y <- sim_data$true_params$beta_y
   
   # Run ABRM method
-  cat("  Running ABRM method...\n")
+  message("  Running ABRM method...\n")
   abrm_full_results <- run_abrm(
     gridx = sim_data$gridx,
     gridy = sim_data$gridy,
@@ -208,7 +208,7 @@ run_both_methods <- function(sim_data, sim_metadata, model_code,
   abrm_betas$method <- "ABRM"
   
   # Run Dasymetric method
-  cat("  Running Dasymetric mapping method...\n")
+  message("  Running Dasymetric mapping method...\n")
   mapped_data <- dasymetric_mapping(sim_data)
   dasymetric_results <- fit_dasymetric_model(mapped_data, outcome_type)
   
@@ -254,6 +254,7 @@ run_both_methods <- function(sim_data, sim_metadata, model_code,
 #' @param mcmc_params List of MCMC parameters
 #' @param model_code NIMBLE model code
 #' @param base_seed Base random seed
+#' @param output_dir Output directory for results (default: NULL, uses tempdir())
 #'
 #' @return List with combined results, summary statistics, and output directory
 #' @export
@@ -278,13 +279,16 @@ run_sensitivity_analysis <- function(
       nchains = 2
     ),
     model_code,
-    base_seed = 123
+    base_seed = 123,
+    output_dir = NULL
 ) {
   
   # Create output directory
-  date_stamp <- format(Sys.time(), "%Y%m%d_%H%M")
-  output_dir <- paste0("sensitivity_analysis_", date_stamp)
-  dir.create(output_dir, showWarnings = FALSE)
+  if(is.null(output_dir)) {
+    output_dir <- tempdir()
+    message("Using temporary directory: ", output_dir)
+  }
+  dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
   
   # Initialize results storage
   all_results <- list()
@@ -296,19 +300,19 @@ run_sensitivity_analysis <- function(
   # Run through correlation grid
   for(x_cor in correlation_grid) {
     for(y_cor in correlation_grid) {
-      cat(sprintf("\n=== Running analysis for x_cor = %.2f, y_cor = %.2f ===\n", x_cor, y_cor))
+      message(sprintf("\n=== Running analysis for x_cor = %.2f, y_cor = %.2f ===\n", x_cor, y_cor))
       
       for(sim in 1:n_sims_per_setting) {
         sim_seed <- base_seed + ((sim-1) * 100) + counter
         
-        cat(sprintf("\nSimulation %d of %d (seed: %d)\n", sim, n_sims_per_setting, sim_seed))
+        message(sprintf("\nSimulation %d of %d (seed: %d)\n", sim, n_sims_per_setting, sim_seed))
         
         # Create sub-directory for this simulation
         sim_dir <- file.path(output_dir, sprintf("xcor%.1f_ycor%.1f_sim%d", x_cor, y_cor, sim))
         dir.create(sim_dir, showWarnings = FALSE, recursive = TRUE)
         
         # Generate simulated data
-        cat("  Generating data...\n")
+        message("  Generating data...\n")
         sim_data <- simulate_misaligned_data(
           seed = sim_seed,
           dist_covariates_x = base_params$dist_covariates_x,
@@ -369,7 +373,7 @@ run_sensitivity_analysis <- function(
         all_results[[counter]] <- combined_comparison
         counter <- counter + 1
         
-        cat(sprintf("  Completed simulation %d\n", sim))
+        message(sprintf("  Completed simulation %d\n", sim))
       }
     }
   }
@@ -383,11 +387,11 @@ run_sensitivity_analysis <- function(
             row.names = FALSE)
   
   # Create summary statistics
-  cat("\nCreating summary statistics...\n")
+  message("\nCreating summary statistics...\n")
   summary_stats <- create_summary_statistics(combined_results, output_dir)
   
   # Create sensitivity summary plots
-  cat("\nCreating sensitivity summary plots...\n")
+  message("\nCreating sensitivity summary plots...\n")
   create_sensitivity_summary_plots(combined_results, output_dir)
   
   # Aggregate results by correlation and method
@@ -405,8 +409,8 @@ run_sensitivity_analysis <- function(
             file = file.path(output_dir, "sensitivity_summary_by_correlation.csv"), 
             row.names = FALSE)
   
-  cat("\n=== SENSITIVITY ANALYSIS COMPLETE ===\n")
-  cat("Results saved to:", output_dir, "\n")
+  message("\n=== SENSITIVITY ANALYSIS COMPLETE ===\n")
+  message("Results saved to:", output_dir, "\n")
   
   result <- list(
     combined_results = combined_results,

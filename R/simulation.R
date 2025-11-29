@@ -48,8 +48,8 @@ gen_correlated_spat <- function(W, n_vars, rho = 0.6, var_spat = 1, correlation 
 #' @param beta0_y Intercept for outcome model
 #' @param beta_x Outcome model coefficients for X-grid covariates
 #' @param beta_y Outcome model coefficients for Y-grid covariates
-#' @param diff_pops Logical, indicating whether the atoms should be generated with different population sizes (diff_pops=T) or a common population size (diff_pops=F)
-#' @param xy_cov_cor Logical, indicating whether the atom-level spatial random effects for X-grid and Y-grid covariates should be correlated (xy_cov_cor=T) or not. When set to TRUE, the x_correlation and rho_x parameters are used to generate all covariates (separate correlation parameters are not allowed for X-grid and Y-grid covariates).
+#' @param diff_pops Logical, indicating whether the atoms should be generated with different population sizes (diff_pops = TRUE) or a common population size (diff_pops = FALSE)
+#' @param xy_cov_cor Logical, indicating whether the atom-level spatial random effects for X-grid and Y-grid covariates should be correlated (xy_cov_cor = TRUE) or not. When set to TRUE, the x_correlation and rho_x parameters are used to generate all covariates (separate correlation parameters are not allowed for X-grid and Y-grid covariates).
 #'
 #' @return List containing gridy, gridx, atoms, and true_params
 #' @importFrom sp GridTopology SpatialGrid
@@ -71,8 +71,8 @@ simulate_misaligned_data <- function(seed = 2,
                                      beta0_y = NULL,
                                      beta_x = NULL, 
                                      beta_y = NULL,
-                                     diff_pops=T,
-                                     xy_cov_cor=F) {
+                                     diff_pops = TRUE,
+                                     xy_cov_cor = FALSE) {
   set.seed(seed)
   
   n_covariates_x <- length(dist_covariates_x)
@@ -141,7 +141,7 @@ simulate_misaligned_data <- function(seed = 2,
   atoms$ID_atomorder <- 1:nrow(atoms)
   
   # Generate atom-level population
-  if (diff_pops==T){
+  if (diff_pops==TRUE){
     atoms$population <- rpois(nrow(atoms), lambda = 50) + 10
   } else{
     atoms$population <- 1
@@ -153,7 +153,7 @@ simulate_misaligned_data <- function(seed = 2,
   W_atoms <- spdep::nb2mat(neighbors_atoms, style = "B", zero.policy = TRUE)
   
   ## generate atom level spatial random effects for covariates
-  if (xy_cov_cor==F){
+  if (xy_cov_cor == FALSE){
     x_atom_results <- gen_correlated_spat(W_atoms, n_covariates_x, correlation = x_correlation, rho=rho_x)
     y_atom_results <- gen_correlated_spat(W_atoms, n_covariates_y , correlation = y_correlation, rho = rho_y)
   } else{

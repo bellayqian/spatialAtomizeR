@@ -170,17 +170,17 @@ create_diagnostic_plots <- function(chains_list, sim_metadata) {
 #' @param convergence_results Results from check_mcmc_diagnostics
 #' @export
 print_convergence_summary <- function(convergence_results) {
-  cat("\nConvergence Summary:\n")
-  cat("===================\n")
+  message("\nConvergence Summary:\n")
+  message("===================\n")
   
   # Overall convergence
-  cat(sprintf("\nOverall convergence: %s\n", 
+  message(sprintf("\nOverall convergence: %s\n", 
               ifelse(convergence_results$overall_converged, "Achieved", "Not achieved")))
   
   # Group convergence
-  cat("\nParameter Group Convergence:\n")
+  message("\nParameter Group Convergence:\n")
   for(group in names(convergence_results$group_convergence)) {
-    cat(sprintf("%s parameters: %s\n", 
+    message(sprintf("%s parameters: %s\n", 
                 group,
                 ifelse(convergence_results$group_convergence[[group]], 
                        "Converged", "Not converged")))
@@ -191,20 +191,20 @@ print_convergence_summary <- function(convergence_results) {
                            !converged)
   
   if(nrow(problem_params) > 0) {
-    cat("\nParameters requiring attention:\n")
+    message("\nParameters requiring attention:\n")
     print(problem_params[, c("parameter", "rhat", "ess")])
   }
   
   # Print general diagnostics summary
-  cat("\nDiagnostic Summary Statistics:\n")
+  message("\nDiagnostic Summary Statistics:\n")
   diagnostics <- convergence_results$diagnostics
-  cat(sprintf("Median ESS: %.1f\n", median(diagnostics$ess, na.rm = TRUE)))
-  cat(sprintf("Max Rhat: %.3f\n", max(diagnostics$rhat, na.rm = TRUE)))
+  message(sprintf("Median ESS: %.1f\n", median(diagnostics$ess, na.rm = TRUE)))
+  message(sprintf("Max Rhat: %.3f\n", max(diagnostics$rhat, na.rm = TRUE)))
   
   # Check for any unusually high variances
   high_var_params <- subset(diagnostics, sd/abs(mean) > 0.5)
   if(nrow(high_var_params) > 0) {
-    cat("\nParameters with high relative variance:\n")
+    message("\nParameters with high relative variance:\n")
     print(high_var_params[, c("parameter", "mean", "sd")])
   }
 }
@@ -279,13 +279,19 @@ create_comparison_plots <- function(comparison_data, output_dir, true_params = N
                   y = "Count")
   
   # Save plots
-  grDevices::pdf(file.path(output_dir, "coefficient_comparison.pdf"), width = 10, height = 8)
-  print(coef_plot)
-  print(bias_plot)
-  print(coverage_plot)
-  grDevices::dev.off()
-  
-  cat("Comparison plots saved to", file.path(output_dir, "coefficient_comparison.pdf"), "\n")
+  if(!is.null(output_dir)) {
+    grDevices::pdf(file.path(output_dir, "coefficient_comparison.pdf"), width = 10, height = 8)
+    print(coef_plot)
+    print(bias_plot)
+    print(coverage_plot)
+    grDevices::dev.off()
+    message("Comparison plots saved to ", file.path(output_dir, "coefficient_comparison.pdf"))
+  } else {
+    # Just display plots without saving
+    print(coef_plot)
+    print(bias_plot)
+    print(coverage_plot)
+  }
 }
 
 #' Create Summary Statistics
@@ -336,10 +342,10 @@ create_summary_statistics <- function(all_results, output_dir) {
             row.names = FALSE)
   
   # Print summary to console
-  cat("\nMethod Comparison Summary:\n")
+  message("\nMethod Comparison Summary:\n")
   print(summary_stats)
   
-  cat("\nParameter-Specific Comparison:\n")
+  message("\nParameter-Specific Comparison:\n")
   print(param_summary)
   
   return(list(method_summary = summary_stats, param_summary = param_summary))
@@ -411,12 +417,18 @@ create_sensitivity_summary_plots <- function(combined_results, output_dir) {
                   y = "Coverage Rate (%)")
   
   # Save plots
-  grDevices::pdf(file.path(output_dir, "sensitivity_summary_plots.pdf"), width = 12, height = 10)
-  print(corr_plot)
-  print(bias_plot)
-  print(coverage_plot)
-  grDevices::dev.off()
-  
-  cat("Sensitivity summary plots saved to", file.path(output_dir, "sensitivity_summary_plots.pdf"), "\n")
+  if(!is.null(output_dir)) {
+    grDevices::pdf(file.path(output_dir, "sensitivity_summary_plots.pdf"), width = 12, height = 10)
+    print(corr_plot)
+    print(bias_plot)
+    print(coverage_plot)
+    grDevices::dev.off()
+    message("Sensitivity summary plots saved to ", file.path(output_dir, "sensitivity_summary_plots.pdf"))
+  } else {
+    # Just display plots without saving
+    print(corr_plot)
+    print(bias_plot)
+    print(coverage_plot)
+  }
 }
 
