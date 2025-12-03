@@ -268,7 +268,7 @@ This work was funded by the Robert Wood Johnson Foundation, Grant 81746. Project
 
 If you use this package, please cite:
 
-Qian, Y., & Nethery, R. (2025). spatialAtomizeR: Atom-Based Regression Models for Misaligned Spatial Data. R package version 0.2.1.
+Qian Y, Nethery R, Krieger N, Johnson N (2025). spatialAtomizeR: Spatial Analysis with Misaligned Data Using Atom-Based Regression Models. R package version 0.2.3, https://github.com/bellayqian/spatialAtomizeR.
 
 ## About
 
