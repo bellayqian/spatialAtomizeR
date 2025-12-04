@@ -4,4 +4,5 @@
 
 ## Resubmission
 
-This is a resubmission addressing reviewer comments from November 20, 2025.
+We previously did a resubmission addressing reviewer comments from November 20, 2025.
+This is another resubmission addressing reviewer comments from December 4, 2025.

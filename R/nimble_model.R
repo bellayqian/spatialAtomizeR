@@ -145,12 +145,6 @@ register_nimble_distributions <- function() {
 #'
 #' @return A nimbleCode object containing the model specification
 #' @export
-#' @importFrom nimble nimbleCode
-#' @examples
-#' \dontrun{
-#' model_code <- get_abrm_model()
-#' # Use in nimbleMCMC call
-#' }
 get_abrm_model <- function() {
   
   # Ensure distributions are registered

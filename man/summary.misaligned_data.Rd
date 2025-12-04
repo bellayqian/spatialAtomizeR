@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (unused)}
 }
+\value{
+Invisibly returns the input object \code{object}. The function is called for its side effect of printing the misaligned data summary including grid information and true parameter values (beta_x and beta_y).
+}
 \description{
 Summary method for misaligned_data objects
 }

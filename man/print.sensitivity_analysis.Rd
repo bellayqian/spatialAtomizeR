@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (unused)}
 }
+\value{
+Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of the sensitivity analysis results including the number of simulations and scenarios tested.
+}
 \description{
 Print method for sensitivity_analysis objects
 }

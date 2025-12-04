@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (unused)}
 }
+\value{
+Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of the simulated misaligned spatial data including grid dimensions and number of atoms.
+}
 \description{
 Print method for misaligned_data objects
 }

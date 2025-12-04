@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (unused)}
 }
+\value{
+Invisibly returns the input object \code{object}. The function is called for its side effect of printing the ABRM model summary including detailed parameter estimates.
+}
 \description{
 Summary method for abrm objects
 }

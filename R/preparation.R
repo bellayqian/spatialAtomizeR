@@ -330,38 +330,38 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
   
   # Add this diagnostic function to check the indexing
   check_nimble_indexing <- function(constants, data) {
-    cat("=== NIMBLE Indexing Diagnostics ===\n")
+    message("=== NIMBLE Indexing Diagnostics ===\n")
     
     D <- constants$D
     J_y <- constants$J_y
     
     # Check if y_to_atom exists
     if(!"y_to_atom" %in% names(constants)) {
-      cat("ERROR: y_to_atom missing from constants!\n")
+      message("ERROR: y_to_atom missing from constants!\n")
       return(FALSE)
     }
     
     # Check dimensions
-    cat("D (atoms):", D, "\n")
-    cat("J_y (atom-equivalent Y grids):", J_y, "\n")
-    cat("Length of y_to_atom:", length(constants$y_to_atom), "\n")
-    cat("Length of expand_y:", length(constants$expand_y), "\n")
-    cat("Length of pop_atoms:", length(constants$pop_atoms), "\n")
+    message("D (atoms):", D, "\n")
+    message("J_y (atom-equivalent Y grids):", J_y, "\n")
+    message("Length of y_to_atom:", length(constants$y_to_atom), "\n")
+    message("Length of expand_y:", length(constants$expand_y), "\n")
+    message("Length of pop_atoms:", length(constants$pop_atoms), "\n")
     
     # Check population alignment
     # Check y_to_atom mapping
     if(any(constants$y_to_atom > D) || any(constants$y_to_atom < 1)) {
-      cat("Warning: y_to_atom contains invalid indices!\n")
+      message("Warning: y_to_atom contains invalid indices!\n")
       return(FALSE)
     }
     
     # Check temp_yx dimensions
     if(nrow(data$yx_obs) != constants$S_y) {
-      cat("Warning: yx_obs rows don't match S_y!\n")
+      message("Warning: yx_obs rows don't match S_y!\n")
       return(FALSE)
     }
     
-    cat("Basic indexing checks passed\n")
+    message("Basic indexing checks passed\n")
     return(TRUE)
   }
   # check_nimble_indexing(constants, data)

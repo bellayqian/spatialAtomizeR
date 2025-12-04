@@ -18,10 +18,3 @@ List with diagnostic results including convergence statistics and plots
 Calculates convergence diagnostics including Gelman-Rubin statistics
 and effective sample sizes for MCMC output
 }
-\examples{
-\dontrun{
-# After running MCMC
-diagnostics <- check_mcmc_diagnostics(mcmc_output)
-print(diagnostics$overall_converged)
-}
-}

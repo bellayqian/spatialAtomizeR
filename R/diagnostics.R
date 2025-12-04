@@ -19,12 +19,6 @@ utils::globalVariables(c(
 #' @importFrom stats cor sd median
 #' @importFrom utils head
 #' @export
-#' @examples
-#' \dontrun{
-#' # After running MCMC
-#' diagnostics <- check_mcmc_diagnostics(mcmc_output)
-#' print(diagnostics$overall_converged)
-#' }
 check_mcmc_diagnostics <- function(mcmc_output, sim_metadata = NULL) {
   # Validate chain structure
   chains_list <- mcmc_output$samples
@@ -168,6 +162,7 @@ create_diagnostic_plots <- function(chains_list, sim_metadata) {
 #' Print Convergence Summary
 #'
 #' @param convergence_results Results from check_mcmc_diagnostics
+#' @return No return value, called for side effects. Prints convergence diagnostics including overall convergence status, minimum effective sample size, median ESS, maximum Rhat statistic, and identifies parameters with high relative variance.
 #' @export
 print_convergence_summary <- function(convergence_results) {
   message("\nConvergence Summary:\n")
@@ -214,6 +209,7 @@ print_convergence_summary <- function(convergence_results) {
 #' @param comparison_data Data frame with comparison results
 #' @param output_dir Output directory for plots
 #' @param true_params True parameter values (optional)
+#' @return No return value, called for side effects. Creates and displays/saves comparison plots of coefficient estimates, bias, and coverage rates across different methods. If output_dir is provided, plots are saved to a PDF file.
 #' @importFrom ggplot2 ggplot aes geom_point geom_errorbar geom_bar geom_hline coord_flip theme_minimal labs position_dodge facet_wrap .data
 #' @importFrom dplyr select mutate
 #' @importFrom grDevices pdf dev.off
@@ -298,6 +294,7 @@ create_comparison_plots <- function(comparison_data, output_dir, true_params = N
 #'
 #' @param all_results Combined results data frame
 #' @param output_dir Output directory
+#' @return A list with two components: \code{method_summary} (data frame containing overall summary statistics for each method, including mean bias, relative bias, and coverage rates) and \code{param_summary} (data frame containing parameter-specific comparisons across methods). The function also saves these summaries to CSV files in the output directory.
 #' @importFrom dplyr group_by summarize select
 #' @importFrom tidyr pivot_wider
 #' @importFrom utils write.csv
@@ -355,6 +352,7 @@ create_summary_statistics <- function(all_results, output_dir) {
 #'
 #' @param combined_results Combined results data frame
 #' @param output_dir Output directory
+#' @return No return value, called for side effects. Creates and displays/saves summary plots for sensitivity analysis including correlation effects, bias patterns, and coverage rates. If output_dir is provided, plots are saved to a PDF file.
 #' @importFrom ggplot2 ggplot aes geom_point geom_errorbar geom_bar geom_hline coord_flip facet_grid theme_minimal labs position_dodge
 #' @importFrom grDevices pdf dev.off
 #' @importFrom dplyr group_by summarize

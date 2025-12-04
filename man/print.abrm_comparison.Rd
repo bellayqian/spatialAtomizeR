@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (unused)}
 }
+\value{
+Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of method comparison results including the number of simulations and methods compared.
+}
 \description{
 Print method for abrm_comparison objects
 }

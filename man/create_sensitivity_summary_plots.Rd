@@ -11,6 +11,9 @@ create_sensitivity_summary_plots(combined_results, output_dir)
 
 \item{output_dir}{Output directory}
 }
+\value{
+No return value, called for side effects. Creates and displays/saves summary plots for sensitivity analysis including correlation effects, bias patterns, and coverage rates. If output_dir is provided, plots are saved to a PDF file.
+}
 \description{
 Create Sensitivity Summary Plots
 }

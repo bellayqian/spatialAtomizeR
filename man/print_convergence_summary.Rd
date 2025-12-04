@@ -9,6 +9,9 @@ print_convergence_summary(convergence_results)
 \arguments{
 \item{convergence_results}{Results from check_mcmc_diagnostics}
 }
+\value{
+No return value, called for side effects. Prints convergence diagnostics including overall convergence status, minimum effective sample size, median ESS, maximum Rhat statistic, and identifies parameters with high relative variance.
+}
 \description{
 Print Convergence Summary
 }

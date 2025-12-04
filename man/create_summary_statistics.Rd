@@ -11,6 +11,9 @@ create_summary_statistics(all_results, output_dir)
 
 \item{output_dir}{Output directory}
 }
+\value{
+A list with two components: \code{method_summary} (data frame containing overall summary statistics for each method, including mean bias, relative bias, and coverage rates) and \code{param_summary} (data frame containing parameter-specific comparisons across methods). The function also saves these summaries to CSV files in the output directory.
+}
 \description{
 Create Summary Statistics
 }

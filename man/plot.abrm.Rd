@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (ignored)}
 }
+\value{
+Invisibly returns the input object \code{x}. The function is called for its side effect of displaying MCMC diagnostic plots (trace plots and density plots) if they are available in the abrm object.
+}
 \description{
 Plot method for abrm objects
 }

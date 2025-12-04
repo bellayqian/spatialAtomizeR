@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (ignored)}
 }
+\value{
+Invisibly returns the input object \code{x}. The function is called for its side effect of displaying comparison plots between methods if true parameters are available in the comparison object.
+}
 \description{
 Plot method for abrm_comparison objects
 }

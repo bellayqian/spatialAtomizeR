@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (unused)}
 }
+\value{
+Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of the ABRM model results including convergence status, number of parameters estimated, and key fit statistics.
+}
 \description{
 Print method for abrm objects
 }

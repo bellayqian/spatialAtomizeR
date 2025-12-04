@@ -13,9 +13,3 @@ A nimbleCode object containing the model specification
 Returns the NIMBLE code for the Atom-Based Regression Model with mixed-type variables.
 Automatically registers custom distributions if not already registered.
 }
-\examples{
-\dontrun{
-model_code <- get_abrm_model()
-# Use in nimbleMCMC call
-}
-}

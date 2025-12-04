@@ -13,6 +13,9 @@ create_comparison_plots(comparison_data, output_dir, true_params = NULL)
 
 \item{true_params}{True parameter values (optional)}
 }
+\value{
+No return value, called for side effects. Creates and displays/saves comparison plots of coefficient estimates, bias, and coverage rates across different methods. If output_dir is provided, plots are saved to a PDF file.
+}
 \description{
 Create Comparison Plots
 }
