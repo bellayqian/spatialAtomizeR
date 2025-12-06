@@ -48,7 +48,9 @@ biasedUrn_rmfnc <- function(total, odds, ni) {
 #' @export
 #' @importFrom nimble nimbleFunction nimbleRcall registerDistributions
 register_nimble_distributions <- function() {
-  if (.pkg_env$distributions_registered) {
+  if (exists("distributions_registered_spatialAtomizeR", 
+             envir = .GlobalEnv) && 
+      .GlobalEnv$distributions_registered_spatialAtomizeR) {
     return(invisible(TRUE))
   }
   
@@ -56,9 +58,10 @@ register_nimble_distributions <- function() {
     stop("nimble package is required but not installed")
   }
   
-  # Define the dmfnchypg density function
-  .pkg_env$dmfnchypg <- nimble::nimbleFunction(
-    run = function(x = double(1), total = double(0), odds = double(1), ni = double(1),
+  # Define dmfnchypg in GLOBAL environment
+  dmfnchypg <<- nimble::nimbleFunction(
+    run = function(x = double(1), total = double(0), 
+                   odds = double(1), ni = double(1),
                    log = integer(0)) {
       returnType(double(0))
       
@@ -106,18 +109,19 @@ register_nimble_distributions <- function() {
     }
   )
   
-  # Create nimbleRcall wrapper
-  .pkg_env$Rmfnchypg <- nimble::nimbleRcall(
+  # Create nimbleRcall wrapper in GLOBAL environment
+  Rmfnchypg <<- nimble::nimbleRcall(
     prototype = function(total = double(0), odds = double(1), ni = double(1)) {},
     returnType = double(1),
     Rfun = "biasedUrn_rmfnc"
   )
   
-  # Create the nimbleFunction wrapper for random generation
-  .pkg_env$rmfnchypg <- nimble::nimbleFunction(
-    run = function(n = integer(0), total = double(0), odds = double(1), ni = double(1)) {
+  # Create rmfnchypg WITHOUT referencing .pkg_env
+  rmfnchypg <<- nimble::nimbleFunction(
+    run = function(n = integer(0), total = double(0), 
+                   odds = double(1), ni = double(1)) {
       returnType(double(1))
-      return(.pkg_env$Rmfnchypg(total, odds, ni))
+      return(Rmfnchypg(total, odds, ni))  # Direct reference, not .pkg_env$
     }
   )
   
@@ -126,14 +130,18 @@ register_nimble_distributions <- function() {
     dmfnchypg = list(
       BUGSdist = "dmfnchypg(total, odds, ni)",
       discrete = TRUE,
-      types = c('value = double(1)', 'total = double(0)', 'odds = double(1)', 'ni = double(1)'),
+      types = c('value = double(1)', 'total = double(0)', 
+                'odds = double(1)', 'ni = double(1)'),
       mixedSizes = TRUE,
       pqAvail = FALSE,
       range = c(0, Inf)
     )
   ))
   
-  .pkg_env$distributions_registered <- TRUE
+  # Store flag in global environment
+  assign("distributions_registered_spatialAtomizeR", TRUE, 
+         envir = .GlobalEnv)
+  
   message("NIMBLE custom distributions registered successfully")
   invisible(TRUE)
 }
