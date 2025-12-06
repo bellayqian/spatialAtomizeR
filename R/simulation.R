@@ -136,8 +136,20 @@ simulate_misaligned_data <- function(seed = 2,
   
   # Create atoms
   atoms <- sf::st_as_sf(raster::intersect(as(gridy, 'Spatial'), as(gridx, 'Spatial')))
-  names(atoms)[which(names(atoms) == 'ID')] <- c("ID_y")
-  names(atoms)[which(names(atoms) == 'ID.1')] <- c("ID_x")
+  
+  # Fix the column name detection and renaming
+  # First, identify which columns contain the grid IDs
+  id_cols <- grep("^ID", names(atoms), value = TRUE)
+  if (length(id_cols) == 2) {
+    # Rename to ID_y and ID_x
+    names(atoms)[names(atoms) == id_cols[1]] <- "ID_y"
+    names(atoms)[names(atoms) == id_cols[2]] <- "ID_x"
+  } else {
+    # Fallback: try original naming approach
+    names(atoms)[which(names(atoms) == 'ID')] <- "ID_y"
+    names(atoms)[which(names(atoms) == 'ID.1')] <- "ID_x"
+  }
+  
   atoms$ID_atomorder <- 1:nrow(atoms)
   
   # Generate atom-level population
@@ -232,6 +244,12 @@ simulate_misaligned_data <- function(seed = 2,
                      sd = atoms$population * 1)
   } else {
     stop('Distribution of outcome not recognized.')
+  }
+  
+  # Add verification before aggregation
+  if (!"ID_x" %in% names(atoms) || !"ID_y" %in% names(atoms)) {
+    stop(sprintf("Column renaming failed. Atom columns are: %s", 
+                 paste(names(atoms), collapse = ", ")))
   }
   
   # Aggregate to grid level
