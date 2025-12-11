@@ -14,6 +14,8 @@ Registers the custom multivariate non-central hypergeometric distribution
 for use in NIMBLE models. This function is called automatically when needed.
 }
 \note{
-The <<- operator is used intentionally to create package-level 
-nimbleFunctions accessible across the package environment.
+This function intentionally assigns to the global environment
+(.GlobalEnv) as required by NIMBLE's compilation process. NIMBLE cannot
+access package environments during compilation, so custom distributions
+must be globally accessible.
 }

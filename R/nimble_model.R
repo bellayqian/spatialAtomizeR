@@ -41,9 +41,10 @@ biasedUrn_rmfnc <- function(total, odds, ni) {
 #' Registers the custom multivariate non-central hypergeometric distribution
 #' for use in NIMBLE models. This function is called automatically when needed.
 #' 
-#' @note This function creates nimbleFunctions in the global environment so that
-#' NIMBLE can access them during compilation. This is required because NIMBLE
-#' cannot access package environments during the compilation process.
+#' @note This function intentionally assigns to the global environment
+#' (.GlobalEnv) as required by NIMBLE's compilation process. NIMBLE cannot
+#' access package environments during compilation, so custom distributions
+#' must be globally accessible.
 #'
 #' @return Invisible TRUE if successful
 #' @export
@@ -62,7 +63,7 @@ register_nimble_distributions <- function() {
   # This is necessary because NIMBLE needs to access it during compilation
   assign("dmfnchypg", nimble::nimbleFunction(
     run = function(x = double(1), total = double(0), odds = double(1), ni = double(1),
-                   log = integer(0, default = 0)) {
+                   log = integer(0)) {
       returnType(double(0))
       
       x_round <- round(x)
