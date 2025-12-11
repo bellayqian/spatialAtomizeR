@@ -41,14 +41,16 @@ biasedUrn_rmfnc <- function(total, odds, ni) {
 #' Registers the custom multivariate non-central hypergeometric distribution
 #' for use in NIMBLE models. This function is called automatically when needed.
 #' 
-#' @note The <<- operator is used intentionally to create package-level 
-#' nimbleFunctions accessible across the package environment.
+#' @note This function creates nimbleFunctions in the global environment so that
+#' NIMBLE can access them during compilation. This is required because NIMBLE
+#' cannot access package environments during the compilation process.
 #'
 #' @return Invisible TRUE if successful
 #' @export
 #' @importFrom nimble nimbleFunction nimbleRcall registerDistributions
 register_nimble_distributions <- function() {
-  if (.pkg_env$distributions_registered) {
+  if (exists("distributions_registered", envir = .pkg_env) && 
+      .pkg_env$distributions_registered) {
     return(invisible(TRUE))
   }
   
@@ -56,10 +58,11 @@ register_nimble_distributions <- function() {
     stop("nimble package is required but not installed")
   }
   
-  # Define the dmfnchypg density function
-  .pkg_env$dmfnchypg <- nimble::nimbleFunction(
+  # Define the dmfnchypg density function in GLOBAL environment
+  # This is necessary because NIMBLE needs to access it during compilation
+  assign("dmfnchypg", nimble::nimbleFunction(
     run = function(x = double(1), total = double(0), odds = double(1), ni = double(1),
-                   log = integer(0)) {
+                   log = integer(0, default = 0)) {
       returnType(double(0))
       
       x_round <- round(x)
@@ -104,22 +107,23 @@ register_nimble_distributions <- function() {
       
       if(log == 1) return(logProb) else return(exp(logProb))
     }
-  )
+  ), envir = .GlobalEnv)
   
-  # Create nimbleRcall wrapper
-  .pkg_env$Rmfnchypg <- nimble::nimbleRcall(
+  # Create nimbleRcall wrapper in GLOBAL environment
+  assign("Rmfnchypg", nimble::nimbleRcall(
     prototype = function(total = double(0), odds = double(1), ni = double(1)) {},
     returnType = double(1),
     Rfun = "biasedUrn_rmfnc"
-  )
+  ), envir = .GlobalEnv)
   
-  # Create the nimbleFunction wrapper for random generation
-  .pkg_env$rmfnchypg <- nimble::nimbleFunction(
+  # Create the nimbleFunction wrapper for random generation in GLOBAL environment
+  # NOTE: Now references Rmfnchypg from global environment, not .pkg_env
+  assign("rmfnchypg", nimble::nimbleFunction(
     run = function(n = integer(0), total = double(0), odds = double(1), ni = double(1)) {
       returnType(double(1))
-      return(.pkg_env$Rmfnchypg(total, odds, ni))
+      return(Rmfnchypg(total, odds, ni))
     }
-  )
+  ), envir = .GlobalEnv)
   
   # Register the custom distribution
   nimble::registerDistributions(list(
