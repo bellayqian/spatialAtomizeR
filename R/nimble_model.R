@@ -535,7 +535,7 @@ get_abrm_model <- function() {
 #'
 #' @return List containing MCMC samples, summary, and convergence diagnostics
 #' @export
-#' @importFrom nimble nimbleMCMC
+#' @importFrom nimble nimbleMCMC getNimbleOption
 #' @importFrom grDevices pdf dev.off
 run_nimble_model <- function(constants, data, inits, sim_metadata = NULL, 
                              model_code, niter = 50000, nburnin = 30000, 
