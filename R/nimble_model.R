@@ -45,7 +45,7 @@ biasedUrn_rmfnc <- function(total, odds, ni) {
 #' @param log Logical, return log probability
 #' @return The log-probability (if log=1) or probability (if log=0)
 #' @export
-#' @importFrom nimble nimRound
+#' @import nimble
 dmfnchypg <- nimble::nimbleFunction(
   run = function(x = double(1), total = double(0), odds = double(1), 
                  ni = double(1), log = integer(0, default = 0)) {
@@ -535,7 +535,7 @@ get_abrm_model <- function() {
 #'
 #' @return List containing MCMC samples, summary, and convergence diagnostics
 #' @export
-#' @importFrom nimble nimbleMCMC getNimbleOption
+#' @import nimble
 #' @importFrom grDevices pdf dev.off
 run_nimble_model <- function(constants, data, inits, sim_metadata = NULL, 
                              model_code, niter = 50000, nburnin = 30000, 
