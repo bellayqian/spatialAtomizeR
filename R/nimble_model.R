@@ -36,102 +36,117 @@ biasedUrn_rmfnc <- function(total, odds, ni) {
   return(as.numeric(result))
 }
 
-#' Register Custom NIMBLE Distributions
+#' Density function for multivariate non-central hypergeometric
 #'
-#' Registers the custom multivariate non-central hypergeometric distribution
-#' for use in NIMBLE models. This function is called automatically when needed.
-#' 
-#' @note This function intentionally assigns to the global environment
-#' (.GlobalEnv) as required by NIMBLE's compilation process. NIMBLE cannot
-#' access package environments during compilation, so custom distributions
-#' must be globally accessible.
-#'
-#' @return Invisible TRUE if successful
+#' @param x Vector of counts
+#' @param total Total number of items
+#' @param odds Vector of odds
+#' @param ni Vector of category sizes
+#' @param log Logical, return log probability
+#' @return The log-probability (if log=1) or probability (if log=0)
 #' @export
-#' @importFrom nimble nimbleFunction nimbleRcall registerDistributions
+#' @importFrom nimble nimRound
+dmfnchypg <- nimble::nimbleFunction(
+  run = function(x = double(1), total = double(0), odds = double(1), 
+                 ni = double(1), log = integer(0, default = 0)) {
+    returnType(double(0))
+    
+    x_round <- round(x)
+    total_round <- round(total)
+    
+    sumX <- 0
+    for(i in 1:length(x)) {
+      sumX <- sumX + x[i]
+    }
+    
+    if(abs(sumX - total) > 0.1) {
+      if(log == 1) return(-Inf) else return(0)
+    }
+    
+    for(i in 1:length(x)) {
+      if(x[i] < 0) {
+        if(log == 1) return(-Inf) else return(0)
+      }
+      if(x_round[i] > round(ni[i])) {
+        if(log == 1) return(-Inf) else return(0)
+      }
+    }
+    
+    logProb <- 0
+    
+    for(i in 1:length(ni)) {
+      logProb <- logProb + lfactorial(round(ni[i]))
+    }
+    
+    for(i in 1:length(x_round)) {
+      logProb <- logProb - lfactorial(x_round[i])
+    }
+    
+    for(i in 1:length(x_round)) {
+      logProb <- logProb - lfactorial(round(ni[i]) - x_round[i])
+    }
+    
+    for(i in 1:length(x_round)) {
+      safe_odds <- max(odds[i], 1e-10)
+      logProb <- logProb + x_round[i] * log(safe_odds)
+    }
+    
+    if(log == 1) return(logProb) else return(exp(logProb))
+  }
+)
+
+#' Nimble R Call Wrapper for BiasedUrn
+#' 
+#' Internal wrapper to call R function from compiled Nimble code.
+#' 
+#' @param total Total number of items
+#' @param odds Vector of odds
+#' @param ni Vector of category sizes
+#' @return Vector of sampled counts
+#' @export
+#' @rdname Rmfnchypg_rcall
+Rmfnchypg <- nimble::nimbleRcall(
+  prototype = function(total = double(0), odds = double(1), ni = double(1)) {},
+  returnType = double(1),
+  Rfun = "biasedUrn_rmfnc"
+)
+
+#' Random generation for multivariate non-central hypergeometric
+#' 
+#' @param n number of observations (only n=1 is used)
+#' @param total Total number of items
+#' @param odds Vector of odds
+#' @param ni Vector of category sizes
+#' @return Vector of sampled counts
+#' @export
+#' @rdname rmfnchypg
+rmfnchypg <- nimble::nimbleFunction(
+  run = function(n = integer(0), total = double(0), odds = double(1), 
+                 ni = double(1)) {
+    returnType(double(1))
+    return(Rmfnchypg(total, odds, ni))
+  }
+)
+
+#' Register Custom NIMBLE Distributions
+#' 
+#' Registers the custom distributions for use in NIMBLE models.
+#' 
+#' @return Invisible TRUE
+#' @export
 register_nimble_distributions <- function() {
   if (exists("distributions_registered", envir = .pkg_env) && 
       .pkg_env$distributions_registered) {
     return(invisible(TRUE))
   }
   
-  if (!requireNamespace("nimble", quietly = TRUE)) {
-    stop("nimble package is required but not installed")
-  }
-  
-  # Define the dmfnchypg density function in GLOBAL environment
-  # This is necessary because NIMBLE needs to access it during compilation
-  assign("dmfnchypg", nimble::nimbleFunction(
-    run = function(x = double(1), total = double(0), odds = double(1), ni = double(1),
-                   log = integer(0)) {
-      returnType(double(0))
-      
-      x_round <- round(x)
-      total_round <- round(total)
-      
-      sumX <- 0
-      for(i in 1:length(x)) {
-        sumX <- sumX + x[i]
-      }
-      
-      if(abs(sumX - total) > 0.1) {
-        if(log == 1) return(-Inf) else return(0)
-      }
-      
-      for(i in 1:length(x)) {
-        if(x[i] < 0) {
-          if(log == 1) return(-Inf) else return(0)
-        }
-        if(x_round[i] > round(ni[i])) {
-          if(log == 1) return(-Inf) else return(0)
-        }
-      }
-      
-      logProb <- 0
-      
-      for(i in 1:length(ni)) {
-        logProb <- logProb + lfactorial(round(ni[i]))
-      }
-      
-      for(i in 1:length(x_round)) {
-        logProb <- logProb - lfactorial(x_round[i])
-      }
-      
-      for(i in 1:length(x_round)) {
-        logProb <- logProb - lfactorial(round(ni[i]) - x_round[i])
-      }
-      
-      for(i in 1:length(x_round)) {
-        safe_odds <- max(odds[i], 1e-10)
-        logProb <- logProb + x_round[i] * log(safe_odds)
-      }
-      
-      if(log == 1) return(logProb) else return(exp(logProb))
-    }
-  ), envir = .GlobalEnv)
-  
-  # Create nimbleRcall wrapper in GLOBAL environment
-  assign("Rmfnchypg", nimble::nimbleRcall(
-    prototype = function(total = double(0), odds = double(1), ni = double(1)) {},
-    returnType = double(1),
-    Rfun = "biasedUrn_rmfnc"
-  ), envir = .GlobalEnv)
-  
-  # Create the nimbleFunction wrapper for random generation in GLOBAL environment
-  # NOTE: Now references Rmfnchypg from global environment, not .pkg_env
-  assign("rmfnchypg", nimble::nimbleFunction(
-    run = function(n = integer(0), total = double(0), odds = double(1), ni = double(1)) {
-      returnType(double(1))
-      return(Rmfnchypg(total, odds, ni))
-    }
-  ), envir = .GlobalEnv)
-  
-  # Register the custom distribution
+  # Only the registration call here - functions are already exported above
   nimble::registerDistributions(list(
     dmfnchypg = list(
       BUGSdist = "dmfnchypg(total, odds, ni)",
       discrete = TRUE,
-      types = c('value = double(1)', 'total = double(0)', 'odds = double(1)', 'ni = double(1)'),
+      types = c('value = double(1)', 'total = double(0)', 
+                'odds = double(1)', 'ni = double(1)'),
       mixedSizes = TRUE,
       pqAvail = FALSE,
       range = c(0, Inf)
@@ -139,7 +154,6 @@ register_nimble_distributions <- function() {
   ))
   
   .pkg_env$distributions_registered <- TRUE
-  message("NIMBLE custom distributions registered successfully")
   invisible(TRUE)
 }
 

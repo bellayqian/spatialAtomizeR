@@ -7,15 +7,8 @@
 register_nimble_distributions()
 }
 \value{
-Invisible TRUE if successful
+Invisible TRUE
 }
 \description{
-Registers the custom multivariate non-central hypergeometric distribution
-for use in NIMBLE models. This function is called automatically when needed.
-}
-\note{
-This function intentionally assigns to the global environment
-(.GlobalEnv) as required by NIMBLE's compilation process. NIMBLE cannot
-access package environments during compilation, so custom distributions
-must be globally accessible.
+Registers the custom distributions for use in NIMBLE models.
 }
