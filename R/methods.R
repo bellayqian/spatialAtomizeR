@@ -176,11 +176,11 @@ summary.sensitivity_analysis <- function(object, ...) {
 print.misaligned_data <- function(x, ...) {
   message("Simulated Misaligned Spatial Data\n")
   message("==================================\n")
-  message("Y-grid cells:", nrow(x$gridy), "\n")
-  message("X-grid cells:", nrow(x$gridx), "\n")
-  message("Atoms:", nrow(x$atoms), "\n")
-  message("Number of X covariates:", length(grep("covariate_x", names(x$gridx))), "\n")
-  message("Number of Y covariates:", length(grep("covariate_y", names(x$gridy))), "\n")
+  message("Y-grid cells: ", nrow(x$gridy), "\n")
+  message("X-grid cells: ", nrow(x$gridx), "\n")
+  message("Atoms: ", nrow(x$atoms), "\n")
+  message("Number of X covariates: ", length(grep("covariate_x", names(x$gridx))), "\n")
+  message("Number of Y covariates: ", length(grep("covariate_y", names(x$gridy))), "\n")
   if (!is.null(x$true_params)) {
     message("True parameters available\n")
   }
