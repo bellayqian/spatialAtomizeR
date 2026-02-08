@@ -1,8 +1,17 @@
 ## R CMD check results
 
-0 errors | 0 warnings | 1 notes 
+0 errors | 0 warnings | 0 note
 
 ## Resubmission
 
-We previously did a resubmission addressing reviewer comments from November 20, 2025 and December 4, 2025.
-This is another resubmission addressing function register to global environment issue from December 10, 2025.
+This is a resubmission addressing the package environment issue found in the previous submission (December 4, 2025).
+
+## Changes made:
+
+REFACTORED the Nimble model architecture: custom distributions are now defined as top-level exported functions within the package namespace.
+
+MOVED nimble from Imports to Depends to ensure internal compilation tools are correctly available on the search path without needing global assignments.
+
+## Notes
+
+If there is 1 note about timestamps: The note regarding "future file timestamps" is due to local system clock differences and does not affect package functionality.

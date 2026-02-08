@@ -3,7 +3,8 @@
 #' @param data List containing gridy, gridx, and atoms from simulate_misaligned_data
 #'
 #' @return List of bookkeeping objects for NIMBLE model
-#' @export
+#' @keywords internal
+#' @noRd
 #' @importFrom sf st_drop_geometry
 #' @importFrom nimble as.carAdjacency
 #' @importFrom stats rmultinom
@@ -98,7 +99,8 @@ prepare_spatial_bookkeeping <- function(data) {
 #' @param gridx_xorder Reordered X grid
 #'
 #' @return List containing W_x and W_y adjacency matrices
-#' @export
+#' @keywords internal
+#' @noRd
 #' @importFrom spdep poly2nb nb2mat
 #' @importFrom dplyr select
 prepare_adjacency_matrices <- function(gridy_yorder, gridx_xorder) {
@@ -125,7 +127,8 @@ prepare_adjacency_matrices <- function(gridy_yorder, gridx_xorder) {
 #' @param dist_y Distribution type for outcome (1=normal, 2=poisson, 3=binomial)
 #'
 #' @return List containing constants, data, and inits for NIMBLE
-#' @export
+#' @keywords internal
+#' @noRd
 #' @importFrom BiasedUrn rMFNCHypergeo
 #' @importFrom stats rWishart rnorm
 #' @importFrom nimble as.carAdjacency
@@ -178,7 +181,7 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     return(covar_matrix)
   }
   
-  print("\nCreating and standardizing covariate matrices...")
+  message("Creating and standardizing covariate matrices...")
   covar_x <- create_covariate_matrix(grid_data=gridx_xorder[order(gridx_xorder$ID_xorder), ],
                                      vars=bookkeeping$x_vars,
                                      grid_size=nrow(gridx_xorder))

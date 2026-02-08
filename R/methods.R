@@ -2,18 +2,19 @@
 #' @param x An abrm object
 #' @param ... Additional arguments (unused)
 #' @return Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of the ABRM model results including convergence status, number of parameters estimated, and key fit statistics.
-#' @export
+#' @keywords internal
+#' @noRd
 print.abrm <- function(x, ...) {
-  message("ABRM Model Results\n")
-  message("==================\n\n")
-  message("Number of parameters estimated:", nrow(x$parameter_estimates), "\n")
+  cat("\nABRM Model Results\n")
+  cat("==================\n")
+  cat("Number of parameters estimated:", nrow(x$parameter_estimates), "\n")
   if (is.data.frame(x$parameter_estimates) && "true_beta" %in% names(x$parameter_estimates)) {
-    message("Mean absolute bias:", 
+    cat("Mean absolute bias:", 
         round(mean(abs(x$parameter_estimates$bias), na.rm = TRUE), 4), "\n")
-    message("Coverage rate:", 
+    cat("Coverage rate:", 
         round(mean(x$parameter_estimates$within_ci, na.rm = TRUE) * 100, 2), "%\n")
   }
-  message("\nUse summary() for detailed parameter estimates\n")
+  cat("\nUse summary() for detailed parameter estimates\n")
   invisible(x)
 }
 
@@ -21,11 +22,31 @@ print.abrm <- function(x, ...) {
 #' @param object An abrm object
 #' @param ... Additional arguments (unused)
 #' @return Invisibly returns the input object \code{object}. The function is called for its side effect of printing the ABRM model summary including detailed parameter estimates.
-#' @export
+#' @keywords internal
+#' @noRd
 summary.abrm <- function(object, ...) {
-  message("ABRM Model Summary\n")
-  message("==================\n\n")
-  print(object$parameter_estimates)
+  cat("ABRM Model Summary\n")
+  cat("==================\n\n")
+  # Remove redundant row names in parameter estimates
+  param_table <- object$parameter_estimates
+  rownames(param_table) <- NULL
+  
+  # Better column names
+  if("estimated_beta" %in% names(param_table)) {
+    names(param_table)[names(param_table) == "estimated_beta"] <- "Estimate"
+  }
+  if("std_error" %in% names(param_table)) {
+    names(param_table)[names(param_table) == "std_error"] <- "Std.Error"
+  }
+  if("ci_lower" %in% names(param_table)) {
+    names(param_table)[names(param_table) == "ci_lower"] <- "CI.Lower"
+  }
+  if("ci_upper" %in% names(param_table)) {
+    names(param_table)[names(param_table) == "ci_upper"] <- "CI.Upper"
+  }
+  
+  print(param_table, row.names = FALSE)
+  cat("\n")
   invisible(object)
 }
 
@@ -34,12 +55,13 @@ summary.abrm <- function(object, ...) {
 #' @param x An object of class "abrm"
 #' @param ... Additional arguments (ignored)
 #' @return Invisibly returns the input object \code{x}. The function is called for its side effect of displaying MCMC diagnostic plots (trace plots and density plots) if they are available in the abrm object.
-#' @export
+#' @keywords internal
+#' @noRd
 #' @importFrom graphics par
 plot.abrm <- function(x, ...) {
   if(!is.null(x$mcmc_results$convergence$plots)) {
-    print(x$mcmc_results$convergence$plots$trace)
-    print(x$mcmc_results$convergence$plots$density)
+    message(x$mcmc_results$convergence$plots$trace)
+    message(x$mcmc_results$convergence$plots$density)
   } else {
     message("No diagnostic plots available.\n")
   }
@@ -50,7 +72,8 @@ plot.abrm <- function(x, ...) {
 #' @param x A abrm_comparison object
 #' @param ... Additional arguments (unused)
 #' @return Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of method comparison results including the number of simulations and methods compared.
-#' @export
+#' @keywords internal
+#' @noRd
 print.abrm_comparison <- function(x, ...) {
   message("Method Comparison Results\n")
   message("=========================\n\n")
@@ -70,7 +93,8 @@ print.abrm_comparison <- function(x, ...) {
 #' @param object An object of class "abrm_comparison"
 #' @param ... Additional arguments (ignored)
 #' @return Invisibly returns the input object \code{object}. The function is called for its side effect of printing the method comparison summary including combined comparison results across all simulations.
-#' @export
+#' @keywords internal
+#' @noRd
 summary.abrm_comparison <- function(object, ...) {
   message("Method Comparison Summary\n")
   message("=========================\n\n")
@@ -92,7 +116,8 @@ summary.abrm_comparison <- function(object, ...) {
 #' @param x An object of class "abrm_comparison"
 #' @param ... Additional arguments (ignored)
 #' @return Invisibly returns the input object \code{x}. The function is called for its side effect of displaying comparison plots between methods if true parameters are available in the comparison object.
-#' @export
+#' @keywords internal
+#' @noRd
 plot.abrm_comparison <- function(x, ...) {
   if (!is.null(x$abrm_results$parameter_estimates) && 
       "true_beta" %in% names(x$abrm_results$parameter_estimates)) {
@@ -115,7 +140,8 @@ plot.abrm_comparison <- function(x, ...) {
 #' @param x A sensitivity_analysis object
 #' @param ... Additional arguments (unused)
 #' @return Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of the sensitivity analysis results including the number of simulations and scenarios tested.
-#' @export
+#' @keywords internal
+#' @noRd
 print.sensitivity_analysis <- function(x, ...) {
   message("Sensitivity Analysis Results\n")
   message("============================\n\n")
@@ -132,11 +158,12 @@ print.sensitivity_analysis <- function(x, ...) {
 #' @param object A sensitivity_analysis object
 #' @param ... Additional arguments (unused)
 #' @return Invisibly returns the input object \code{object}. The function is called for its side effect of printing the sensitivity analysis summary including comprehensive results across all simulation scenarios.
-#' @export
+#' @keywords internal
+#' @noRd
 summary.sensitivity_analysis <- function(object, ...) {
   message("Sensitivity Analysis Summary\n")
   message("============================\n\n")
-  print(object$summary_by_correlation)
+  message(object$summary_by_correlation)
   invisible(object)
 }
 
@@ -144,17 +171,18 @@ summary.sensitivity_analysis <- function(object, ...) {
 #' @param x A misaligned_data object
 #' @param ... Additional arguments (unused)
 #' @return Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of the simulated misaligned spatial data including grid dimensions and number of atoms.
-#' @export
+#' @keywords internal
+#' @noRd
 print.misaligned_data <- function(x, ...) {
   message("Simulated Misaligned Spatial Data\n")
-  message("==================================\n\n")
+  message("==================================\n")
   message("Y-grid cells:", nrow(x$gridy), "\n")
   message("X-grid cells:", nrow(x$gridx), "\n")
   message("Atoms:", nrow(x$atoms), "\n")
   message("Number of X covariates:", length(grep("covariate_x", names(x$gridx))), "\n")
   message("Number of Y covariates:", length(grep("covariate_y", names(x$gridy))), "\n")
   if (!is.null(x$true_params)) {
-    message("\nTrue parameters available\n")
+    message("True parameters available\n")
   }
   invisible(x)
 }
@@ -163,10 +191,11 @@ print.misaligned_data <- function(x, ...) {
 #' @param object A misaligned_data object
 #' @param ... Additional arguments (unused)
 #' @return Invisibly returns the input object \code{object}. The function is called for its side effect of printing the misaligned data summary including grid information and true parameter values (beta_x and beta_y).
-#' @export
+#' @keywords internal
+#' @noRd
 summary.misaligned_data <- function(object, ...) {
   print.misaligned_data(object)
-  message("\nTrue beta_x:", object$true_params$beta_x, "\n")
-  message("True beta_y:", object$true_params$beta_y, "\n")
+  message("True beta_x: ", paste(object$true_params$beta_x, collapse = ", "), "\n")
+  message("True beta_y: ", paste(object$true_params$beta_y, collapse = ", "), "\n")
   invisible(object)
 }

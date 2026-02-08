@@ -6,7 +6,8 @@
 #' @param odds Numeric vector of odds for each category
 #' @param ni Integer vector of population sizes
 #' @return Numeric vector of sampled counts
-#' @export
+#' @keywords internal
+#' @noRd
 #' @importFrom BiasedUrn rMFNCHypergeo
 biasedUrn_rmfnc <- function(total, odds, ni) {
   total <- as.integer(round(total))
@@ -44,7 +45,8 @@ biasedUrn_rmfnc <- function(total, odds, ni) {
 #' @param ni Vector of category sizes
 #' @param log Logical, return log probability
 #' @return The log-probability (if log=1) or probability (if log=0)
-#' @export
+#' @keywords internal
+#' @noRd
 #' @import nimble
 dmfnchypg <- nimble::nimbleFunction(
   run = function(x = double(1), total = double(0), odds = double(1), 
@@ -103,7 +105,8 @@ dmfnchypg <- nimble::nimbleFunction(
 #' @param odds Vector of odds
 #' @param ni Vector of category sizes
 #' @return Vector of sampled counts
-#' @export
+#' @keywords internal
+#' @noRd
 #' @rdname Rmfnchypg_rcall
 Rmfnchypg <- nimble::nimbleRcall(
   prototype = function(total = double(0), odds = double(1), ni = double(1)) {},
@@ -118,7 +121,8 @@ Rmfnchypg <- nimble::nimbleRcall(
 #' @param odds Vector of odds
 #' @param ni Vector of category sizes
 #' @return Vector of sampled counts
-#' @export
+#' @keywords internal
+#' @noRd
 #' @rdname rmfnchypg
 rmfnchypg <- nimble::nimbleFunction(
   run = function(n = integer(0), total = double(0), odds = double(1), 
@@ -133,7 +137,8 @@ rmfnchypg <- nimble::nimbleFunction(
 #' Registers the custom distributions for use in NIMBLE models.
 #' 
 #' @return Invisible TRUE
-#' @export
+#' @keywords internal
+#' @noRd
 register_nimble_distributions <- function() {
   if (exists("distributions_registered", envir = .pkg_env) && 
       .pkg_env$distributions_registered) {
@@ -534,7 +539,8 @@ get_abrm_model <- function() {
 #' @param output_dir Directory for saving plots (default: NULL)
 #'
 #' @return List containing MCMC samples, summary, and convergence diagnostics
-#' @export
+#' @keywords internal
+#' @noRd
 #' @import nimble
 #' @importFrom grDevices pdf dev.off
 run_nimble_model <- function(constants, data, inits, sim_metadata = NULL, 
@@ -583,8 +589,8 @@ run_nimble_model <- function(constants, data, inits, sim_metadata = NULL,
     }
     
     grDevices::pdf(plot_file, width = 12, height = 8)
-    print(diagnostics$plots$trace)
-    print(diagnostics$plots$density)
+    message(diagnostics$plots$trace)
+    message(diagnostics$plots$density)
     grDevices::dev.off()
     message("\nDiagnostic plots saved to", plot_file, "\n")
   }
