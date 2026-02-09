@@ -589,10 +589,10 @@ run_nimble_model <- function(constants, data, inits, sim_metadata = NULL,
     }
     
     grDevices::pdf(plot_file, width = 12, height = 8)
-    message(diagnostics$plots$trace)
-    message(diagnostics$plots$density)
+    print(diagnostics$plots$trace)
+    print(diagnostics$plots$density)
     grDevices::dev.off()
-    message("\nDiagnostic plots saved to", plot_file, "\n")
+    message("Diagnostic plots saved to", plot_file, "\n")
   }
   
   mcmc.out$convergence <- diagnostics

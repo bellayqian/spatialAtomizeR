@@ -83,7 +83,6 @@ run_abrm <- function(gridx,
   )
   
   # Run NIMBLE model
-  message("Running NIMBLE MCMC...\n")
   abrm_results <- run_nimble_model(
     constants = nimble_inputs$constants,
     data = nimble_inputs$data,
@@ -100,7 +99,7 @@ run_abrm <- function(gridx,
   
   # Extract parameter estimates
   abrm_parameters <- data.frame(
-    variable = as.character(rownames(abrm_results$summary$all.chains)),
+    variable = rownames(abrm_results$summary$all.chains),
     estimated_beta = abrm_results$summary$all.chains[, "Mean"],
     std_error = abrm_results$summary$all.chains[, "St.Dev."],
     ci_lower = abrm_results$summary$all.chains[, "95%CI_low"],
