@@ -141,7 +141,7 @@ create_diagnostic_plots <- function(chains_list, sim_metadata) {
   plot_data$variable <- as.factor(plot_data$variable)
   
   # Create trace plots - use .data pronoun for NSE variables
-  trace_plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = .data$iteration, y = .data$value, color = .data$chain)) +
+  trace_plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = iteration, y = value, color = chain)) +
     ggplot2::geom_line(alpha = 0.7) +
     ggplot2::facet_wrap(~variable, scales = "free_y") +
     ggplot2::theme_minimal() +
@@ -152,7 +152,7 @@ create_diagnostic_plots <- function(chains_list, sim_metadata) {
                    plot.title = ggplot2::element_text(size = 11))
   
   # Create density plots
-  density_plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = .data$value, fill = .data$chain)) +
+  density_plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = value, fill = chain)) +
     ggplot2::geom_density(alpha = 0.3) +
     ggplot2::facet_wrap(~variable, scales = "free") +
     ggplot2::theme_minimal() +

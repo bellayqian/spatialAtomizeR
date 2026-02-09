@@ -60,8 +60,8 @@ summary.abrm <- function(object, ...) {
 #' @importFrom graphics par
 plot.abrm <- function(x, ...) {
   if(!is.null(x$mcmc_results$convergence$plots)) {
-    message(x$mcmc_results$convergence$plots$trace)
-    message(x$mcmc_results$convergence$plots$density)
+    print(x$mcmc_results$convergence$plots$trace)
+    print(x$mcmc_results$convergence$plots$density)
   } else {
     message("No diagnostic plots available.\n")
   }
