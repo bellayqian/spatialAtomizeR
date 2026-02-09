@@ -1,17 +1,31 @@
-## R CMD check results
-
-0 errors | 0 warnings | 0 note
-
 ## Resubmission
 
-This is a resubmission addressing the package environment issue found in the previous submission (December 4, 2025).
+This is a resubmission improving package quality. Changes include:
 
-## Changes made:
+* Fixed `print()` statement causing debug output in console
+* Marked 14 internal helper functions as `@keywords internal` (no longer exported)
+* Fixed vignette errors: removed non-existent function parameters and corrected signatures
+* Improved S3 method output formatting
+* Enhanced documentation with working code examples
 
-REFACTORED the Nimble model architecture: custom distributions are now defined as top-level exported functions within the package namespace.
+## Test environments
 
-MOVED nimble from Imports to Depends to ensure internal compilation tools are correctly available on the search path without needing global assignments.
+* local: macOS/Windows/Linux (R 4.4.0)
+* GitHub Actions:
+  - ubuntu-latest (R-release, R-devel)
+  - windows-latest (R-release)
+  - macOS-latest (R-release)
+* win-builder (R-devel)
+* R-hub (ubuntu-gcc-release)
 
-## Notes
+## R CMD check results
 
-If there is 1 note about timestamps: The note regarding "future file timestamps" is due to local system clock differences and does not affect package functionality.
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔
+
+## Downstream dependencies
+
+There are currently no downstream dependencies for this package.
+
+## Previous submission (v0.2.4)
+
+Addressed package environment issue with NIMBLE model compilation by refactoring custom distributions and moving nimble from Imports to Depends.
