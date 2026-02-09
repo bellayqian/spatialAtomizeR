@@ -130,11 +130,15 @@ create_diagnostic_plots <- function(chains_list, sim_metadata) {
   plot_data <- lapply(seq_along(chains_list), function(chain) {
     data <- as.data.frame(chains_list[[chain]][, params, drop = FALSE])
     data$iteration <- 1:nrow(data)
-    data$chain <- factor(chain)
+    data$chain <- as.factor(chain)
     reshape2::melt(data, id.vars = c("iteration", "chain"))
   })
   
-  plot_data <- do.call(rbind, plot_data)
+  # Combine and ensure it's a proper data frame
+  plot_data <- as.data.frame(do.call(rbind, plot_data))
+  
+  # Ensure variable is a factor
+  plot_data$variable <- as.factor(plot_data$variable)
   
   # Create trace plots - use .data pronoun for NSE variables
   trace_plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = .data$iteration, y = .data$value, color = .data$chain)) +

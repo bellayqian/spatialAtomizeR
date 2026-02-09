@@ -588,11 +588,26 @@ run_nimble_model <- function(constants, data, inits, sim_metadata = NULL,
       plot_file <- file.path(output_dir, plot_file)
     }
     
-    grDevices::pdf(plot_file, width = 12, height = 8)
-    print(diagnostics$plots$trace)
-    print(diagnostics$plots$density)
-    grDevices::dev.off()
-    message("Diagnostic plots saved to", plot_file, "\n")
+    tryCatch({
+      grDevices::pdf(plot_file, width = 12, height = 8)
+      
+      if(!is.null(diagnostics$plots$trace)) {
+        print(diagnostics$plots$trace)
+      }
+      if(!is.null(diagnostics$plots$density)) {
+        print(diagnostics$plots$density)
+      }
+      
+      grDevices::dev.off()
+      message("\nDiagnostic plots saved to ", plot_file, "\n")
+    }, error = function(e) {
+      if(length(dev.list()) > 0 && names(dev.cur()) == "pdf") {
+        grDevices::dev.off()
+      }
+      message("\nWarning: Could not save diagnostic plots to PDF.")
+      message("Error: ", e$message)
+      message("Plots are still available in the diagnostics$plots object.\n")
+    })
   }
   
   mcmc.out$convergence <- diagnostics
