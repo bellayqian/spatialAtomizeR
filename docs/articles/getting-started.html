@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">spatialAtomizeR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +41,7 @@
 <li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started with spatialAtomizeR</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -61,9 +62,10 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Getting Started with spatialAtomizeR</h1>
                         <h4 data-toc-skip class="author">Yunzhe Qian
-(Bella) and Rachel Nethery</h4>
+(Bella), Principal Investigators: Dr. Nancy Krieger and Dr. Rachel
+Nethery</h4>
             
-            <h4 data-toc-skip class="date">2025-11-07</h4>
+            <h4 data-toc-skip class="date">2026-02-08</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bellayqian/spatialAtomizeR/blob/HEAD/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
       <div class="d-none name"><code>getting-started.Rmd</code></div>
@@ -71,82 +73,112 @@
 
     
     
-<div class="section level2">
-<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
-</h2>
+<div class="section level3">
+<h3 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h3>
 <p><code>spatialAtomizeR</code> implements atom-based Bayesian
 regression methods (ABRM) for spatial data with misaligned grids. This
 vignette demonstrates the basic workflow for analyzing misaligned
-spatial data.</p>
+spatial data using both simulated and real-world examples.</p>
 </div>
-<div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h2>
+<div class="section level3">
+<h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install from GitHub</span></span>
+<code class="sourceCode R"><span><span class="co"># Install from CRAN</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"spatialAtomizeR"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Or install development version from GitHub</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"bellayqian/spatialAtomizeR"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="load-packages">Load Packages<a class="anchor" aria-label="anchor" href="#load-packages"></a>
-</h2>
+<div class="section level3">
+<h3 id="load-required-packages">Load Required Packages<a class="anchor" aria-label="anchor" href="#load-required-packages"></a>
+</h3>
 <p><strong>Important:</strong> Always load <code>nimble</code> before
-using spatialAtomizeR functions.</p>
+using spatialAtomizeR functions that involve model fitting.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bellayqian/spatialAtomizeR" class="external-link">spatialAtomizeR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-nimble.org" class="external-link">nimble</a></span><span class="op">)</span>  <span class="co"># Required for ABRM models</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="basic-workflow">Basic Workflow<a class="anchor" aria-label="anchor" href="#basic-workflow"></a>
+<h2 id="example-1-simulated-data">Example 1: Simulated Data<a class="anchor" aria-label="anchor" href="#example-1-simulated-data"></a>
 </h2>
+<p>This example demonstrates the complete workflow using simulated
+data.</p>
 <div class="section level3">
 <h3 id="step-1-simulate-misaligned-data">Step 1: Simulate Misaligned Data<a class="anchor" aria-label="anchor" href="#step-1-simulate-misaligned-data"></a>
 </h3>
-<p>Generate spatial data with misaligned grids and specify all
-parameters:</p>
+<p>Generate spatial data with misaligned grids. The function creates two
+non-overlapping grids (X-grid and Y-grid) and their intersection
+(atoms).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_misaligned_data.html">simulate_misaligned_data</a></span><span class="op">(</span></span>
 <span>  seed <span class="op">=</span> <span class="fl">42</span>,</span>
-<span>  res1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span>,    <span class="co"># Y grid resolution (coarser)</span></span>
-<span>  res2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,  <span class="co"># X grid resolution (finer)</span></span>
 <span>  </span>
-<span>  <span class="co"># Distribution specifications</span></span>
+<span>  <span class="co"># Distribution specifications for covariates</span></span>
 <span>  dist_covariates_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'normal'</span>, <span class="st">'poisson'</span>, <span class="st">'binomial'</span><span class="op">)</span>,</span>
 <span>  dist_covariates_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'normal'</span>, <span class="st">'poisson'</span>, <span class="st">'binomial'</span><span class="op">)</span>,</span>
-<span>  dist_y <span class="op">=</span> <span class="st">'poisson'</span>,</span>
+<span>  dist_y <span class="op">=</span> <span class="st">'poisson'</span>,  <span class="co"># Outcome distribution</span></span>
 <span>  </span>
-<span>  <span class="co"># Intercepts (critical parameters)</span></span>
-<span>  x_intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,</span>
-<span>  y_intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,</span>
-<span>  beta0_y <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,</span>
+<span>  <span class="co"># Intercepts for data generation (REQUIRED)</span></span>
+<span>  x_intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,      <span class="co"># One per X covariate</span></span>
+<span>  y_intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,      <span class="co"># One per Y covariate</span></span>
+<span>  beta0_y <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,                     <span class="co"># Outcome model intercept</span></span>
 <span>  </span>
-<span>  <span class="co"># Spatial correlation</span></span>
-<span>  x_correlation <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  y_correlation <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  <span class="co"># Spatial correlation parameters</span></span>
+<span>  x_correlation <span class="op">=</span> <span class="fl">0.5</span>,  <span class="co"># Correlation between X covariates</span></span>
+<span>  y_correlation <span class="op">=</span> <span class="fl">0.5</span>,  <span class="co"># Correlation between Y covariates</span></span>
 <span>  </span>
-<span>  <span class="co"># True effect sizes</span></span>
-<span>  beta_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.03</span>, <span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.2</span><span class="op">)</span>,</span>
-<span>  beta_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.03</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.2</span><span class="op">)</span></span>
+<span>  <span class="co"># True effect sizes for outcome model</span></span>
+<span>  beta_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.03</span>, <span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.2</span><span class="op">)</span>,    <span class="co"># Effects of X covariates</span></span>
+<span>  beta_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.03</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.2</span><span class="op">)</span>      <span class="co"># Effects of Y covariates</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>The simulated data object contains: - <code>gridx</code>: X-grid
+spatial features with covariates - <code>gridy</code>: Y-grid spatial
+features with covariates and outcome - <code>atoms</code>: Atom-level
+spatial features (intersection of grids) - <code>true_params</code>:
+True parameter values used in simulation</p>
 </div>
 <div class="section level3">
-<h3 id="step-2-get-model-code">Step 2: Get Model Code<a class="anchor" aria-label="anchor" href="#step-2-get-model-code"></a>
+<h3 id="step-2-examine-simulated-data">Step 2: Examine Simulated Data<a class="anchor" aria-label="anchor" href="#step-2-examine-simulated-data"></a>
 </h3>
+<p>The <code>simulate_misaligned_data</code> function returns an object
+of class <code>misaligned_data</code> with useful S3 methods:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Check the class</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Print method shows basic information</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Summary method shows more details</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-3-get-abrm-model-code">Step 3: Get ABRM Model Code<a class="anchor" aria-label="anchor" href="#step-3-get-abrm-model-code"></a>
+</h3>
+<p>Retrieve the pre-compiled NIMBLE model specification:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_code</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_abrm_model.html">get_abrm_model</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-3-run-abrm-analysis">Step 3: Run ABRM Analysis<a class="anchor" aria-label="anchor" href="#step-3-run-abrm-analysis"></a>
+<h3 id="step-4-run-abrm-analysis">Step 4: Run ABRM Analysis<a class="anchor" aria-label="anchor" href="#step-4-run-abrm-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_abrm.html">run_abrm</a></span><span class="op">(</span></span>
-<span>  sim_data <span class="op">=</span> <span class="va">sim_data</span>,</span>
+<p>Fit the ABRM model. You must specify which covariates follow which
+distributions by providing their indices:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">abrm_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_abrm.html">run_abrm</a></span><span class="op">(</span></span>
+<span>  gridx <span class="op">=</span> <span class="va">sim_data</span><span class="op">$</span><span class="va">gridx</span>,</span>
+<span>  gridy <span class="op">=</span> <span class="va">sim_data</span><span class="op">$</span><span class="va">gridy</span>,</span>
+<span>  atoms <span class="op">=</span> <span class="va">sim_data</span><span class="op">$</span><span class="va">atoms</span>,</span>
 <span>  model_code <span class="op">=</span> <span class="va">model_code</span>,</span>
+<span>  true_params <span class="op">=</span> <span class="va">sim_data</span><span class="op">$</span><span class="va">true_params</span>,  <span class="co"># Optional: for validation</span></span>
 <span>  </span>
-<span>  <span class="co"># Map distribution indices to positions</span></span>
+<span>  <span class="co"># Map distribution indices to positions in dist_covariates_x/y</span></span>
 <span>  norm_idx_x <span class="op">=</span> <span class="fl">1</span>,   <span class="co"># 'normal' is 1st in dist_covariates_x</span></span>
 <span>  pois_idx_x <span class="op">=</span> <span class="fl">2</span>,   <span class="co"># 'poisson' is 2nd</span></span>
 <span>  binom_idx_x <span class="op">=</span> <span class="fl">3</span>,  <span class="co"># 'binomial' is 3rd</span></span>
-<span>  norm_idx_y <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  norm_idx_y <span class="op">=</span> <span class="fl">1</span>,   <span class="co"># Same for Y covariates</span></span>
 <span>  pois_idx_y <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  binom_idx_y <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  </span>
@@ -154,109 +186,317 @@ parameters:</p>
 <span>  dist_y <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  </span>
 <span>  <span class="co"># MCMC parameters</span></span>
-<span>  niter <span class="op">=</span> <span class="fl">50000</span>,</span>
-<span>  nburnin <span class="op">=</span> <span class="fl">30000</span>,</span>
-<span>  nchains <span class="op">=</span> <span class="fl">2</span></span>
+<span>  niter <span class="op">=</span> <span class="fl">50000</span>,    <span class="co"># Total iterations per chain</span></span>
+<span>  nburnin <span class="op">=</span> <span class="fl">30000</span>,  <span class="co"># Burn-in iterations</span></span>
+<span>  nchains <span class="op">=</span> <span class="fl">2</span>       <span class="co"># Number of chains</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-4-examine-results">Step 4: Examine Results<a class="anchor" aria-label="anchor" href="#step-4-examine-results"></a>
+<h3 id="step-5-examine-abrm-results">Step 5: Examine ABRM Results<a class="anchor" aria-label="anchor" href="#step-5-examine-abrm-results"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Parameter estimates</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">parameter_estimates</span><span class="op">)</span></span>
+<p>The <code>run_abrm</code> function returns an object of class
+<code>abrm</code> with S3 methods:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Check the class</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Convergence diagnostics</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">mcmc_results</span><span class="op">$</span><span class="va">convergence</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Print method shows summary statistics</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Summary method shows detailed parameter estimates</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot method shows MCMC diagnostics (if available)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span></code></pre></div>
+<p>Access specific results:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Parameter estimates table</span></span>
+<span><span class="va">abrm_results</span><span class="op">$</span><span class="va">parameter_estimates</span></span>
+<span></span>
+<span><span class="co"># MCMC convergence diagnostics</span></span>
+<span><span class="va">abrm_results</span><span class="op">$</span><span class="va">mcmc_results</span><span class="op">$</span><span class="va">convergence</span></span>
+<span></span>
+<span><span class="co"># Full MCMC samples</span></span>
+<span><span class="co"># abrm_results$mcmc_results$samples</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="example-2-real-data---utah-counties-and-school-districts">Example 2: Real Data - Utah Counties and School Districts<a class="anchor" aria-label="anchor" href="#example-2-real-data---utah-counties-and-school-districts"></a>
+</h2>
+<p>This example demonstrates using real spatial data from Utah, matching
+the analysis in the manuscript.</p>
+<div class="section level3">
+<h3 id="load-required-packages-for-spatial-data">Load Required Packages for Spatial Data<a class="anchor" aria-label="anchor" href="#load-required-packages-for-spatial-data"></a>
+</h3>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/walkerke/tigris" class="external-link">tigris</a></span><span class="op">)</span>    <span class="co"># For US Census shapefiles</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span>        <span class="co"># Spatial features</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/edzer/sp/" class="external-link">sp</a></span><span class="op">)</span>        <span class="co"># Spatial objects</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/spdep/" class="external-link">spdep</a></span><span class="op">)</span>     <span class="co"># Spatial dependence</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster" class="external-link">raster</a></span><span class="op">)</span>    <span class="co"># Spatial data manipulation</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>     <span class="co"># Data manipulation</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>   <span class="co"># Plotting</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-1-load-utah-shapefiles">Step 1: Load Utah Shapefiles<a class="anchor" aria-label="anchor" href="#step-1-load-utah-shapefiles"></a>
+</h3>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load Utah counties (Y-grid)</span></span>
+<span><span class="va">cnty</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tigris/man/counties.html" class="external-link">counties</a></span><span class="op">(</span>state <span class="op">=</span> <span class="st">'UT'</span><span class="op">)</span></span>
+<span><span class="va">gridy</span> <span class="op">&lt;-</span> <span class="va">cnty</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>ID <span class="op">=</span> <span class="va">GEOID</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span><span class="op">)</span>  <span class="co"># ID must be numeric</span></span>
+<span></span>
+<span><span class="co"># Load Utah school districts (X-grid)</span></span>
+<span><span class="va">scd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tigris/man/school_districts.html" class="external-link">school_districts</a></span><span class="op">(</span>state <span class="op">=</span> <span class="st">'UT'</span><span class="op">)</span></span>
+<span><span class="va">gridx</span> <span class="op">&lt;-</span> <span class="va">scd</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>ID <span class="op">=</span> <span class="va">GEOID</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-2-visualize-spatial-misalignment">Step 2: Visualize Spatial Misalignment<a class="anchor" aria-label="anchor" href="#step-2-visualize-spatial-misalignment"></a>
+</h3>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">gridx</span>, fill <span class="op">=</span> <span class="cn">NA</span>, color <span class="op">=</span> <span class="st">"orange"</span>, linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">gridy</span>, fill <span class="op">=</span> <span class="cn">NA</span>, color <span class="op">=</span> <span class="st">"blue"</span>, </span>
+<span>          linetype <span class="op">=</span> <span class="st">'dashed'</span>, linewidth <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Spatial Misalignment in Utah"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Orange: School Districts | Blue: Counties"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_void</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-3-create-atoms-by-intersecting-grids">Step 3: Create Atoms by Intersecting Grids<a class="anchor" aria-label="anchor" href="#step-3-create-atoms-by-intersecting-grids"></a>
+</h3>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Intersect the two grids to create atoms</span></span>
+<span><span class="va">atoms</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a></span><span class="op">(</span><span class="va">gridy</span>, <span class="st">'Spatial'</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a></span><span class="op">(</span><span class="va">gridx</span>, <span class="st">'Spatial'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">atoms</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Rename ID variables to match expected names</span></span>
+<span><span class="va">atoms</span> <span class="op">&lt;-</span> <span class="va">atoms</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>ID_y <span class="op">=</span> <span class="va">ID_1</span>,    <span class="co"># Y-grid (county) ID</span></span>
+<span>         ID_x <span class="op">=</span> <span class="va">ID_2</span><span class="op">)</span>     <span class="co"># X-grid (school district) ID</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-4-add-atom-level-population-counts">Step 4: Add Atom-Level Population Counts<a class="anchor" aria-label="anchor" href="#step-4-add-atom-level-population-counts"></a>
+</h3>
+<p>ABRM requires population counts at the atom level. Here we use
+LandScan gridded population data:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># NOTE: You must download LandScan data separately</span></span>
+<span><span class="co"># Available at: https://landscan.ornl.gov/</span></span>
+<span><span class="co"># This example assumes the file is in your working directory</span></span>
+<span></span>
+<span><span class="va">pop_raster</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="st">"landscan-global-2022.tif"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Extract population for each atom</span></span>
+<span><span class="va">pop_atoms</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/extract.html" class="external-link">extract</a></span><span class="op">(</span></span>
+<span>  <span class="va">pop_raster</span>, </span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="va">atoms</span>, <span class="fu"><a href="https://rspatial.github.io/terra/reference/crs.html" class="external-link">crs</a></span><span class="op">(</span><span class="va">pop_raster</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  fun <span class="op">=</span> <span class="va">sum</span>, </span>
+<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">atoms</span><span class="op">$</span><span class="va">population</span> <span class="op">&lt;-</span> <span class="va">pop_atoms</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-5-generate-semi-synthetic-outcome-and-covariates">Step 5: Generate Semi-Synthetic Outcome and Covariates<a class="anchor" aria-label="anchor" href="#step-5-generate-semi-synthetic-outcome-and-covariates"></a>
+</h3>
+<p>For demonstration, we generate synthetic outcome and covariate data
+at the atom level:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create atom-level spatial adjacency matrix</span></span>
+<span><span class="va">W_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/spdep/reference/nb2mat.html" class="external-link">nb2mat</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/spdep/reference/poly2nb.html" class="external-link">poly2nb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a></span><span class="op">(</span><span class="va">atoms</span>, <span class="st">"Spatial"</span><span class="op">)</span>, queen <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  style <span class="op">=</span> <span class="st">"B"</span>, </span>
+<span>  zero.policy <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Generate spatial random effects</span></span>
+<span><span class="va">atoms</span> <span class="op">&lt;-</span> <span class="va">atoms</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    re_x <span class="op">=</span> <span class="fu"><a href="../reference/gen_correlated_spat.html">gen_correlated_spat</a></span><span class="op">(</span>W <span class="op">=</span> <span class="va">W_a</span>, n_vars <span class="op">=</span> <span class="fl">1</span>, correlation <span class="op">=</span> <span class="fl">1</span>, rho <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span>,</span>
+<span>    re_z <span class="op">=</span> <span class="fu"><a href="../reference/gen_correlated_spat.html">gen_correlated_spat</a></span><span class="op">(</span>W <span class="op">=</span> <span class="va">W_a</span>, n_vars <span class="op">=</span> <span class="fl">1</span>, correlation <span class="op">=</span> <span class="fl">1</span>, rho <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span>,</span>
+<span>    re_y <span class="op">=</span> <span class="fu"><a href="../reference/gen_correlated_spat.html">gen_correlated_spat</a></span><span class="op">(</span>W <span class="op">=</span> <span class="va">W_a</span>, n_vars <span class="op">=</span> <span class="fl">1</span>, correlation <span class="op">=</span> <span class="fl">1</span>, rho <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Generate atom-level covariates and outcome</span></span>
+<span><span class="va">atoms</span> <span class="op">&lt;-</span> <span class="va">atoms</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    <span class="co"># X-grid covariate (Poisson)</span></span>
+<span>    covariate_x_1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span></span>
+<span>      n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">)</span>, </span>
+<span>      lambda <span class="op">=</span> <span class="va">population</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span> <span class="op">+</span> <span class="va">re_x</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    <span class="co"># Y-grid covariate (Normal)</span></span>
+<span>    covariate_y_1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span></span>
+<span>      n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">)</span>, </span>
+<span>      mean <span class="op">=</span> <span class="va">population</span> <span class="op">*</span> <span class="op">(</span><span class="fl">3</span> <span class="op">+</span> <span class="va">re_z</span><span class="op">)</span>, </span>
+<span>      sd <span class="op">=</span> <span class="fl">1</span> <span class="op">*</span> <span class="va">population</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    <span class="co"># Outcome (Poisson)</span></span>
+<span>    y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span></span>
+<span>      n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">)</span>,</span>
+<span>      lambda <span class="op">=</span> <span class="va">population</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span></span>
+<span>        <span class="op">-</span><span class="fl">5</span> <span class="op">+</span> </span>
+<span>        <span class="fl">1</span> <span class="op">*</span> <span class="op">(</span><span class="va">covariate_x_1</span> <span class="op">/</span> <span class="va">population</span><span class="op">)</span> <span class="op">-</span> </span>
+<span>        <span class="fl">0.3</span> <span class="op">*</span> <span class="op">(</span><span class="va">covariate_y_1</span> <span class="op">/</span> <span class="va">population</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>        <span class="va">re_y</span></span>
+<span>      <span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-6-aggregate-to-observed-grids">Step 6: Aggregate to Observed Grids<a class="anchor" aria-label="anchor" href="#step-6-aggregate-to-observed-grids"></a>
+</h3>
+<p>In reality, we only observe aggregated data at the grid level, not at
+atoms:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Aggregate X covariates to X-grid</span></span>
+<span><span class="va">gridx</span><span class="op">[[</span><span class="st">"covariate_x_1"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gridx</span><span class="op">$</span><span class="va">ID</span>, <span class="kw">function</span><span class="op">(</span><span class="va">j</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">atom_indices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">$</span><span class="va">ID_x</span> <span class="op">==</span> <span class="va">j</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">[[</span><span class="st">"covariate_x_1"</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="va">atom_indices</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Aggregate Y covariates to Y-grid</span></span>
+<span><span class="va">gridy</span><span class="op">[[</span><span class="st">"covariate_y_1"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gridy</span><span class="op">$</span><span class="va">ID</span>, <span class="kw">function</span><span class="op">(</span><span class="va">j</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">atom_indices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">$</span><span class="va">ID_y</span> <span class="op">==</span> <span class="va">j</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">[[</span><span class="st">"covariate_y_1"</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="va">atom_indices</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Aggregate outcome to Y-grid</span></span>
+<span><span class="va">gridy</span><span class="op">$</span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gridy</span><span class="op">$</span><span class="va">ID</span>, <span class="kw">function</span><span class="op">(</span><span class="va">j</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">atom_indices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">$</span><span class="va">ID_y</span> <span class="op">==</span> <span class="va">j</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">$</span><span class="va">y</span><span class="op">[</span><span class="va">atom_indices</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-7-run-abrm-on-real-data">Step 7: Run ABRM on Real Data<a class="anchor" aria-label="anchor" href="#step-7-run-abrm-on-real-data"></a>
+</h3>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">model_code</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_abrm_model.html">get_abrm_model</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mcmc_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_abrm.html">run_abrm</a></span><span class="op">(</span></span>
+<span>  gridx <span class="op">=</span> <span class="va">gridx</span>,</span>
+<span>  gridy <span class="op">=</span> <span class="va">gridy</span>,</span>
+<span>  atoms <span class="op">=</span> <span class="va">atoms</span>,</span>
+<span>  model_code <span class="op">=</span> <span class="va">model_code</span>,</span>
+<span>  </span>
+<span>  <span class="co"># Specify covariate distributions</span></span>
+<span>  pois_idx_x <span class="op">=</span> <span class="fl">1</span>,  <span class="co"># X covariate is Poisson</span></span>
+<span>  norm_idx_y <span class="op">=</span> <span class="fl">1</span>,  <span class="co"># Y covariate is Normal</span></span>
+<span>  dist_y <span class="op">=</span> <span class="fl">2</span>,      <span class="co"># Outcome is Poisson</span></span>
+<span>  </span>
+<span>  <span class="co"># MCMC settings (increase for real analysis)</span></span>
+<span>  niter <span class="op">=</span> <span class="fl">300000</span>,</span>
+<span>  nburnin <span class="op">=</span> <span class="fl">200000</span>,</span>
+<span>  nchains <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># View results</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mcmc_results</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="understanding-distribution-indices">Understanding Distribution Indices<a class="anchor" aria-label="anchor" href="#understanding-distribution-indices"></a>
 </h2>
-<p>When you specify
-<code>dist_covariates_x = c('normal', 'poisson', 'binomial')</code>, the
-indices correspond to positions:</p>
-<ul>
-<li>
-<code>norm_idx_x = 1</code> (first position)</li>
-<li>
-<code>pois_idx_x = 2</code> (second position)</li>
-<li>
-<code>binom_idx_x = 3</code> (third position)</li>
-</ul>
+<p>When you specify covariates, the indices correspond to their
+positions:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dist_covariates_x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'normal'</span>, <span class="st">'poisson'</span>, <span class="st">'binomial'</span><span class="op">)</span></span>
+<span><span class="co">#                       ^1        ^2         ^3</span></span>
+<span></span>
+<span><span class="co"># So you would specify:</span></span>
+<span><span class="va">norm_idx_x</span> <span class="op">=</span> <span class="fl">1</span>    <span class="co"># First position</span></span>
+<span><span class="va">pois_idx_x</span> <span class="op">=</span> <span class="fl">2</span>    <span class="co"># Second position  </span></span>
+<span><span class="va">binom_idx_x</span> <span class="op">=</span> <span class="fl">3</span>   <span class="co"># Third position</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="distribution-type-codes">Distribution Type Codes<a class="anchor" aria-label="anchor" href="#distribution-type-codes"></a>
+</h3>
+<table class="table">
+<thead><tr class="header">
+<th>Code</th>
+<th>Distribution</th>
+<th>String</th>
+<th>Use Case</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Normal</td>
+<td>‘normal’</td>
+<td>Continuous data</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Poisson</td>
+<td>‘poisson’</td>
+<td>Count/rate data</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Binomial</td>
+<td>‘binomial’</td>
+<td>Proportion/binary data</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section level2">
-<h2 id="advanced-step-by-step-control">Advanced: Step-by-Step Control<a class="anchor" aria-label="anchor" href="#advanced-step-by-step-control"></a>
+<h2 id="method-comparison">Method Comparison<a class="anchor" aria-label="anchor" href="#method-comparison"></a>
 </h2>
-<p>For more control over the analysis pipeline:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Prepare spatial structure</span></span>
-<span><span class="va">bookkeeping</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_spatial_bookkeeping.html">prepare_spatial_bookkeeping</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create adjacency matrices</span></span>
-<span><span class="va">adjacency</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_adjacency_matrices.html">prepare_adjacency_matrices</a></span><span class="op">(</span></span>
-<span>  <span class="va">bookkeeping</span><span class="op">$</span><span class="va">gridy_yorder</span>, </span>
-<span>  <span class="va">bookkeeping</span><span class="op">$</span><span class="va">gridx_xorder</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Prepare NIMBLE inputs</span></span>
-<span><span class="va">nimble_inputs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_nimble_inputs.html">prepare_nimble_inputs</a></span><span class="op">(</span></span>
-<span>  <span class="va">bookkeeping</span>, <span class="va">adjacency</span>, <span class="va">sim_data</span>,</span>
-<span>  norm_idx_x <span class="op">=</span> <span class="fl">1</span>, pois_idx_x <span class="op">=</span> <span class="fl">2</span>, binom_idx_x <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  norm_idx_y <span class="op">=</span> <span class="fl">1</span>, pois_idx_y <span class="op">=</span> <span class="fl">2</span>, binom_idx_y <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  dist_y <span class="op">=</span> <span class="fl">2</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Run NIMBLE MCMC</span></span>
-<span><span class="va">sim_metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  sim_number <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  x_correlation <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  y_correlation <span class="op">=</span> <span class="fl">0.5</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">mcmc_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_nimble_model.html">run_nimble_model</a></span><span class="op">(</span></span>
-<span>  constants <span class="op">=</span> <span class="va">nimble_inputs</span><span class="op">$</span><span class="va">constants</span>,</span>
-<span>  data <span class="op">=</span> <span class="va">nimble_inputs</span><span class="op">$</span><span class="va">data</span>,</span>
-<span>  inits <span class="op">=</span> <span class="va">nimble_inputs</span><span class="op">$</span><span class="va">inits</span>,</span>
-<span>  sim_metadata <span class="op">=</span> <span class="va">sim_metadata</span>,</span>
+<p>Compare ABRM with traditional dasymetric mapping:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_both_methods.html">run_both_methods</a></span><span class="op">(</span></span>
+<span>  sim_data <span class="op">=</span> <span class="va">sim_data</span>,</span>
+<span>  sim_metadata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sim_number <span class="op">=</span> <span class="fl">1</span>, x_correlation <span class="op">=</span> <span class="fl">0.5</span>, y_correlation <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
 <span>  model_code <span class="op">=</span> <span class="va">model_code</span>,</span>
-<span>  niter <span class="op">=</span> <span class="fl">50000</span>,</span>
-<span>  nburnin <span class="op">=</span> <span class="fl">30000</span>,</span>
-<span>  nchains <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  thin <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  save_plots <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span>  nimble_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">1000</span>, nburnin <span class="op">=</span> <span class="fl">500</span>, thin <span class="op">=</span> <span class="fl">2</span>, nchains <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  norm_idx_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>  pois_idx_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>  binom_idx_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>,</span>
+<span>  norm_idx_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>  pois_idx_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>  binom_idx_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>,</span>
+<span>  dist_y <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  outcome_type <span class="op">=</span> <span class="st">'poisson'</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># View comparison results</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="sensitivity-analysis">Sensitivity Analysis<a class="anchor" aria-label="anchor" href="#sensitivity-analysis"></a>
+<h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
 </h2>
-<p>Test model performance across different correlation structures:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Define base parameters</span></span>
-<span><span class="va">base_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  res1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span>  res2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
-<span>  dist_covariates_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'normal'</span>,<span class="st">'poisson'</span>,<span class="st">'binomial'</span><span class="op">)</span>,</span>
-<span>  dist_covariates_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'normal'</span>,<span class="st">'poisson'</span>,<span class="st">'binomial'</span><span class="op">)</span>,</span>
-<span>  dist_y <span class="op">=</span> <span class="st">'poisson'</span>,</span>
-<span>  x_intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,</span>
-<span>  y_intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,</span>
-<span>  beta0_y <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,</span>
-<span>  beta_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.03</span>, <span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.2</span><span class="op">)</span>,</span>
-<span>  beta_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.03</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.2</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Run sensitivity analysis</span></span>
-<span><span class="va">sensitivity_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_sensitivity_analysis.html">run_sensitivity_analysis</a></span><span class="op">(</span></span>
-<span>  correlation_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.6</span><span class="op">)</span>,</span>
-<span>  n_sims_per_setting <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  base_params <span class="op">=</span> <span class="va">base_params</span>,</span>
-<span>  model_code <span class="op">=</span> <span class="va">model_code</span>,</span>
-<span>  base_seed <span class="op">=</span> <span class="fl">123</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># View summary</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sensitivity_results</span><span class="op">$</span><span class="va">summary_by_correlation</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="common-errors">Common Errors<a class="anchor" aria-label="anchor" href="#common-errors"></a>
+</h3>
+<p><strong>Error: “could not find function ‘getNimbleOption’”</strong> -
+<strong>Solution:</strong> Load <code>nimble</code> before calling
+<code><a href="../reference/get_abrm_model.html">get_abrm_model()</a></code>: <code><a href="https://r-nimble.org" class="external-link">library(nimble)</a></code></p>
+<p><strong>Error: “unused arguments (res1 = c(5, 5), res2 = c(10,
+10))”</strong> - <strong>Solution:</strong> The
+<code><a href="../reference/simulate_misaligned_data.html">simulate_misaligned_data()</a></code> function does not have
+<code>res1</code> or <code>res2</code> parameters. Grid resolutions are
+fixed internally.</p>
+<p><strong>Error: “gridx must contain an area ID variable named
+‘ID’”</strong> - <strong>Solution:</strong> Ensure your spatial
+dataframes have a numeric column named <code>ID</code></p>
+</div>
+<div class="section level3">
+<h3 id="warnings">Warnings<a class="anchor" aria-label="anchor" href="#warnings"></a>
+</h3>
+<p><strong>Warning: “pop_atoms length doesn’t match D!”</strong> -
+Usually harmless. The model should still run correctly.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="key-parameters-reference">Key Parameters Reference<a class="anchor" aria-label="anchor" href="#key-parameters-reference"></a>
@@ -273,49 +513,33 @@ length of <code>dist_covariates_x</code>)</li>
 length of <code>dist_covariates_y</code>)</li>
 <li>
 <code>beta0_y</code>: Outcome model intercept</li>
+<li>
+<code>beta_x</code>: True coefficients for X covariates (if
+simulating)</li>
+<li>
+<code>beta_y</code>: True coefficients for Y covariates (if
+simulating)</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="distribution-types">Distribution Types<a class="anchor" aria-label="anchor" href="#distribution-types"></a>
+<h3 id="mcmc-parameters">MCMC Parameters<a class="anchor" aria-label="anchor" href="#mcmc-parameters"></a>
 </h3>
-<table class="table">
-<thead><tr class="header">
-<th>Code</th>
-<th>Distribution</th>
-<th>String</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Normal</td>
-<td>‘normal’</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Poisson</td>
-<td>‘poisson’</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Binomial</td>
-<td>‘binomial’</td>
-</tr>
-</tbody>
-</table>
+<ul>
+<li>
+<code>niter</code>: Total MCMC iterations per chain (default:
+50000)</li>
+<li>
+<code>nburnin</code>: Burn-in iterations to discard (default:
+30000)</li>
+<li>
+<code>nchains</code>: Number of independent chains (default: 2)</li>
+<li>
+<code>thin</code>: Thinning interval (default: 10)</li>
+</ul>
 </div>
-</div>
-<div class="section level2">
-<h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
-</h2>
-<p><strong>Error: “could not find function ‘getNimbleOption’”</strong> -
-Load <code>nimble</code> before calling <code><a href="../reference/get_abrm_model.html">get_abrm_model()</a></code>:
-<code><a href="https://r-nimble.org" class="external-link">library(nimble)</a></code></p>
-<p><strong>Warning: “pop_atoms length doesn’t match D!”</strong> -
-Usually harmless, model should still run correctly</p>
-</div>
-<div class="section level2">
-<h2 id="getting-help">Getting Help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
-</h2>
+<div class="section level3">
+<h3 id="getting-help">Getting Help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
+</h3>
 <ul>
 <li>Function documentation: <code><a href="../reference/simulate_misaligned_data.html">?simulate_misaligned_data</a></code>,
 <code><a href="../reference/run_abrm.html">?run_abrm</a></code>
@@ -326,14 +550,15 @@ Usually harmless, model should still run correctly</p>
 </li>
 </ul>
 </div>
+</div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"spatialAtomizeR"</span><span class="op">)</span></span></code></pre></div>
-<p>Qian, Y., &amp; Nethery, R. (2025). spatialAtomizeR: Atom-Based
-Regression Models for Misaligned Spatial Data. R package version
-0.2.1.</p>
+<p><strong>Reference:</strong> Qian, Y., Johnson, N., Krieger, N., &amp;
+Nethery, R.C. (2024). spatialAtomizeR: Atom-Based Regression Models for
+Spatially Misaligned Data in R. R package version 0.2.4.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -346,7 +571,7 @@ Regression Models for Misaligned Spatial Data. R package version
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

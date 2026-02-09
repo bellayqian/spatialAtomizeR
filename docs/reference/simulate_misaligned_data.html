@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">spatialAtomizeR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started with spatialAtomizeR</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/bellayqian/spatialAtomizeR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -42,19 +43,21 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simulate_misaligned_data</span><span class="op">(</span></span>
-<span>  res1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span>  res2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  dist_covariates_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"poisson"</span>, <span class="st">"binomial"</span><span class="op">)</span>,</span>
 <span>  dist_covariates_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"poisson"</span>, <span class="st">"binomial"</span><span class="op">)</span>,</span>
 <span>  dist_y <span class="op">=</span> <span class="st">"poisson"</span>,</span>
 <span>  x_intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  y_intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  rho_x <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span>  rho_y <span class="op">=</span> <span class="fl">0.6</span>,</span>
 <span>  x_correlation <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  y_correlation <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  beta0_y <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  beta_x <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  beta_y <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  beta_y <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  diff_pops <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  xy_cov_cor <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -62,28 +65,20 @@
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-res-">res1<a class="anchor" aria-label="anchor" href="#arg-res-"></a></dt>
-<dd><p>Resolution for coarser grid (default = c(5, 5))</p></dd>
-
-
-<dt id="arg-res-">res2<a class="anchor" aria-label="anchor" href="#arg-res-"></a></dt>
-<dd><p>Resolution for finer grid (default = c(10, 10))</p></dd>
-
-
-<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
+<dl><dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Random seed (default = 2)</p></dd>
 
 
 <dt id="arg-dist-covariates-x">dist_covariates_x<a class="anchor" aria-label="anchor" href="#arg-dist-covariates-x"></a></dt>
-<dd><p>Distribution types for X covariates</p></dd>
+<dd><p>Vector specifying distribution type for each synthetic X-grid covariate ('poisson', 'binomial', or 'normal')</p></dd>
 
 
 <dt id="arg-dist-covariates-y">dist_covariates_y<a class="anchor" aria-label="anchor" href="#arg-dist-covariates-y"></a></dt>
-<dd><p>Distribution types for Y covariates</p></dd>
+<dd><p>Vector specifying distribution type for each synthetic Y-grid covariate ('poisson', 'binomial', or 'normal')</p></dd>
 
 
 <dt id="arg-dist-y">dist_y<a class="anchor" aria-label="anchor" href="#arg-dist-y"></a></dt>
-<dd><p>Distribution type for outcome</p></dd>
+<dd><p>Distribution type for synthetic outcome variable (one of 'poisson', 'binomial', or 'normal')</p></dd>
 
 
 <dt id="arg-x-intercepts">x_intercepts<a class="anchor" aria-label="anchor" href="#arg-x-intercepts"></a></dt>
@@ -94,12 +89,20 @@
 <dd><p>Intercepts for Y covariates</p></dd>
 
 
+<dt id="arg-rho-x">rho_x<a class="anchor" aria-label="anchor" href="#arg-rho-x"></a></dt>
+<dd><p>Spatial correlation parameter for X-grid covariates (0 to 1 with higher values yielding more spatial correlation, default = 0.6)</p></dd>
+
+
+<dt id="arg-rho-y">rho_y<a class="anchor" aria-label="anchor" href="#arg-rho-y"></a></dt>
+<dd><p>Spatial correlation parameter for Y-grid covariates and outcome (0 to 1 with higher values yielding more spatial correlation, default = 0.6)</p></dd>
+
+
 <dt id="arg-x-correlation">x_correlation<a class="anchor" aria-label="anchor" href="#arg-x-correlation"></a></dt>
-<dd><p>Correlation structure for X (default = 0.5)</p></dd>
+<dd><p>Between-variable correlation for all pairs of X-grid covariates (default = 0.5)</p></dd>
 
 
 <dt id="arg-y-correlation">y_correlation<a class="anchor" aria-label="anchor" href="#arg-y-correlation"></a></dt>
-<dd><p>Correlation structure for Y (default = 0.5)</p></dd>
+<dd><p>Between-variable correlation for all pairs of Y-grid covariates (default = 0.5)</p></dd>
 
 
 <dt id="arg-beta-y">beta0_y<a class="anchor" aria-label="anchor" href="#arg-beta-y"></a></dt>
@@ -107,11 +110,19 @@
 
 
 <dt id="arg-beta-x">beta_x<a class="anchor" aria-label="anchor" href="#arg-beta-x"></a></dt>
-<dd><p>Coefficients for X covariates</p></dd>
+<dd><p>Outcome model coefficients for X-grid covariates</p></dd>
 
 
 <dt id="arg-beta-y">beta_y<a class="anchor" aria-label="anchor" href="#arg-beta-y"></a></dt>
-<dd><p>Coefficients for Y covariates</p></dd>
+<dd><p>Outcome model coefficients for Y-grid covariates</p></dd>
+
+
+<dt id="arg-diff-pops">diff_pops<a class="anchor" aria-label="anchor" href="#arg-diff-pops"></a></dt>
+<dd><p>Logical, indicating whether the atoms should be generated with different population sizes (diff_pops = TRUE) or a common population size (diff_pops = FALSE)</p></dd>
+
+
+<dt id="arg-xy-cov-cor">xy_cov_cor<a class="anchor" aria-label="anchor" href="#arg-xy-cov-cor"></a></dt>
+<dd><p>Logical, indicating whether the atom-level spatial random effects for X-grid and Y-grid covariates should be correlated (xy_cov_cor = TRUE) or not. When set to TRUE, the x_correlation and rho_x parameters are used to generate all covariates (separate correlation parameters are not allowed for X-grid and Y-grid covariates).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -128,7 +139,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
