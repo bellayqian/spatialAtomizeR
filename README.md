@@ -81,16 +81,6 @@ print(results$parameter_estimates)
 - Multivariate CAR models to allow for information-sharing over space and across variables
 - Automatic convergence diagnostics
 
-### Method Comparison
-- Compare ABRM with dasymetric mapping
-- Calculate bias, RMSE, and coverage rates
-- Generate comparison plots
-
-### Sensitivity Analysis
-- Test across different correlation structures
-- Multiple simulations per setting
-- Automated result summarization
-
 ### S3 Object System
 
 All main functions return S3 objects with dedicated print, summary, and plot methods:
@@ -110,13 +100,6 @@ class(results)    # "abrm"
 print(results)    # Shows parameter count, bias, coverage
 summary(results)  # Shows full parameter table
 plot(results)     # Shows MCMC diagnostic plots
-
-# Compare methods
-comparison <- run_both_methods(...)
-class(comparison) # "abrm_comparison"
-
-print(comparison)   # Shows method comparison summary
-summary(comparison) # Shows detailed metrics by method
 ```
 
 ## S3 Methods Examples
@@ -156,8 +139,6 @@ summary(results)  # Shows full parameter table
 | `get_abrm_model()` | Get NIMBLE model specification |
 | `run_abrm()` | Run ABRM analysis (wrapper function) |
 | `run_nimble_model()` | Run NIMBLE MCMC with diagnostics |
-| `run_both_methods()` | Compare ABRM and dasymetric mapping |
-| `run_sensitivity_analysis()` | Conduct sensitivity analysis |
 | `prepare_spatial_bookkeeping()` | Prepare spatial indices |
 | `prepare_adjacency_matrices()` | Create spatial adjacency structures |
 | `prepare_nimble_inputs()` | Prepare NIMBLE model inputs |
@@ -199,46 +180,6 @@ When running ABRM models, you need to specify which covariates follow which dist
 - `pois_idx_x = 2` (second covariate)
 - `binom_idx_x = 3` (third covariate)
 
-## Example: Comprehensive Sensitivity Analysis
-
-```r
-library(spatialAtomizeR)
-library(nimble)
-
-# Define base parameters
-base_params <- list(
-  dist_covariates_x = c('normal','poisson','binomial'),
-  dist_covariates_y = c('normal','poisson','binomial'),
-  dist_y = 'poisson',
-  x_intercepts = c(4, -1, -1),
-  y_intercepts = c(4, -1, -1),
-  beta0_y = -1,
-  beta_x = c(-0.03, 0.1, -0.2),
-  beta_y = c(0.03, -0.1, 0.2)
-)
-
-# Get model code
-model_code <- get_abrm_model()
-
-# Run sensitivity analysis across correlation structures
-sensitivity_results <- run_sensitivity_analysis(
-  correlation_grid = c(0.2, 0.6),
-  n_sims_per_setting = 3,
-  base_params = base_params,
-  model_code = model_code,
-  base_seed = 123
-)
-
-# View summary by correlation
-print(sensitivity_results$summary_by_correlation)
-
-# Access detailed results
-write.csv(
-  sensitivity_results$combined_results,
-  "sensitivity_analysis_full_results.csv"
-)
-```
-
 ## Requirements
 
 - R >= 4.0.0
@@ -268,7 +209,7 @@ This work was funded by the Robert Wood Johnson Foundation, Grant 81746. Project
 
 If you use this package, please cite:
 
-Qian Y, Nethery R, Krieger N, Johnson N (2025). spatialAtomizeR: Spatial Analysis with Misaligned Data Using Atom-Based Regression Models. R package version 0.2.4, https://github.com/bellayqian/spatialAtomizeR.
+Qian Y, Nethery R, Krieger N, Johnson N (2026). spatialAtomizeR: Spatial Analysis with Misaligned Data Using Atom-Based Regression Models. R package version 0.2.5, https://github.com/bellayqian/spatialAtomizeR.
 
 ## About
 

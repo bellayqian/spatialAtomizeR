@@ -5,7 +5,7 @@
 * Fixed `print()` statement in `prepare_nimble_inputs()` that caused debug output (`[1] "\nCreating..."`) to appear in console
 * Marked 14 internal helper functions as `@keywords internal` to prevent export:
   - NIMBLE distribution functions: `biasedUrn_rmfnc`, `dmfnchypg`, `Rmfnchypg`, `rmfnchypg`, `register_nimble_distributions`
-  - Diagnostic functions: `check_mcmc_diagnostics`, `create_diagnostic_plots`, `print_convergence_summary`, `create_comparison_plots`, `create_summary_statistics`, `create_sensitivity_summary_plots`
+  - Diagnostic functions: `check_mcmc_diagnostics`, `create_diagnostic_plots`, `print_convergence_summary`
   - Preparation functions: `prepare_spatial_bookkeeping`, `prepare_adjacency_matrices`, `prepare_nimble_inputs`
   - Added vcov() method for variance-covariance matrices
   - Fixed coefficient naming for beta_x and beta_y parameters
@@ -21,7 +21,6 @@
   - Added Example 2: Real-world Utah counties and school districts analysis (matches manuscript)
   - Enhanced troubleshooting section with common errors and solutions
 * Improved `summary.abrm()` output formatting (cleaner column names, removed redundancy)
-* All vignette code examples now tested and verified to run without errors
 
 # spatialAtomizeR 0.2.4
 

@@ -391,32 +391,6 @@ binom_idx_x = 3   # Third position
 | 2    | Poisson      | 'poisson'   | Count/rate data         |
 | 3    | Binomial     | 'binomial'  | Proportion/binary data  |
 
-# Method Comparison
-
-Compare ABRM with traditional dasymetric mapping:
-
-```{r comparison, eval = FALSE}
-comparison <- run_both_methods(
-  sim_data = sim_data,
-  sim_metadata = list(sim_number = 1, x_correlation = 0.5, y_correlation = 0.5),
-  model_code = model_code,
-  nimble_params = list(niter = 1000, nburnin = 500, thin = 2, nchains = 2),
-  output_dir = tempdir(),
-  norm_idx_x = c(1),
-  pois_idx_x = c(2),
-  binom_idx_x = c(3),
-  norm_idx_y = c(1),
-  pois_idx_y = c(2),
-  binom_idx_y = c(3),
-  dist_y = 2,
-  outcome_type = 'poisson'
-)
-
-# View comparison results
-print(comparison)
-summary(comparison)
-```
-
 # Troubleshooting
 
 ## Common Errors
@@ -429,11 +403,6 @@ summary(comparison)
 
 **Error: "gridx must contain an area ID variable named 'ID'"**
 - **Solution:** Ensure your spatial dataframes have a numeric column named `ID`
-
-## Warnings
-
-**Warning: "pop_atoms length doesn't match D!"**
-- Usually harmless. The model should still run correctly.
 
 # Key Parameters Reference
 
@@ -465,4 +434,4 @@ citation("spatialAtomizeR")
 ```
 
 **Reference:**
-Qian, Y., Johnson, N., Krieger, N., & Nethery, R.C. (2024). spatialAtomizeR: Atom-Based Regression Models for Spatially Misaligned Data in R. R package version 0.2.4.
+Qian, Y., Johnson, N., Krieger, N., & Nethery, R.C. (2026). spatialAtomizeR: Atom-Based Regression Models for Spatially Misaligned Data in R. R package version 0.2.5.

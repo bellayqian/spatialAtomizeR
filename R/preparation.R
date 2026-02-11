@@ -348,7 +348,6 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     message("J_y (atom-equivalent Y grids):", J_y, "\n")
     message("Length of y_to_atom:", length(constants$y_to_atom), "\n")
     message("Length of expand_y:", length(constants$expand_y), "\n")
-    message("Length of pop_atoms:", length(constants$pop_atoms), "\n")
     
     # Check population alignment
     # Check y_to_atom mapping
