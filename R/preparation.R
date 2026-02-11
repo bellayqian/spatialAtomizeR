@@ -181,7 +181,6 @@ prepare_nimble_inputs <- function(bookkeeping, adjacency, data,
     return(covar_matrix)
   }
   
-  message("Creating and standardizing covariate matrices...")
   covar_x <- create_covariate_matrix(grid_data=gridx_xorder[order(gridx_xorder$ID_xorder), ],
                                      vars=bookkeeping$x_vars,
                                      grid_size=nrow(gridx_xorder))

@@ -272,7 +272,15 @@ Qian Y, Nethery R, Krieger N, Johnson N (2025). spatialAtomizeR: Spatial Analysi
 
 ## About
 
-This work is an extension of:
+Atom-based regression models (ABRM) were originally proposed by:
+
+Mugglin, A. S., Carlin, B. P., & Gelfand, A. E. (2000). Fully model-based approaches for spatially misaligned data. Journal of the American Statistical Association, 95(451), 877-887.
+
+The methods were further investigated in:
+
+Trevisani, M., & Gelfand, A. E. (2013). Spatial misalignment models for small area estimation: A simulation study. In Advances in Theoretical and Applied Statistics (pp. 269-279). Springer.
+
+This package builds upon the applied work in:
 
 Nethery, R. C., Testa, C., Tabb, L. P., Hanage, W. P., Chen, J. T., & Krieger, N. (2023). Addressing spatial misalignment in population health research: a case study of US congressional district political metrics and county health data. MedRxiv.
 

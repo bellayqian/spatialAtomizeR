@@ -151,6 +151,31 @@ summary(abrm_results)
 plot(abrm_results)
 ```
 
+Access vairance-covariance matrices from the MCMC posterior sample
+
+```{r vcov}
+# Get variance-covariance matrices
+vcov_matrices <- vcov(abrm_results)
+
+# Print summary
+print(vcov_matrices)
+
+# Access specific matrices
+vcov_matrices$vcov_beta_x   # Variance-covariance for X-grid coefficients
+vcov_matrices$vcov_beta_y   # Variance-covariance for Y-grid coefficients
+vcov_matrices$vcov_beta_0   # Variance of intercept
+vcov_matrices$vcov_all      # Combined matrix for all parameters
+
+# Compute standard errors from diagonal
+sqrt(diag(vcov_matrices$vcov_beta_x))
+
+# Compute correlation matrix from covariance matrix
+cov2cor(vcov_matrices$vcov_beta_y)
+
+# Check if parameters are correlated
+vcov_matrices$vcov_beta_x[1, 2]  # Covariance between first two X coefficients
+```
+
 Access specific results:
 
 ```{r access_results}

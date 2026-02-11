@@ -548,7 +548,7 @@ run_nimble_model <- function(constants, data, inits, sim_metadata = NULL,
     dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
   }
   
-  message("\nRunning NIMBLE MCMC...\n")
+  message("Running NIMBLE MCMC...\n")
   
   mcmc.out <- nimble::nimbleMCMC(
     code = model_code,
@@ -563,8 +563,8 @@ run_nimble_model <- function(constants, data, inits, sim_metadata = NULL,
     summary = TRUE
   )
   
-  message("\nCalculating convergence diagnostics...\n")
-  diagnostics <- check_mcmc_diagnostics(mcmc.out, sim_metadata)
+  message("Calculating convergence diagnostics...\n")
+  diagnostics <- check_mcmc_diagnostics(mcmc.out, sim_metadata, p_x = constants$p_x, p_y = constants$p_y)
   
   print_convergence_summary(diagnostics)
   
@@ -586,7 +586,7 @@ run_nimble_model <- function(constants, data, inits, sim_metadata = NULL,
     print(diagnostics$plots$trace)
     print(diagnostics$plots$density)
     grDevices::dev.off()
-    message("\nDiagnostic plots saved to", plot_file, "\n")
+    message("Diagnostic plots saved to", plot_file, "\n")
   }
   
   mcmc.out$convergence <- diagnostics

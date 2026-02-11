@@ -7,6 +7,8 @@ This is a resubmission improving package quality. Changes include:
 * Fixed vignette errors: removed non-existent function parameters and corrected signatures
 * Improved S3 method output formatting
 * Enhanced documentation with working code examples
+* Added vcov() method for variance-covariance matrices
+* Fixed coefficient naming for beta_x and beta_y parameters
 
 ## Test environments
 

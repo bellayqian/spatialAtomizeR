@@ -7,10 +7,13 @@
   - NIMBLE distribution functions: `biasedUrn_rmfnc`, `dmfnchypg`, `Rmfnchypg`, `rmfnchypg`, `register_nimble_distributions`
   - Diagnostic functions: `check_mcmc_diagnostics`, `create_diagnostic_plots`, `print_convergence_summary`, `create_comparison_plots`, `create_summary_statistics`, `create_sensitivity_summary_plots`
   - Preparation functions: `prepare_spatial_bookkeeping`, `prepare_adjacency_matrices`, `prepare_nimble_inputs`
+  - Added vcov() method for variance-covariance matrices
+  - Fixed coefficient naming for beta_x and beta_y parameters
 
 ## Documentation
 
 * **Major vignette overhaul** - Fixed critical errors and improved usability:
+  - Enhanced Method Clarification
   - Removed non-existent parameters (`res1`, `res2`) from `simulate_misaligned_data()` examples
   - Corrected `run_abrm()` function signature (now uses `gridx`, `gridy`, `atoms` instead of `sim_data`)
   - Removed "Advanced" section showing internal functions

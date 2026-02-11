@@ -16,8 +16,9 @@ Description: Implements atom-based regression models (ABRM) for analyzing spatia
     preparing NIMBLE model inputs, running MCMC diagnostics, and comparing different 
     spatial analysis methods including dasymetric mapping. All main functions return
     S3 objects with print(), summary(), and plot() methods for intuitive result exploration.
-    Methods are described in Nethery et al. (2023) <doi:10.1101/2023.01.10.23284410>.
-    Further methodological details and software implementation are described in Qian et al. (in review).
+    Methods originally described in Mugglin et al. (2000) <doi:10.1080/01621459.2000.10474279>,
+    further investigated in Trevisani & Gelfand (2013), and applied in Nethery et al. (2023) 
+    <doi:10.1101/2023.01.10.23284410>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

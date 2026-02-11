@@ -20,12 +20,37 @@ utils::globalVariables(c(
 #' @importFrom utils head
 #' @keywords internal
 #' @noRd
-check_mcmc_diagnostics <- function(mcmc_output, sim_metadata = NULL) {
+check_mcmc_diagnostics <- function(mcmc_output, sim_metadata = NULL, p_x = NULL, p_y = NULL) {
   # Validate chain structure
   chains_list <- mcmc_output$samples
   if (!is.list(chains_list) || length(chains_list) < 2) {
     warning("Insufficient number of chains for convergence diagnostics")
     return(list(converged = FALSE, error = "insufficient_chains"))
+  }
+  
+  # Rename beta_y columns to beta_x and beta_y if p_x and p_y are provided
+  if (!is.null(p_x) && !is.null(p_y)) {
+    for (i in seq_along(chains_list)) {
+      old_names <- colnames(chains_list[[i]])
+      new_names <- old_names
+      
+      # Rename beta_y[1:p_x] to beta_x[1:p_x]
+      for (j in 1:p_x) {
+        old_pattern <- paste0("beta_y\\[", j, "\\]")
+        new_pattern <- paste0("beta_x[", j, "]")
+        new_names <- gsub(old_pattern, new_pattern, new_names, fixed = FALSE)
+      }
+      
+      # Rename beta_y[(p_x+1):(p_x+p_y)] to beta_y[1:p_y]
+      for (j in 1:p_y) {
+        old_idx <- p_x + j
+        old_pattern <- paste0("beta_y\\[", old_idx, "\\]")
+        new_pattern <- paste0("beta_y[", j, "]")
+        new_names <- gsub(old_pattern, new_pattern, new_names, fixed = FALSE)
+      }
+      
+      colnames(chains_list[[i]]) <- new_names
+    }
   }
   
   # Convert to mcmc objects

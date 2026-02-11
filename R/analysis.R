@@ -97,6 +97,53 @@ run_abrm <- function(gridx,
     output_dir = output_dir
   )
   
+  # Rename MCMC sample columns to distinguish beta_x and beta_y
+  p_x <- nimble_inputs$constants$p_x
+  p_y <- nimble_inputs$constants$p_y
+  
+  for (chain_name in names(abrm_results$samples)) {
+    old_names <- colnames(abrm_results$samples[[chain_name]])
+    new_names <- old_names
+    
+    # Rename beta_y[1] through beta_y[p_x] to beta_x[1] through beta_x[p_x]
+    for (i in 1:p_x) {
+      old_pattern <- paste0("beta_y\\[", i, "\\]")
+      new_pattern <- paste0("beta_x[", i, "]")
+      new_names <- gsub(old_pattern, new_pattern, new_names, fixed = FALSE)
+    }
+    
+    # Rename beta_y[p_x+1] through beta_y[p_x+p_y] to beta_y[1] through beta_y[p_y]
+    for (i in 1:p_y) {
+      old_idx <- p_x + i
+      old_pattern <- paste0("beta_y\\[", old_idx, "\\]")
+      new_pattern <- paste0("beta_y[", i, "]")
+      new_names <- gsub(old_pattern, new_pattern, new_names, fixed = FALSE)
+    }
+    
+    colnames(abrm_results$samples[[chain_name]]) <- new_names
+  }
+  
+  # Also update summary table row names if it exists
+  if (!is.null(abrm_results$summary$all.chains)) {
+    old_rownames <- rownames(abrm_results$summary$all.chains)
+    new_rownames <- old_rownames
+    
+    for (i in 1:p_x) {
+      old_pattern <- paste0("beta_y\\[", i, "\\]")
+      new_pattern <- paste0("beta_x[", i, "]")
+      new_rownames <- gsub(old_pattern, new_pattern, new_rownames, fixed = FALSE)
+    }
+    
+    for (i in 1:p_y) {
+      old_idx <- p_x + i
+      old_pattern <- paste0("beta_y\\[", old_idx, "\\]")
+      new_pattern <- paste0("beta_y[", i, "]")
+      new_rownames <- gsub(old_pattern, new_pattern, new_rownames, fixed = FALSE)
+    }
+    
+    rownames(abrm_results$summary$all.chains) <- new_rownames
+  }
+  
   # Extract parameter estimates
   abrm_parameters <- data.frame(
     variable = rownames(abrm_results$summary$all.chains),
@@ -113,8 +160,10 @@ run_abrm <- function(gridx,
     true_beta_y <- sim_data$true_params$beta_y
     true_values <- c(true_beta_x, true_beta_y)
     
-    # Filter for beta_y parameters
-    beta_params <- grep("^beta_y\\[", abrm_parameters$variable)
+    # Filter for beta parameters (both X and Y)
+    beta_x_params <- grep("^beta_x\\[", abrm_parameters$variable)
+    beta_y_params <- grep("^beta_y\\[", abrm_parameters$variable)
+    beta_params <- c(beta_x_params, beta_y_params)
     abrm_betas <- abrm_parameters[beta_params, ]
     
     abrm_betas$true_beta <- true_values
