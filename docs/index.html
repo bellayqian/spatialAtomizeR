@@ -16,8 +16,8 @@
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Spatial Analysis with Misaligned Data Using Atom-Based Regression Models">
-<meta name="description" content="Implements atom-based regression models (ABRM) for analyzing spatially misaligned data. Provides functions for simulating misaligned spatial data, preparing NIMBLE model inputs, running MCMC diagnostics, and comparing different spatial analysis methods including dasymetric mapping. All main functions return S3 objects with print(), summary(), and plot() methods for intuitive result exploration. Methods are described in Nethery et al. (2023) &lt;doi:10.1101/2023.01.10.23284410&gt;. Further methodological details and software implementation are described in Qian et al. (in review).">
-<meta property="og:description" content="Implements atom-based regression models (ABRM) for analyzing spatially misaligned data. Provides functions for simulating misaligned spatial data, preparing NIMBLE model inputs, running MCMC diagnostics, and comparing different spatial analysis methods including dasymetric mapping. All main functions return S3 objects with print(), summary(), and plot() methods for intuitive result exploration. Methods are described in Nethery et al. (2023) &lt;doi:10.1101/2023.01.10.23284410&gt;. Further methodological details and software implementation are described in Qian et al. (in review).">
+<meta name="description" content="Implements atom-based regression models (ABRM) for analyzing spatially misaligned data. Provides functions for simulating misaligned spatial data, preparing NIMBLE model inputs, running MCMC diagnostics, and providing results. All main functions return S3 objects with print(), summary(), and plot() methods for intuitive result exploration. Methods originally described in Mugglin et al. (2000) &lt;doi:10.1080/01621459.2000.10474279&gt;, further investigated in Trevisani &amp; Gelfand (2013), and applied in Nethery et al. (2023) &lt;doi:10.1101/2023.01.10.23284410&gt;.">
+<meta property="og:description" content="Implements atom-based regression models (ABRM) for analyzing spatially misaligned data. Provides functions for simulating misaligned spatial data, preparing NIMBLE model inputs, running MCMC diagnostics, and providing results. All main functions return S3 objects with print(), summary(), and plot() methods for intuitive result exploration. Methods originally described in Mugglin et al. (2000) &lt;doi:10.1080/01621459.2000.10474279&gt;, further investigated in Trevisani &amp; Gelfand (2013), and applied in Nethery et al. (2023) &lt;doi:10.1101/2023.01.10.23284410&gt;.">
 <meta property="og:image" content="/logo.png">
 </head>
 <body>
@@ -156,24 +156,6 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="method-comparison">Method Comparison<a class="anchor" aria-label="anchor" href="#method-comparison"></a>
-</h3>
-<ul>
-<li>Compare ABRM with dasymetric mapping</li>
-<li>Calculate bias, RMSE, and coverage rates</li>
-<li>Generate comparison plots</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="sensitivity-analysis">Sensitivity Analysis<a class="anchor" aria-label="anchor" href="#sensitivity-analysis"></a>
-</h3>
-<ul>
-<li>Test across different correlation structures</li>
-<li>Multiple simulations per setting</li>
-<li>Automated result summarization</li>
-</ul>
-</div>
-<div class="section level3">
 <h3 id="s3-object-system">S3 Object System<a class="anchor" aria-label="anchor" href="#s3-object-system"></a>
 </h3>
 <p>All main functions return S3 objects with dedicated print, summary, and plot methods:</p>
@@ -192,14 +174,7 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>    <span class="co"># Shows parameter count, bias, coverage</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>  <span class="co"># Shows full parameter table</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>     <span class="co"># Shows MCMC diagnostic plots</span></span>
-<span></span>
-<span><span class="co"># Compare methods</span></span>
-<span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_both_methods.html">run_both_methods</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span> <span class="co"># "abrm_comparison"</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span>   <span class="co"># Shows method comparison summary</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span> <span class="co"># Shows detailed metrics by method</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>     <span class="co"># Shows MCMC diagnostic plots</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -261,14 +236,6 @@
 <td>Run NIMBLE MCMC with diagnostics</td>
 </tr>
 <tr>
-<td><code><a href="reference/run_both_methods.html">run_both_methods()</a></code></td>
-<td>Compare ABRM and dasymetric mapping</td>
-</tr>
-<tr>
-<td><code><a href="reference/run_sensitivity_analysis.html">run_sensitivity_analysis()</a></code></td>
-<td>Conduct sensitivity analysis</td>
-</tr>
-<tr>
 <td><code>prepare_spatial_bookkeeping()</code></td>
 <td>Prepare spatial indices</td>
 </tr>
@@ -309,46 +276,6 @@
 <p><strong>Example:</strong> If <code>dist_covariates_x = c('normal', 'poisson', 'binomial')</code>, then: - <code>norm_idx_x = 1</code> (first covariate) - <code>pois_idx_x = 2</code> (second covariate) - <code>binom_idx_x = 3</code> (third covariate)</p>
 </div>
 <div class="section level2">
-<h2 id="example-comprehensive-sensitivity-analysis">Example: Comprehensive Sensitivity Analysis<a class="anchor" aria-label="anchor" href="#example-comprehensive-sensitivity-analysis"></a>
-</h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bellayqian/spatialAtomizeR" class="external-link">spatialAtomizeR</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-nimble.org" class="external-link">nimble</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Define base parameters</span></span>
-<span><span class="va">base_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  dist_covariates_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'normal'</span>,<span class="st">'poisson'</span>,<span class="st">'binomial'</span><span class="op">)</span>,</span>
-<span>  dist_covariates_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'normal'</span>,<span class="st">'poisson'</span>,<span class="st">'binomial'</span><span class="op">)</span>,</span>
-<span>  dist_y <span class="op">=</span> <span class="st">'poisson'</span>,</span>
-<span>  x_intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,</span>
-<span>  y_intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,</span>
-<span>  beta0_y <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,</span>
-<span>  beta_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.03</span>, <span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.2</span><span class="op">)</span>,</span>
-<span>  beta_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.03</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.2</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Get model code</span></span>
-<span><span class="va">model_code</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_abrm_model.html">get_abrm_model</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Run sensitivity analysis across correlation structures</span></span>
-<span><span class="va">sensitivity_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_sensitivity_analysis.html">run_sensitivity_analysis</a></span><span class="op">(</span></span>
-<span>  correlation_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.6</span><span class="op">)</span>,</span>
-<span>  n_sims_per_setting <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  base_params <span class="op">=</span> <span class="va">base_params</span>,</span>
-<span>  model_code <span class="op">=</span> <span class="va">model_code</span>,</span>
-<span>  base_seed <span class="op">=</span> <span class="fl">123</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># View summary by correlation</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sensitivity_results</span><span class="op">$</span><span class="va">summary_by_correlation</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Access detailed results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span></span>
-<span>  <span class="va">sensitivity_results</span><span class="op">$</span><span class="va">combined_results</span>,</span>
-<span>  <span class="st">"sensitivity_analysis_full_results.csv"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
 <h2 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>
 </h2>
 <ul>
@@ -376,12 +303,16 @@
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use this package, please cite:</p>
-<p>Qian Y, Nethery R, Krieger N, Johnson N (2025). spatialAtomizeR: Spatial Analysis with Misaligned Data Using Atom-Based Regression Models. R package version 0.2.4, <a href="https://github.com/bellayqian/spatialAtomizeR" class="external-link uri">https://github.com/bellayqian/spatialAtomizeR</a>.</p>
+<p>Qian Y, Nethery R, Krieger N, Johnson N (2026). spatialAtomizeR: Spatial Analysis with Misaligned Data Using Atom-Based Regression Models. R package version 0.2.5, <a href="https://github.com/bellayqian/spatialAtomizeR" class="external-link uri">https://github.com/bellayqian/spatialAtomizeR</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="about">About<a class="anchor" aria-label="anchor" href="#about"></a>
 </h2>
-<p>This work is an extension of:</p>
+<p>Atom-based regression models (ABRM) were originally proposed by:</p>
+<p>Mugglin, A. S., Carlin, B. P., &amp; Gelfand, A. E. (2000). Fully model-based approaches for spatially misaligned data. Journal of the American Statistical Association, 95(451), 877-887.</p>
+<p>The methods were further investigated in:</p>
+<p>Trevisani, M., &amp; Gelfand, A. E. (2013). Spatial misalignment models for small area estimation: A simulation study. In Advances in Theoretical and Applied Statistics (pp. 269-279). Springer.</p>
+<p>This package builds upon the applied work in:</p>
 <p>Nethery, R. C., Testa, C., Tabb, L. P., Hanage, W. P., Chen, J. T., &amp; Krieger, N. (2023). Addressing spatial misalignment in population health research: a case study of US congressional district political metrics and county health data. MedRxiv.</p>
 <p><strong>Spatial misalignment</strong>—which occurs when data on multiple variables are collected using mismatched geographic boundary definitions—is a longstanding challenge in public health research. For instance, congressional districts can cut across multiple counties, and environmental hazard zones may cross census tract boundaries, in both cases creating intersecting areas that complicate efforts to study the relationships between health outcomes and their social, political, and environmental determinants.</p>
 <p><strong>Atom-based regression models (ABRM)</strong> offer a promising alternative by using atoms—the intersecting areas of all relevant units—as the fundamental units of analysis. By preserving the original spatial resolution of the data, ABRM account for uncertainty in statistical relationships while offering a robust method for handling misaligned data.</p>
