@@ -18,6 +18,7 @@
 #' @param nburnin Number of burn-in iterations (default: 30000)
 #' @param nchains Number of MCMC chains (default: 2)
 #' @param thin Thinning interval (default: 10)
+#' @param seed Integer seed for reproducibility. Each chain uses seed+(chain_number-1) (default: NULL)
 #' @param sim_metadata Optional simulation metadata list
 #' @param save_plots Logical, whether to save diagnostic plots (default: TRUE)
 #' @param output_dir Directory for saving outputs (default: NULL)
@@ -42,6 +43,7 @@ run_abrm <- function(gridx,
                      nburnin = 30000,
                      nchains = 2,
                      thin = 10,
+                     seed = NULL,
                      sim_metadata = NULL,
                      save_plots = TRUE,
                      output_dir = NULL) {
@@ -93,6 +95,7 @@ run_abrm <- function(gridx,
     nburnin = nburnin,
     nchains = nchains,
     thin = thin,
+    seed = seed,
     save_plots = save_plots,
     output_dir = output_dir
   )

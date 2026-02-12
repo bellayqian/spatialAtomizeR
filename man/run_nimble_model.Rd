@@ -14,6 +14,7 @@ run_nimble_model(
   nburnin = 30000,
   nchains = 2,
   thin = 10,
+  seed = NULL,
   save_plots = TRUE,
   output_dir = NULL
 )
@@ -36,6 +37,8 @@ run_nimble_model(
 \item{nchains}{Number of MCMC chains (default: 2)}
 
 \item{thin}{Thinning interval (default: 10)}
+
+\item{seed}{Integer seed for reproducibility. Each chain uses seed+(chain_number-1) (default: NULL)}
 
 \item{save_plots}{Logical, whether to save diagnostic plots (default: TRUE)}
 

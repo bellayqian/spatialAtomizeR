@@ -129,7 +129,8 @@ abrm_results <- run_abrm(
   # MCMC parameters
   niter = 50000,    # Total iterations per chain
   nburnin = 30000,  # Burn-in iterations
-  nchains = 2       # Number of chains
+  nchains = 2,      # Number of chains
+  seed = 123
 )
 ```
 
@@ -362,7 +363,8 @@ mcmc_results <- run_abrm(
   # MCMC settings (increase for real analysis)
   niter = 300000,
   nburnin = 200000,
-  nchains = 2
+  nchains = 2,
+  seed = 123
 )
 
 # View results

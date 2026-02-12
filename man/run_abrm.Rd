@@ -21,6 +21,7 @@ run_abrm(
   nburnin = 30000,
   nchains = 2,
   thin = 10,
+  seed = NULL,
   sim_metadata = NULL,
   save_plots = TRUE,
   output_dir = NULL
@@ -58,6 +59,8 @@ run_abrm(
 \item{nchains}{Number of MCMC chains (default: 2)}
 
 \item{thin}{Thinning interval (default: 10)}
+
+\item{seed}{Integer seed for reproducibility. Each chain uses seed+(chain_number-1) (default: NULL)}
 
 \item{sim_metadata}{Optional simulation metadata list}
 

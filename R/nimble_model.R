@@ -530,16 +530,16 @@ get_abrm_model <- function() {
 #' @param nburnin Number of burn-in iterations (default: 30000)
 #' @param nchains Number of MCMC chains (default: 2)
 #' @param thin Thinning interval (default: 10)
+#' @param seed Integer seed for reproducibility. Each chain uses seed+(chain_number-1) (default: NULL)
 #' @param save_plots Logical, whether to save diagnostic plots (default: TRUE)
 #' @param output_dir Directory for saving plots (default: NULL)
-#'
 #' @return List containing MCMC samples, summary, and convergence diagnostics
 #' @export
 #' @import nimble
 #' @importFrom grDevices pdf dev.off
 run_nimble_model <- function(constants, data, inits, sim_metadata = NULL, 
                              model_code, niter = 50000, nburnin = 30000, 
-                             nchains = 2, thin = 10, 
+                             nchains = 2, thin = 10, seed = NULL,
                              save_plots = TRUE, output_dir = NULL) {
   
   register_nimble_distributions()
@@ -558,6 +558,7 @@ run_nimble_model <- function(constants, data, inits, sim_metadata = NULL,
     monitors = c('beta_0_y', 'beta_y'),
     thin = thin,
     niter = niter,
+    setSeed = if(!is.null(seed)) seed + (0:(nchains-1)) else NULL,
     nburnin = nburnin,
     nchains = nchains,
     summary = TRUE
