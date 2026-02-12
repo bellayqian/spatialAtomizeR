@@ -19,3 +19,4 @@ Numeric vector of sampled counts
 \description{
 Wraps the BiasedUrn::rMFNCHypergeo function for use in NIMBLE models
 }
+\keyword{internal}

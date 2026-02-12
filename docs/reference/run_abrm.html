@@ -59,6 +59,7 @@
 <span>  nburnin <span class="op">=</span> <span class="fl">30000</span>,</span>
 <span>  nchains <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  thin <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sim_metadata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  save_plots <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -131,6 +132,10 @@
 
 <dt id="arg-thin">thin<a class="anchor" aria-label="anchor" href="#arg-thin"></a></dt>
 <dd><p>Thinning interval (default: 10)</p></dd>
+
+
+<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
+<dd><p>Integer seed for reproducibility. Each chain uses seed+(chain_number-1) (default: NULL)</p></dd>
 
 
 <dt id="arg-sim-metadata">sim_metadata<a class="anchor" aria-label="anchor" href="#arg-sim-metadata"></a></dt>

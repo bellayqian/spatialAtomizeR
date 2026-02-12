@@ -21,3 +21,4 @@ Vector of sampled counts
 \description{
 Random generation for multivariate non-central hypergeometric
 }
+\keyword{internal}

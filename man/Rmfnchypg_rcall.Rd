@@ -19,3 +19,4 @@ Vector of sampled counts
 \description{
 Internal wrapper to call R function from compiled Nimble code.
 }
+\keyword{internal}

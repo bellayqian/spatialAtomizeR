@@ -23,3 +23,4 @@ The log-probability (if log=1) or probability (if log=0)
 \description{
 Density function for multivariate non-central hypergeometric
 }
+\keyword{internal}

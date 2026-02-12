@@ -2,7 +2,8 @@
 % Please edit documentation in R/nimble_model.R
 \name{register_nimble_distributions}
 \alias{register_nimble_distributions}
-\title{Register Custom NIMBLE Distributions}
+\title{Register Custom NIMBLE Distributions
+Registers the custom distributions for use in NIMBLE models.}
 \usage{
 register_nimble_distributions()
 }
@@ -10,5 +11,7 @@ register_nimble_distributions()
 Invisible TRUE
 }
 \description{
+Register Custom NIMBLE Distributions
 Registers the custom distributions for use in NIMBLE models.
 }
+\keyword{internal}

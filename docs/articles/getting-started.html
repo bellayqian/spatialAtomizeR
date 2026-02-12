@@ -65,7 +65,7 @@
 (Bella), Principal Investigators: Dr. Nancy Krieger and Dr. Rachel
 Nethery</h4>
             
-            <h4 data-toc-skip class="date">2026-02-11</h4>
+            <h4 data-toc-skip class="date">2026-02-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bellayqian/spatialAtomizeR/blob/HEAD/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
       <div class="d-none name"><code>getting-started.Rmd</code></div>
@@ -188,7 +188,8 @@ distributions by providing their indices:</p>
 <span>  <span class="co"># MCMC parameters</span></span>
 <span>  niter <span class="op">=</span> <span class="fl">50000</span>,    <span class="co"># Total iterations per chain</span></span>
 <span>  nburnin <span class="op">=</span> <span class="fl">30000</span>,  <span class="co"># Burn-in iterations</span></span>
-<span>  nchains <span class="op">=</span> <span class="fl">2</span>       <span class="co"># Number of chains</span></span>
+<span>  nchains <span class="op">=</span> <span class="fl">2</span>,      <span class="co"># Number of chains</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -418,7 +419,8 @@ atoms:</p>
 <span>  <span class="co"># MCMC settings (increase for real analysis)</span></span>
 <span>  niter <span class="op">=</span> <span class="fl">300000</span>,</span>
 <span>  nburnin <span class="op">=</span> <span class="fl">200000</span>,</span>
-<span>  nchains <span class="op">=</span> <span class="fl">2</span></span>
+<span>  nchains <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># View results</span></span>

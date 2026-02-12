@@ -7,6 +7,7 @@
 #' @param ni Integer vector of population sizes
 #' @return Numeric vector of sampled counts
 #' @export
+#' @keywords internal
 #' @importFrom BiasedUrn rMFNCHypergeo
 biasedUrn_rmfnc <- function(total, odds, ni) {
   total <- as.integer(round(total))
@@ -45,6 +46,7 @@ biasedUrn_rmfnc <- function(total, odds, ni) {
 #' @param log Logical, return log probability
 #' @return The log-probability (if log=1) or probability (if log=0)
 #' @export
+#' @keywords internal
 #' @import nimble
 dmfnchypg <- nimble::nimbleFunction(
   run = function(x = double(1), total = double(0), odds = double(1), 
@@ -104,6 +106,7 @@ dmfnchypg <- nimble::nimbleFunction(
 #' @param ni Vector of category sizes
 #' @return Vector of sampled counts
 #' @export
+#' @keywords internal
 #' @rdname Rmfnchypg_rcall
 Rmfnchypg <- nimble::nimbleRcall(
   prototype = function(total = double(0), odds = double(1), ni = double(1)) {},
@@ -119,6 +122,7 @@ Rmfnchypg <- nimble::nimbleRcall(
 #' @param ni Vector of category sizes
 #' @return Vector of sampled counts
 #' @export
+#' @keywords internal
 #' @rdname rmfnchypg
 rmfnchypg <- nimble::nimbleFunction(
   run = function(n = integer(0), total = double(0), odds = double(1), 
@@ -129,11 +133,10 @@ rmfnchypg <- nimble::nimbleFunction(
 )
 
 #' Register Custom NIMBLE Distributions
-#' 
 #' Registers the custom distributions for use in NIMBLE models.
-#' 
 #' @return Invisible TRUE
 #' @export
+#' @keywords internal
 register_nimble_distributions <- function() {
   if (exists("distributions_registered", envir = .pkg_env) && 
       .pkg_env$distributions_registered) {
@@ -161,7 +164,6 @@ register_nimble_distributions <- function() {
 #'
 #' Returns the NIMBLE code for the Atom-Based Regression Model with mixed-type variables.
 #' Automatically registers custom distributions if not already registered.
-#'
 #' @return A nimbleCode object containing the model specification
 #' @export
 get_abrm_model <- function() {
