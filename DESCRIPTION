@@ -1,8 +1,8 @@
 Package: spatialAtomizeR
 Type: Package
 Title: Spatial Analysis with Misaligned Data Using Atom-Based Regression Models
-Version: 0.2.5
-Date: 2026-02-11
+Version: 0.2.6
+Date: 2026-02-13
 Authors@R: c(
     person("Yunzhe", "Qian", email = "qyzanemos@gmail.com", role = c("aut", "cre")),
     person("Rachel", "Nethery", email = "rnethery@hsph.harvard.edu", role = "aut"),

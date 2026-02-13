@@ -436,4 +436,4 @@ citation("spatialAtomizeR")
 ```
 
 **Reference:**
-Qian, Y., Johnson, N., Krieger, N., & Nethery, R.C. (2026). spatialAtomizeR: Atom-Based Regression Models for Spatially Misaligned Data in R. R package version 0.2.5.
+Qian, Y., Johnson, N., Krieger, N., & Nethery, R.C. (2026). spatialAtomizeR: Atom-Based Regression Models for Spatially Misaligned Data in R. R package version 0.2.6.

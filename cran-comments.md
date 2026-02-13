@@ -2,7 +2,9 @@
 
 This is a resubmission improving package quality. Changes include:
 
+* Fixed Editor's comments
 * Fixed `print()` statement causing debug output in console
+* Fixed unable to use S3 plot() function bug
 * Marked 14 internal helper functions as `@keywords internal` (no longer exported)
 * Fixed vignette errors: removed non-existent function parameters and corrected signatures
 * Improved S3 method output formatting

@@ -1,4 +1,4 @@
-# spatialAtomizeR 0.2.5
+# spatialAtomizeR 1.0.0
 
 ## Major Changes
 
