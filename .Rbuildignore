@@ -9,3 +9,4 @@
 ^.*\.Rproj$
 ^\.git$
 ^\.gitignore$
+^data-raw$

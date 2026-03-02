@@ -23,8 +23,9 @@ run_abrm(
   thin = 10,
   seed = NULL,
   sim_metadata = NULL,
-  save_plots = TRUE,
-  output_dir = NULL
+  save_plots = FALSE,
+  output_dir = NULL,
+  compute_waic = FALSE
 )
 }
 \arguments{
@@ -64,13 +65,62 @@ run_abrm(
 
 \item{sim_metadata}{Optional simulation metadata list}
 
-\item{save_plots}{Logical, whether to save diagnostic plots (default: TRUE)}
+\item{save_plots}{Logical, whether to save diagnostic plots (default: FALSE)}
 
 \item{output_dir}{Directory for saving outputs (default: NULL)}
+
+\item{compute_waic}{Logical; if \code{TRUE}, NIMBLE computes the Widely
+Applicable Information Criterion (WAIC) during MCMC sampling and stores it
+in the returned object. Retrieve it afterwards with \code{\link{waic}}.
+Default \code{FALSE}.}
 }
 \value{
-List containing MCMC results and parameter estimates
+An object of class \code{"abrm"}: a named list with components \code{mcmc_results} (raw NIMBLE output including posterior samples and convergence diagnostics), 
+\code{parameter_estimates} (data frame of posterior summaries for the regression coefficients), and \code{all_parameters} (posterior summaries for all monitored parameters). 
+Use \code{print()}, \code{summary()}, \code{plot()}, and \code{vcov()} to inspect the fitted model.
 }
 \description{
 Runs the Atom-Based Regression Model on simulated data
+}
+\examples{
+\donttest{
+  # Simulate misaligned spatial data with one normal covariate per grid
+  sim_data <- simulate_misaligned_data(
+    seed = 1,
+    dist_covariates_x = "normal",
+    dist_covariates_y = "normal",
+    dist_y = "normal",
+    x_intercepts = 0,
+    y_intercepts = 0,
+    beta0_y = 0,
+    beta_x = 0.1,
+    beta_y = -0.1
+  )
+
+  # Retrieve the pre-compiled NIMBLE model code
+  model_code <- get_abrm_model()
+
+  # Fit the ABRM (use small niter/nburnin for illustration only)
+  results <- run_abrm(
+    gridx      = sim_data$gridx,
+    gridy      = sim_data$gridy,
+    atoms      = sim_data$atoms,
+    model_code = model_code,
+    true_params = sim_data$true_params,
+    norm_idx_x = 1,
+    norm_idx_y = 1,
+    dist_y     = 1,
+    niter      = 1000,
+    nburnin    = 500,
+    nchains    = 2,
+    seed       = 1,
+    save_plots = FALSE
+  )
+
+  print(results)    # concise model summary
+  summary(results)  # full parameter table
+  plot(results)     # MCMC trace and density plots
+  vcov(results)     # posterior variance-covariance matrices
+}
+
 }

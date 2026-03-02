@@ -2,7 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{print.misaligned_data}
 \alias{print.misaligned_data}
-\title{Print method for misaligned_data objects}
+\title{Print Method for Misaligned_data Objects}
 \usage{
 \method{print}{misaligned_data}(x, ...)
 }
@@ -15,5 +15,20 @@
 Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of the simulated misaligned spatial data including grid dimensions and number of atoms.
 }
 \description{
-Print method for misaligned_data objects
+Print Method for Misaligned_data Objects
+}
+\examples{
+## Simulate misaligned spatial data
+sim_data <- simulate_misaligned_data(
+  seed              = 1,
+  dist_covariates_x = c("normal", "poisson"),
+  dist_covariates_y = c("normal", "poisson"),
+  dist_y            = "poisson",
+  x_intercepts      = c(0, -1),
+  y_intercepts      = c(0, -1),
+  beta0_y           = -1,
+  beta_x            = c(0.1, -0.05),
+  beta_y            = c(-0.1, 0.05)
+)
+print(sim_data)
 }

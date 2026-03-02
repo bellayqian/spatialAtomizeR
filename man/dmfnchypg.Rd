@@ -2,7 +2,7 @@
 % Please edit documentation in R/nimble_model.R
 \name{dmfnchypg}
 \alias{dmfnchypg}
-\title{Density function for multivariate non-central hypergeometric}
+\title{Density Function for Multivariate Non-Central Hypergeometrics Distribution}
 \usage{
 dmfnchypg(x, total, odds, ni, log = 0)
 }
@@ -21,6 +21,6 @@ dmfnchypg(x, total, odds, ni, log = 0)
 The log-probability (if log=1) or probability (if log=0)
 }
 \description{
-Density function for multivariate non-central hypergeometric
+Density Function for Multivariate Non-Central Hypergeometrics Distribution
 }
 \keyword{internal}

@@ -27,8 +27,24 @@ gen_correlated_spat(
 \item{verify}{Logical for verification (default = FALSE)}
 }
 \value{
-Matrix of spatial effects
+Matrix of spatial effects with \code{nrow(W)} rows and \code{n_vars}
+  columns, where each column is one spatially-correlated variable.
 }
 \description{
 Generate Correlated Spatial Effects
 }
+\examples{
+# A simple 4-node chain graph adjacency matrix
+W <- matrix(c(0, 1, 0, 0,
+              1, 0, 1, 0,
+              0, 1, 0, 1,
+              0, 0, 1, 0), nrow = 4, byrow = TRUE)
+
+# Generate 2 correlated spatial effects over the 4 areas
+set.seed(1)
+effects <- gen_correlated_spat(W, n_vars = 2, rho = 0.5, correlation = 0.4)
+dim(effects)        # 4 rows (areas) x 2 columns (variables)
+cor(effects)        # between-variable correlation (approx. 0.4)
+
+}
+\keyword{internal}

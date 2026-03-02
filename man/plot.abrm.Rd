@@ -2,18 +2,64 @@
 % Please edit documentation in R/methods.R
 \name{plot.abrm}
 \alias{plot.abrm}
-\title{Plot method for abrm objects}
+\title{Plot Method for ABRM Objects}
 \usage{
 \method{plot}{abrm}(x, ...)
 }
 \arguments{
-\item{x}{An object of class "abrm"}
+\item{x}{An object of class \code{"abrm"} returned by
+\code{\link{run_abrm}}.}
 
-\item{...}{Additional arguments (ignored)}
+\item{...}{Additional arguments (currently unused).}
 }
 \value{
-Invisibly returns the input object \code{x}. The function is called for its side effect of displaying MCMC diagnostic plots (trace plots and density plots) if they are available in the abrm object.
+Invisibly returns \code{x}. Called for its side effect of rendering
+  the MCMC diagnostic plots.
 }
 \description{
-Plot method for abrm objects
+Displays MCMC diagnostic plots — trace plots and posterior density plots —
+for the parameters monitored during model fitting. If no diagnostic plots
+are stored in the object, a message is issued instead.
+}
+\examples{
+\donttest{
+  ## Step 1: Simulate misaligned spatial data
+  sim_data <- simulate_misaligned_data(
+    seed              = 1,
+    dist_covariates_x = c("normal", "poisson"),
+    dist_covariates_y = c("normal", "poisson"),
+    dist_y            = "poisson",
+    x_intercepts      = c(0, -1),
+    y_intercepts      = c(0, -1),
+    beta0_y           = -1,
+    beta_x            = c(0.1, -0.05),
+    beta_y            = c(-0.1, 0.05)
+  )
+
+  ## Step 2: Retrieve the NIMBLE model code
+  model_code <- get_abrm_model()
+
+  ## Step 3: Fit the ABRM
+  results <- run_abrm(
+    gridx       = sim_data$gridx,
+    gridy       = sim_data$gridy,
+    atoms       = sim_data$atoms,
+    model_code  = model_code,
+    true_params = sim_data$true_params,
+    norm_idx_x  = 1,
+    pois_idx_x  = 2,
+    norm_idx_y  = 1,
+    pois_idx_y  = 2,
+    dist_y      = 2,
+    niter       = 1000,
+    nburnin     = 500,
+    nchains     = 2,
+    seed        = 1,
+    save_plots  = FALSE
+  )
+
+  ## Step 4: Display MCMC trace and posterior density plots
+  plot(results)
+}
+
 }

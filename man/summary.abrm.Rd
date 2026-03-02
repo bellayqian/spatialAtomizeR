@@ -2,18 +2,48 @@
 % Please edit documentation in R/methods.R
 \name{summary.abrm}
 \alias{summary.abrm}
-\title{Summary method for abrm objects}
+\title{Summary Method for ABRM Objects}
 \usage{
 \method{summary}{abrm}(object, ...)
 }
 \arguments{
-\item{object}{An abrm object}
+\item{object}{An object of class \code{"abrm"} returned by
+\code{\link{run_abrm}}.}
 
-\item{...}{Additional arguments (unused)}
+\item{...}{Additional arguments (currently unused).}
 }
 \value{
-Invisibly returns the input object \code{object}. The function is called for its side effect of printing the ABRM model summary including detailed parameter estimates.
+An object of class \code{"summary.abrm"} (a list) with components:
+  \describe{
+    \item{\code{n_params}}{Number of regression parameters estimated.}
+    \item{\code{mean_abs_bias}}{Mean absolute bias across parameters, or
+      \code{NA} if true values were not supplied.}
+    \item{\code{coverage}}{Percentage of parameters whose true value falls
+      within its 95\% credible interval, or \code{NA} if unavailable.}
+    \item{\code{estimates}}{Data frame of posterior summaries.}
+  }
+  The object is printed via \code{\link{print.summary.abrm}}.
 }
 \description{
-Summary method for abrm objects
+Returns a structured summary of a fitted ABRM, including posterior means,
+standard deviations, and 95% credible intervals for all regression
+coefficients. When true parameter values are available (i.e., the model
+was fitted on simulated data via \code{\link{simulate_misaligned_data}}),
+mean absolute bias and credible-interval coverage are also reported.
+}
+\examples{
+\donttest{
+  sim_data <- simulate_misaligned_data(
+    seed = 1, dist_covariates_x = "normal", dist_covariates_y = "normal",
+    dist_y = "normal", x_intercepts = 0, y_intercepts = 0,
+    beta0_y = 0, beta_x = 0.1, beta_y = -0.1
+  )
+  results <- run_abrm(
+    gridx = sim_data$gridx, gridy = sim_data$gridy, atoms = sim_data$atoms,
+    model_code = get_abrm_model(), norm_idx_x = 1, norm_idx_y = 1,
+    dist_y = 1, niter = 1000, nburnin = 500, nchains = 2, seed = 1
+  )
+  summary(results)    # full parameter table with bias and coverage
+}
+
 }

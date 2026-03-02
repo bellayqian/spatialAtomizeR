@@ -2,18 +2,37 @@
 % Please edit documentation in R/methods.R
 \name{summary.misaligned_data}
 \alias{summary.misaligned_data}
-\title{Summary method for misaligned_data objects}
+\title{Summary Method for Misaligned Data Objects}
 \usage{
 \method{summary}{misaligned_data}(object, ...)
 }
 \arguments{
-\item{object}{A misaligned_data object}
+\item{object}{An object of class \code{"misaligned_data"} returned by
+\code{\link{simulate_misaligned_data}}.}
 
-\item{...}{Additional arguments (unused)}
+\item{...}{Additional arguments (currently unused).}
 }
 \value{
-Invisibly returns the input object \code{object}. The function is called for its side effect of printing the misaligned data summary including grid information and true parameter values (beta_x and beta_y).
+Invisibly returns \code{object}. Called for its side effect of
+  printing the data summary including the true parameter values.
 }
 \description{
-Summary method for misaligned_data objects
+Prints grid dimensions, atom counts, and the true regression coefficients
+(\code{beta_x} and \code{beta_y}) used to generate the data.
+}
+\examples{
+## Simulate misaligned spatial data
+sim_data <- simulate_misaligned_data(
+  seed              = 1,
+  dist_covariates_x = c("normal", "poisson"),
+  dist_covariates_y = c("normal", "poisson"),
+  dist_y            = "poisson",
+  x_intercepts      = c(0, -1),
+  y_intercepts      = c(0, -1),
+  beta0_y           = -1,
+  beta_x            = c(0.1, -0.05),
+  beta_y            = c(-0.1, 0.05)
+)
+summary(sim_data)
+
 }

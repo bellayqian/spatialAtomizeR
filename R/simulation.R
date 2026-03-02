@@ -6,12 +6,27 @@
 #' @param var_spat Spatial variance (default = 1)
 #' @param correlation Correlation between variables (default = 0.5)
 #' @param verify Logical for verification (default = FALSE)
+#' @return Matrix of spatial effects with \code{nrow(W)} rows and \code{n_vars}
+#'   columns, where each column is one spatially-correlated variable.
 #'
-#' @return Matrix of spatial effects
+#' @examples
+#' # A simple 4-node chain graph adjacency matrix
+#' W <- matrix(c(0, 1, 0, 0,
+#'               1, 0, 1, 0,
+#'               0, 1, 0, 1,
+#'               0, 0, 1, 0), nrow = 4, byrow = TRUE)
+#'
+#' # Generate 2 correlated spatial effects over the 4 areas
+#' set.seed(1)
+#' effects <- gen_correlated_spat(W, n_vars = 2, rho = 0.5, correlation = 0.4)
+#' dim(effects)        # 4 rows (areas) x 2 columns (variables)
+#' cor(effects)        # between-variable correlation (approx. 0.4)
+#'
 #' @importFrom MASS mvrnorm
 #' @importFrom stats rpois rbinom
 #' @importFrom methods as
 #' @export
+#' @keywords internal
 gen_correlated_spat <- function(W, n_vars, rho = 0.6, var_spat = 1, correlation = 0.5, verify = FALSE) {
   n <- nrow(W)
   
@@ -50,8 +65,31 @@ gen_correlated_spat <- function(W, n_vars, rho = 0.6, var_spat = 1, correlation 
 #' @param beta_y Outcome model coefficients for Y-grid covariates
 #' @param diff_pops Logical, indicating whether the atoms should be generated with different population sizes (diff_pops = TRUE) or a common population size (diff_pops = FALSE)
 #' @param xy_cov_cor Logical, indicating whether the atom-level spatial random effects for X-grid and Y-grid covariates should be correlated (xy_cov_cor = TRUE) or not. When set to TRUE, the x_correlation and rho_x parameters are used to generate all covariates (separate correlation parameters are not allowed for X-grid and Y-grid covariates).
-#'
-#' @return List containing gridy, gridx, atoms, and true_params
+#' 
+#' @return An object of class \code{"misaligned_data"}: a named list with components \code{gridy} (Y-grid sf data frame with outcome and Y
+#'   covariates), \code{gridx} (X-grid sf data frame with X covariates), \code{atoms} (atom-level sf data frame, the spatial intersection of the
+#'   two grids), and \code{true_params} (list of the true regression coefficients used for data generation).
+#' 
+#' @examples
+#' sim_data <- simulate_misaligned_data(
+#' seed = 1,
+#' dist_covariates_x = c('normal', 'poisson', 'binomial'),
+#' dist_covariates_y = c('normal', 'poisson', 'binomial'),
+#' dist_y = "poisson",
+#' x_intercepts = c(4, -1, -1), 
+#' y_intercepts = c(4, -1, -1),
+#' beta0_y = -1, 
+#' x_correlation = 0.5, 
+#' y_correlation = 0.5,
+#' beta_x = c(-0.03, 0.1, -0.2), 
+#' beta_y = c(0.03, -0.1, 0.2)
+#' )
+#' class(sim_data)              # "misaligned_data"
+#' print(sim_data)              # grid dimensions and atom count
+#' summary(sim_data)            # includes true beta values
+#' names(sim_data$atoms)        # atom-level variables
+#' sim_data$true_params$beta_x  # true X-grid coefficients
+#' 
 #' @importFrom sp GridTopology SpatialGrid
 #' @importFrom sf st_as_sf st_union st_sf st_contains
 #' @importFrom spdep poly2nb nb2mat

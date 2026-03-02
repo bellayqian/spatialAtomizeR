@@ -15,8 +15,9 @@ run_nimble_model(
   nchains = 2,
   thin = 10,
   seed = NULL,
-  save_plots = TRUE,
-  output_dir = NULL
+  save_plots = FALSE,
+  output_dir = NULL,
+  compute_waic = FALSE
 )
 }
 \arguments{
@@ -40,13 +41,50 @@ run_nimble_model(
 
 \item{seed}{Integer seed for reproducibility. Each chain uses seed+(chain_number-1) (default: NULL)}
 
-\item{save_plots}{Logical, whether to save diagnostic plots (default: TRUE)}
+\item{save_plots}{Logical, whether to save diagnostic plots (default: FALSE)}
 
 \item{output_dir}{Directory for saving plots (default: NULL)}
+
+\item{compute_waic}{Logical; if \code{TRUE}, WAIC is computed by NIMBLE and stored in the result, enabling \code{\link{waic}()} for model comparison. Default \code{FALSE} to keep fitting fast.}
 }
 \value{
 List containing MCMC samples, summary, and convergence diagnostics
+
+A named list with components \code{samples} (per-chain MCMC sample matrices), \code{summary} (posterior summary statistics), and
+\code{convergence} (Gelman-Rubin statistics, effective sample sizes, and optional diagnostic plots).
 }
 \description{
 Run NIMBLE Model with Diagnostics
+}
+\examples{
+\donttest{
+  # The recommended workflow is to call run_abrm(), which calls
+  # run_nimble_model() internally after preparing all inputs.
+  sim_data <- simulate_misaligned_data(
+    seed = 1,
+    dist_covariates_x = "normal",
+    dist_covariates_y = "normal",
+    dist_y = "normal",
+    x_intercepts = 0,
+    y_intercepts = 0,
+    beta0_y = 0,
+    beta_x = 0.1,
+    beta_y = -0.1
+  )
+  model_code <- get_abrm_model()
+  results <- run_abrm(
+    gridx = sim_data$gridx,
+    gridy = sim_data$gridy,
+    atoms = sim_data$atoms,
+    model_code = model_code,
+    true_params = sim_data$true_params,
+    norm_idx_x = 1,
+    norm_idx_y = 1,
+    dist_y = 1,
+    niter = 1000, nburnin = 500, nchains = 2,
+    seed = 1, save_plots = FALSE
+  )
+  summary(results)
+}
+
 }

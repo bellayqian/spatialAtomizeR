@@ -37,7 +37,7 @@ biasedUrn_rmfnc <- function(total, odds, ni) {
   return(as.numeric(result))
 }
 
-#' Density function for multivariate non-central hypergeometric
+#' Density Function for Multivariate Non-Central Hypergeometrics Distribution
 #'
 #' @param x Vector of counts
 #' @param total Total number of items
@@ -97,7 +97,7 @@ dmfnchypg <- nimble::nimbleFunction(
   }
 )
 
-#' Nimble R Call Wrapper for BiasedUrn
+#' NIMBLE R Call Wrapper for BiasedUrn
 #' 
 #' Internal wrapper to call R function from compiled Nimble code.
 #' 
@@ -114,7 +114,7 @@ Rmfnchypg <- nimble::nimbleRcall(
   Rfun = "biasedUrn_rmfnc"
 )
 
-#' Random generation for multivariate non-central hypergeometric
+#' Random Generation for Multivariate Non-Central Hypergeometric Distribution
 #' 
 #' @param n number of observations (only n=1 is used)
 #' @param total Total number of items
@@ -164,6 +164,9 @@ register_nimble_distributions <- function() {
 #'
 #' Returns the NIMBLE code for the Atom-Based Regression Model with mixed-type variables.
 #' Automatically registers custom distributions if not already registered.
+#' @examples
+#' model_code <- get_abrm_model()
+#' print(model_code)
 #' @return A nimbleCode object containing the model specification
 #' @export
 get_abrm_model <- function() {
@@ -533,18 +536,64 @@ get_abrm_model <- function() {
 #' @param nchains Number of MCMC chains (default: 2)
 #' @param thin Thinning interval (default: 10)
 #' @param seed Integer seed for reproducibility. Each chain uses seed+(chain_number-1) (default: NULL)
-#' @param save_plots Logical, whether to save diagnostic plots (default: TRUE)
+#' @param save_plots Logical, whether to save diagnostic plots (default: FALSE)
 #' @param output_dir Directory for saving plots (default: NULL)
+#' @param compute_waic Logical; if \code{TRUE}, WAIC is computed by NIMBLE and stored in the result, enabling \code{\link{waic}()} for model comparison. Default \code{FALSE} to keep fitting fast.
 #' @return List containing MCMC samples, summary, and convergence diagnostics
+#' @return A named list with components \code{samples} (per-chain MCMC sample matrices), \code{summary} (posterior summary statistics), and
+#' \code{convergence} (Gelman-Rubin statistics, effective sample sizes, and optional diagnostic plots).
+#' @examples
+#' \donttest{
+#'   # The recommended workflow is to call run_abrm(), which calls
+#'   # run_nimble_model() internally after preparing all inputs.
+#'   sim_data <- simulate_misaligned_data(
+#'     seed = 1,
+#'     dist_covariates_x = "normal",
+#'     dist_covariates_y = "normal",
+#'     dist_y = "normal",
+#'     x_intercepts = 0,
+#'     y_intercepts = 0,
+#'     beta0_y = 0,
+#'     beta_x = 0.1,
+#'     beta_y = -0.1
+#'   )
+#'   model_code <- get_abrm_model()
+#'   results <- run_abrm(
+#'     gridx = sim_data$gridx,
+#'     gridy = sim_data$gridy,
+#'     atoms = sim_data$atoms,
+#'     model_code = model_code,
+#'     true_params = sim_data$true_params,
+#'     norm_idx_x = 1,
+#'     norm_idx_y = 1,
+#'     dist_y = 1,
+#'     niter = 1000, nburnin = 500, nchains = 2,
+#'     seed = 1, save_plots = FALSE
+#'   )
+#'   summary(results)
+#' }
+#'
 #' @export
 #' @import nimble
 #' @importFrom grDevices pdf dev.off
 run_nimble_model <- function(constants, data, inits, sim_metadata = NULL, 
                              model_code, niter = 50000, nburnin = 30000, 
                              nchains = 2, thin = 10, seed = NULL,
-                             save_plots = TRUE, output_dir = NULL) {
+                             save_plots = FALSE, output_dir = NULL,
+                             compute_waic = FALSE) {
   
   register_nimble_distributions()
+  
+  # NIMBLE's internal functions (e.g. getNimbleOption, called from
+  # init_isDataEnv) require nimble to be *attached* to the search path, not
+  # merely imported into the package namespace via NAMESPACE/Imports.
+  # Explicitly attaching it here prevents the
+  # "could not find function 'getNimbleOption'" error during nimbleMCMC init.
+  if (!"package:nimble" %in% search()) {
+    suppressPackageStartupMessages(
+      do.call("require", list(package = "nimble", quietly = TRUE))
+    )
+  }
   
   if(!is.null(output_dir)) {
     dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
@@ -563,7 +612,8 @@ run_nimble_model <- function(constants, data, inits, sim_metadata = NULL,
     setSeed = if(!is.null(seed)) seed + (0:(nchains-1)) else FALSE,
     nburnin = nburnin,
     nchains = nchains,
-    summary = TRUE
+    summary = TRUE,
+    WAIC = compute_waic
   )
   
   message("Calculating convergence diagnostics...\n")

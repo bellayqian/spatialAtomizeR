@@ -2,7 +2,7 @@
 % Please edit documentation in R/nimble_model.R
 \name{rmfnchypg}
 \alias{rmfnchypg}
-\title{Random generation for multivariate non-central hypergeometric}
+\title{Random Generation for Multivariate Non-Central Hypergeometric Distribution}
 \usage{
 rmfnchypg(n, total, odds, ni)
 }
@@ -19,6 +19,6 @@ rmfnchypg(n, total, odds, ni)
 Vector of sampled counts
 }
 \description{
-Random generation for multivariate non-central hypergeometric
+Random Generation for Multivariate Non-Central Hypergeometric Distribution
 }
 \keyword{internal}

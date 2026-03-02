@@ -2,18 +2,64 @@
 % Please edit documentation in R/methods.R
 \name{print.vcov.abrm}
 \alias{print.vcov.abrm}
-\title{Print method for vcov.abrm objects}
+\title{Print Method for vcov.abrm Objects}
 \usage{
 \method{print}{vcov.abrm}(x, ...)
 }
 \arguments{
-\item{x}{A vcov.abrm object}
+\item{x}{An object of class \code{"vcov.abrm"}.}
 
-\item{...}{Additional arguments (currently unused)}
+\item{...}{Additional arguments (currently unused).}
 }
 \value{
-Invisibly returns the input object
+Invisibly returns \code{x}. Called for its side effect of printing
+  the intercept variance and the X-grid and Y-grid covariance matrices.
 }
 \description{
-Print method for vcov.abrm objects
+Prints all variance-covariance matrices stored in a \code{"vcov.abrm"}
+object returned by \code{\link{vcov.abrm}}.
+}
+\examples{
+\donttest{
+  ## Step 1: Simulate misaligned spatial data
+  sim_data <- simulate_misaligned_data(
+    seed              = 1,
+    dist_covariates_x = c("normal", "poisson"),
+    dist_covariates_y = c("normal", "poisson"),
+    dist_y            = "poisson",
+    x_intercepts      = c(0, -1),
+    y_intercepts      = c(0, -1),
+    beta0_y           = -1,
+    beta_x            = c(0.1, -0.05),
+    beta_y            = c(-0.1, 0.05)
+  )
+
+  ## Step 2: Retrieve the NIMBLE model code
+  model_code <- get_abrm_model()
+
+  ## Step 3: Fit the ABRM
+  results <- run_abrm(
+    gridx       = sim_data$gridx,
+    gridy       = sim_data$gridy,
+    atoms       = sim_data$atoms,
+    model_code  = model_code,
+    true_params = sim_data$true_params,
+    norm_idx_x  = 1,
+    pois_idx_x  = 2,
+    norm_idx_y  = 1,
+    pois_idx_y  = 2,
+    dist_y      = 2,
+    niter       = 1000,
+    nburnin     = 500,
+    nchains     = 2,
+    seed        = 1,
+    save_plots  = FALSE
+  )
+
+  ## Step 4: Extract and print the variance-covariance matrices
+  vcov_mats <- vcov(results)
+  print(vcov_mats)
+  # Prints: intercept variance, X-grid and Y-grid covariance matrices
+}
+
 }

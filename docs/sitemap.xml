@@ -8,14 +8,20 @@
 <url><loc>/news/index.html</loc></url>
 <url><loc>/reference/Rmfnchypg_rcall.html</loc></url>
 <url><loc>/reference/biasedUrn_rmfnc.html</loc></url>
+<url><loc>/reference/coef.abrm.html</loc></url>
+<url><loc>/reference/confint.abrm.html</loc></url>
 <url><loc>/reference/dmfnchypg.html</loc></url>
+<url><loc>/reference/fitted.abrm.html</loc></url>
 <url><loc>/reference/gen_correlated_spat.html</loc></url>
 <url><loc>/reference/get_abrm_model.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/plot.abrm.html</loc></url>
+<url><loc>/reference/plot.misaligned_data.html</loc></url>
 <url><loc>/reference/print.abrm.html</loc></url>
 <url><loc>/reference/print.misaligned_data.html</loc></url>
+<url><loc>/reference/print.summary.abrm.html</loc></url>
 <url><loc>/reference/print.vcov.abrm.html</loc></url>
+<url><loc>/reference/print.waic_abrm.html</loc></url>
 <url><loc>/reference/register_nimble_distributions.html</loc></url>
 <url><loc>/reference/rmfnchypg.html</loc></url>
 <url><loc>/reference/run_abrm.html</loc></url>
@@ -25,5 +31,7 @@
 <url><loc>/reference/summary.abrm.html</loc></url>
 <url><loc>/reference/summary.misaligned_data.html</loc></url>
 <url><loc>/reference/vcov.abrm.html</loc></url>
+<url><loc>/reference/waic.abrm.html</loc></url>
+<url><loc>/reference/waic.html</loc></url>
 </urlset>
 

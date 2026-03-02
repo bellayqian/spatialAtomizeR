@@ -9,7 +9,7 @@ Automatically registers custom distributions if not already registered."><meta p
 
     <a class="navbar-brand me-2" href="../index.html">spatialAtomizeR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,6 +53,334 @@ Automatically registers custom distributions if not already registered.</p>
     <p>A nimbleCode object containing the model specification</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">model_code</span> <span class="op">&lt;-</span> <span class="fu">get_abrm_model</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">model_code</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (j in 1:p_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         beta_0_x[j] ~ dnorm(0, sd = 2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (j in 1:p_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         beta_0_yx[j] ~ dnorm(0, sd = 2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     beta_0_y ~ dnorm(0, sd = 2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (j in 1:(p_x + p_y)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         beta_y[j] ~ dnorm(0, sd = 1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (norm_n_x &gt; 0) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:norm_n_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             sigma2_x[j] ~ dinvgamma(2, 1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (norm_n_y &gt; 0) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:norm_n_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             sigma2_yx[j] ~ dinvgamma(2, 1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (vartype_y == 1) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         sigma2_y ~ dinvgamma(2, 1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     tau_y ~ dgamma(2, 2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     phi_y[1:S_y] ~ dcar_normal(adj_y[], weights_y[], num_y[], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         tau_y)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (p_x &gt; 1) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:p_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             tau_x[j] ~ dgamma(2, 2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             psi_x[1:S_x, j] ~ dcar_normal(adj_x[], weights_x[], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 num_x[], tau_x[j])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         Prec_x[1:p_x, 1:p_x] ~ dwish(R_x[1:p_x, 1:p_x], df_x)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         Achol_x[1:p_x, 1:p_x] &lt;- chol(inverse(Prec_x[1:p_x, 1:p_x]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (i in 1:S_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (j in 1:p_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 phi_x[i, j] &lt;- inprod(Achol_x[j, 1:p_x], psi_x[i, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1:p_x])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     else {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:p_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             tau_x[j] ~ dgamma(2, 2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             phi_x[1:S_x, j] ~ dcar_normal(adj_x[], weights_x[], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 num_x[], tau_x[j])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (p_y &gt; 1) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:p_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             tau_yx[j] ~ dgamma(2, 2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             psi_yx[1:S_y, j] ~ dcar_normal(adj_y[], weights_y[], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 num_y[], tau_yx[j])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         Prec_yx[1:p_y, 1:p_y] ~ dwish(R_yx[1:p_y, 1:p_y], df_yx)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         Achol_yx[1:p_y, 1:p_y] &lt;- chol(inverse(Prec_yx[1:p_y, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             1:p_y]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (i in 1:S_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (j in 1:p_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 phi_yx[i, j] &lt;- inprod(Achol_yx[j, 1:p_y], psi_yx[i, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1:p_y])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     else {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:p_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             tau_yx[j] ~ dgamma(2, 2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             phi_yx[1:S_y, j] ~ dcar_normal(adj_y[], weights_y[], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 num_y[], tau_yx[j])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (j in 1:p_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (d in 1:D) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             linear_pred_x[d, j] &lt;- beta_0_x[j] + phi_x[expand_x[d], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 j]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (norm_n_x &gt; 0) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:norm_n_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (i in 1:J_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 x[i, norm_idx_x[j]] ~ dnorm(pop_atoms_x[i] * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   linear_pred_x[i, norm_idx_x[j]], sd = pop_atoms_x[i] * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   sqrt(sigma2_x[j]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (m in 1:(S_x - J_x)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 nat_x[m, j] &lt;- length(xlatent_ind[m, 1]:xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 mu_norm_x[(xlatent_ind[m, 1]):(xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2]), j] &lt;- pop_atoms_x[(J_x + xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1]):(J_x + xlatent_ind[m, 2])] * linear_pred_x[(J_x + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   xlatent_ind[m, 1]):(J_x + xlatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   norm_idx_x[j]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 cov_norm_x[(xlatent_ind[m, 1]):(xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2]), (xlatent_ind[m, 1]):(xlatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   j] &lt;- sigma2_x[j] * diag(pop_atoms_x[(J_x + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   xlatent_ind[m, 1]):(J_x + xlatent_ind[m, 2])]^2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 w_x[xlatent_ind[m, 1]:xlatent_ind[m, 2], j] ~ </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   dmnorm(mu_norm_x[(xlatent_ind[m, 1]):(xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     2]), j], cov = cov_norm_x[(xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     1]):(xlatent_ind[m, 2]), (xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     1]):(xlatent_ind[m, 2]), j])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 x_latent[xlatent_ind[m, 1]:xlatent_ind[m, 2], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   norm_idx_x[j]] &lt;- w_x[xlatent_ind[m, 1]:xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2], j] + (1/nat_x[m, j]) * (x[J_x + m, norm_idx_x[j]] - </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   sum(w_x[xlatent_ind[m, 1]:xlatent_ind[m, 2], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     j])) * rep(1, nat_x[m, j])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (pois_n_x &gt; 0) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:pois_n_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (i in 1:J_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 x[i, pois_idx_x[j]] ~ dpois(pop_atoms_x[i] * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   exp(linear_pred_x[i, pois_idx_x[j]]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (m in 1:(S_x - J_x)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 prob_pois_x[(xlatent_ind[m, 1]):(xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2]), j] &lt;- (pop_atoms_x[(J_x + xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1]):(J_x + xlatent_ind[m, 2])] * exp(linear_pred_x[(J_x + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   xlatent_ind[m, 1]):(J_x + xlatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   pois_idx_x[j]]))/sum(pop_atoms_x[(J_x + xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1]):(J_x + xlatent_ind[m, 2])] * exp(linear_pred_x[(J_x + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   xlatent_ind[m, 1]):(J_x + xlatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   pois_idx_x[j]]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 x_latent[xlatent_ind[m, 1]:xlatent_ind[m, 2], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   pois_idx_x[j]] ~ dmulti(size = x[J_x + m, pois_idx_x[j]], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   prob = prob_pois_x[(xlatent_ind[m, 1]):(xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     2]), j])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (binom_n_x &gt; 0) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:binom_n_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (i in 1:J_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 x[i, binom_idx_x[j]] ~ dbinom(size = pop_atoms_x[i], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   prob = exp(linear_pred_x[i, binom_idx_x[j]])/(1 + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     exp(linear_pred_x[i, binom_idx_x[j]])))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (m in 1:(S_x - J_x)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 x_latent[xlatent_ind[m, 1]:xlatent_ind[m, 2], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   binom_idx_x[j]] ~ dmfnchypg(total = x[J_x + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   m, binom_idx_x[j]], odds = exp(linear_pred_x[(J_x + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   xlatent_ind[m, 1]):(J_x + xlatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   binom_idx_x[j]]), ni = pop_atoms_x[(J_x + xlatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1]):(J_x + xlatent_ind[m, 2])])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (j in 1:p_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (i in 1:J_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             temp_x[i, j] &lt;- x[i, j]/pop_atoms_x[i]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (i in 1:(D - J_x)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             temp_x[J_x + i, j] &lt;- x_latent[i, j]/pop_atoms_x[J_x + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 i]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (j in 1:p_x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (d in 1:D) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             x_atomord[d, j] &lt;- temp_x[x_reorder[d], j]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (j in 1:p_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (d in 1:D) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             linear_pred_yx[d, j] &lt;- beta_0_yx[j] + phi_yx[expand_y[d], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 j]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (norm_n_y &gt; 0) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:norm_n_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (i in 1:J_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 yx_obs[i, norm_idx_y[j]] ~ dnorm(pop_atoms_y[i] * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   linear_pred_yx[i, norm_idx_y[j]], sd = pop_atoms_y[i] * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   sqrt(sigma2_yx[j]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (m in 1:(S_y - J_y)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 nat_yx[m, j] &lt;- length(ylatent_ind[m, 1]:ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 mu_norm_yx[(ylatent_ind[m, 1]):(ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2]), j] &lt;- pop_atoms_y[(J_y + ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1]):(J_y + ylatent_ind[m, 2])] * linear_pred_yx[(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   ylatent_ind[m, 1]):(J_y + ylatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   norm_idx_y[j]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 cov_norm_yx[(ylatent_ind[m, 1]):(ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2]), (ylatent_ind[m, 1]):(ylatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   j] &lt;- sigma2_yx[j] * diag(pop_atoms_y[(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   ylatent_ind[m, 1]):(J_y + ylatent_ind[m, 2])]^2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 w_yx[ylatent_ind[m, 1]:ylatent_ind[m, 2], j] ~ </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   dmnorm(mu_norm_yx[(ylatent_ind[m, 1]):(ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     2]), j], cov = cov_norm_yx[(ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     1]):(ylatent_ind[m, 2]), (ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     1]):(ylatent_ind[m, 2]), j])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 yx_latent[ylatent_ind[m, 1]:ylatent_ind[m, 2], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   norm_idx_y[j]] &lt;- w_yx[ylatent_ind[m, 1]:ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2], j] + (1/nat_yx[m, j]) * (yx_obs[J_y + m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   norm_idx_y[j]] - sum(w_yx[ylatent_ind[m, 1]:ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2], j])) * rep(1, nat_yx[m, j])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (pois_n_y &gt; 0) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:pois_n_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (i in 1:J_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 yx_obs[i, pois_idx_y[j]] ~ dpois(pop_atoms_y[i] * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   exp(linear_pred_yx[i, pois_idx_y[j]]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (m in 1:(S_y - J_y)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 prob_pois_yx[(ylatent_ind[m, 1]):(ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2]), j] &lt;- (pop_atoms_y[(J_y + ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1]):(J_y + ylatent_ind[m, 2])] * exp(linear_pred_yx[(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   ylatent_ind[m, 1]):(J_y + ylatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   pois_idx_y[j]]))/sum(pop_atoms_y[(J_y + ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1]):(J_y + ylatent_ind[m, 2])] * exp(linear_pred_yx[(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   ylatent_ind[m, 1]):(J_y + ylatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   pois_idx_y[j]]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 yx_latent[ylatent_ind[m, 1]:ylatent_ind[m, 2], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   pois_idx_y[j]] ~ dmulti(size = yx_obs[J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   m, pois_idx_y[j]], prob = prob_pois_yx[(ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1]):(ylatent_ind[m, 2]), j])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (binom_n_y &gt; 0) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (j in 1:binom_n_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (i in 1:J_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 yx_obs[i, binom_idx_y[j]] ~ dbinom(size = pop_atoms_y[i], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   prob = exp(linear_pred_yx[i, binom_idx_y[j]])/(1 + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     exp(linear_pred_yx[i, binom_idx_y[j]])))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             for (m in 1:(S_y - J_y)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 yx_latent[ylatent_ind[m, 1]:ylatent_ind[m, 2], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   binom_idx_y[j]] ~ dmfnchypg(total = yx_obs[J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   m, binom_idx_y[j]], odds = exp(linear_pred_yx[(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   ylatent_ind[m, 1]):(J_y + ylatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   binom_idx_y[j]]), ni = pop_atoms_y[(J_y + ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1]):(J_y + ylatent_ind[m, 2])])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (j in 1:p_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (i in 1:J_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             temp_yx[i, j] &lt;- yx_obs[i, j]/pop_atoms_y[i]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         for (i in 1:(D - J_y)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             temp_yx[J_y + i, j] &lt;- yx_latent[i, j]/pop_atoms_y[J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 i]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (d in 1:D) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         if (p_x == 1) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             x_effect_sum[d] &lt;- x_atomord[y_to_atom[d], 1] * beta_y[1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             x_effect_sum[d] &lt;- sum(x_atomord[y_to_atom[d], 1:p_x] * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 beta_y[1:p_x])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         if (p_y == 1) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             y_effect_sum[d] &lt;- temp_yx[d, 1] * beta_y[(p_x + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 1)]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             y_effect_sum[d] &lt;- sum(temp_yx[d, 1:p_y] * beta_y[(p_x + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 1):(p_x + p_y)])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         linear_pred_y[d] &lt;- beta_0_y + x_effect_sum[d] + y_effect_sum[d] + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             phi_y[expand_y[d]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (i in 1:J_y) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         if (vartype_y == 1) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             y_obs[i] ~ dnorm(pop_atoms_y[i] * linear_pred_y[i], </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 sd = pop_atoms_y[i] * sqrt(sigma2_y))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else if (vartype_y == 2) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             y_obs[i] ~ dpois(pop_atoms_y[i] * exp(linear_pred_y[i]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else if (vartype_y == 3) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             y_obs[i] ~ dbinom(size = pop_atoms_y[i], prob = exp(linear_pred_y[i])/(1 + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 exp(linear_pred_y[i])))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (m in 1:(S_y - J_y)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         if (vartype_y == 1) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             nat_y[m] &lt;- length(ylatent_ind[m, 1]:ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 2])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             mu_norm_y[(ylatent_ind[m, 1]):(ylatent_ind[m, 2])] &lt;- pop_atoms_y[(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 ylatent_ind[m, 1]):(J_y + ylatent_ind[m, 2])] * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 linear_pred_y[(J_y + ylatent_ind[m, 1]):(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   ylatent_ind[m, 2])]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             cov_norm_y[(ylatent_ind[m, 1]):(ylatent_ind[m, 2]), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 (ylatent_ind[m, 1]):(ylatent_ind[m, 2])] &lt;- sigma2_y * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 diag(pop_atoms_y[(J_y + ylatent_ind[m, 1]):(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   ylatent_ind[m, 2])]^2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             w_y[ylatent_ind[m, 1]:ylatent_ind[m, 2]] ~ dmnorm(mu_norm_y[(ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 1]):(ylatent_ind[m, 2])], cov = cov_norm_y[(ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 1]):(ylatent_ind[m, 2]), (ylatent_ind[m, 1]):(ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 2])])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             y_latent[ylatent_ind[m, 1]:ylatent_ind[m, 2]] &lt;- w_y[ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 1]:ylatent_ind[m, 2]] + (1/nat_y[m]) * (y_obs[J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 m] - sum(w_y[ylatent_ind[m, 1]:ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 2]])) * rep(1, nat_y[m])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else if (vartype_y == 2) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             prob_pois_y[(ylatent_ind[m, 1]):(ylatent_ind[m, 2])] &lt;- (pop_atoms_y[(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 ylatent_ind[m, 1]):(J_y + ylatent_ind[m, 2])] * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 exp(linear_pred_y[(J_y + ylatent_ind[m, 1]):(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   ylatent_ind[m, 2])]))/sum(pop_atoms_y[(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 ylatent_ind[m, 1]):(J_y + ylatent_ind[m, 2])] * </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 exp(linear_pred_y[(J_y + ylatent_ind[m, 1]):(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   ylatent_ind[m, 2])]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             y_latent[ylatent_ind[m, 1]:ylatent_ind[m, 2]] ~ dmulti(size = y_obs[J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 m], prob = prob_pois_y[(ylatent_ind[m, 1]):(ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 2])])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else if (vartype_y == 3) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             y_latent[ylatent_ind[m, 1]:ylatent_ind[m, 2]] ~ dmfnchypg(total = y_obs[J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 m], odds = exp(linear_pred_y[(J_y + ylatent_ind[m, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 1]):(J_y + ylatent_ind[m, 2])]), ni = pop_atoms_y[(J_y + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 ylatent_ind[m, 1]):(J_y + ylatent_ind[m, 2])])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

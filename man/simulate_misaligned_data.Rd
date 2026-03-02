@@ -54,8 +54,31 @@ simulate_misaligned_data(
 \item{xy_cov_cor}{Logical, indicating whether the atom-level spatial random effects for X-grid and Y-grid covariates should be correlated (xy_cov_cor = TRUE) or not. When set to TRUE, the x_correlation and rho_x parameters are used to generate all covariates (separate correlation parameters are not allowed for X-grid and Y-grid covariates).}
 }
 \value{
-List containing gridy, gridx, atoms, and true_params
+An object of class \code{"misaligned_data"}: a named list with components \code{gridy} (Y-grid sf data frame with outcome and Y
+  covariates), \code{gridx} (X-grid sf data frame with X covariates), \code{atoms} (atom-level sf data frame, the spatial intersection of the
+  two grids), and \code{true_params} (list of the true regression coefficients used for data generation).
 }
 \description{
 Simulate Misaligned Spatial Data
+}
+\examples{
+sim_data <- simulate_misaligned_data(
+seed = 1,
+dist_covariates_x = c('normal', 'poisson', 'binomial'),
+dist_covariates_y = c('normal', 'poisson', 'binomial'),
+dist_y = "poisson",
+x_intercepts = c(4, -1, -1), 
+y_intercepts = c(4, -1, -1),
+beta0_y = -1, 
+x_correlation = 0.5, 
+y_correlation = 0.5,
+beta_x = c(-0.03, 0.1, -0.2), 
+beta_y = c(0.03, -0.1, 0.2)
+)
+class(sim_data)              # "misaligned_data"
+print(sim_data)              # grid dimensions and atom count
+summary(sim_data)            # includes true beta values
+names(sim_data$atoms)        # atom-level variables
+sim_data$true_params$beta_x  # true X-grid coefficients
+
 }

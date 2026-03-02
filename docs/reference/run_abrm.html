@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">spatialAtomizeR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,8 +61,9 @@
 <span>  thin <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sim_metadata <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  save_plots <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  output_dir <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  save_plots <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  output_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  compute_waic <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -143,18 +144,140 @@
 
 
 <dt id="arg-save-plots">save_plots<a class="anchor" aria-label="anchor" href="#arg-save-plots"></a></dt>
-<dd><p>Logical, whether to save diagnostic plots (default: TRUE)</p></dd>
+<dd><p>Logical, whether to save diagnostic plots (default: FALSE)</p></dd>
 
 
 <dt id="arg-output-dir">output_dir<a class="anchor" aria-label="anchor" href="#arg-output-dir"></a></dt>
 <dd><p>Directory for saving outputs (default: NULL)</p></dd>
 
+
+<dt id="arg-compute-waic">compute_waic<a class="anchor" aria-label="anchor" href="#arg-compute-waic"></a></dt>
+<dd><p>Logical; if <code>TRUE</code>, NIMBLE computes the Widely
+Applicable Information Criterion (WAIC) during MCMC sampling and stores it
+in the returned object. Retrieve it afterwards with <code><a href="waic.html">waic</a></code>.
+Default <code>FALSE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>List containing MCMC results and parameter estimates</p>
+    <p>An object of class <code>"abrm"</code>: a named list with components <code>mcmc_results</code> (raw NIMBLE output including posterior samples and convergence diagnostics),
+<code>parameter_estimates</code> (data frame of posterior summaries for the regression coefficients), and <code>all_parameters</code> (posterior summaries for all monitored parameters).
+Use <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, and <code><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov()</a></code> to inspect the fitted model.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span>  <span class="co"># Simulate misaligned spatial data with one normal covariate per grid</span></span></span>
+<span class="r-in"><span>  <span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_misaligned_data.html">simulate_misaligned_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    seed <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    dist_covariates_x <span class="op">=</span> <span class="st">"normal"</span>,</span></span>
+<span class="r-in"><span>    dist_covariates_y <span class="op">=</span> <span class="st">"normal"</span>,</span></span>
+<span class="r-in"><span>    dist_y <span class="op">=</span> <span class="st">"normal"</span>,</span></span>
+<span class="r-in"><span>    x_intercepts <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>    y_intercepts <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>    beta0_y <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>    beta_x <span class="op">=</span> <span class="fl">0.1</span>,</span></span>
+<span class="r-in"><span>    beta_y <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Retrieve the pre-compiled NIMBLE model code</span></span></span>
+<span class="r-in"><span>  <span class="va">model_code</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_abrm_model.html">get_abrm_model</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Fit the ABRM (use small niter/nburnin for illustration only)</span></span></span>
+<span class="r-in"><span>  <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_abrm</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    gridx      <span class="op">=</span> <span class="va">sim_data</span><span class="op">$</span><span class="va">gridx</span>,</span></span>
+<span class="r-in"><span>    gridy      <span class="op">=</span> <span class="va">sim_data</span><span class="op">$</span><span class="va">gridy</span>,</span></span>
+<span class="r-in"><span>    atoms      <span class="op">=</span> <span class="va">sim_data</span><span class="op">$</span><span class="va">atoms</span>,</span></span>
+<span class="r-in"><span>    model_code <span class="op">=</span> <span class="va">model_code</span>,</span></span>
+<span class="r-in"><span>    true_params <span class="op">=</span> <span class="va">sim_data</span><span class="op">$</span><span class="va">true_params</span>,</span></span>
+<span class="r-in"><span>    norm_idx_x <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    norm_idx_y <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    dist_y     <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    niter      <span class="op">=</span> <span class="fl">1000</span>,</span></span>
+<span class="r-in"><span>    nburnin    <span class="op">=</span> <span class="fl">500</span>,</span></span>
+<span class="r-in"><span>    nchains    <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>    seed       <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    save_plots <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Preparing ABRM inputs...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Running NIMBLE MCMC...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Defining model</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Building model</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Setting data and initial values</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Running calculate on model</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   [Note] Any error reports that follow may simply reflect missing values in model variables.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Checking model sizes and dimensions</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   [Note] This model is not fully initialized. This is not an error.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>          To see which variables are not initialized, use model$initializeInfo().</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>          For more information on model initialization, see help(modelInitialization).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Checking model calculations</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Compiling</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   [Note] This may take a minute.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   [Note] Use 'showCompilerOutput = TRUE' to see C++ compilation details.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> running chain 1...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |-------------|-------------|-------------|-------------|</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |-------------------------------------------------------|</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> running chain 2...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |-------------|-------------|-------------|-------------|</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |-------------------------------------------------------|</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Calculating convergence diagnostics...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Diagnostic Summary Statistics:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ESS: 78.5</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Max Rhat: 5.920</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Parameters with high relative variance:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           parameter       mean        sd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> beta_0_y   beta_0_y  1.2341041 2.1578336</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> beta_x[1] beta_x[1]  0.1174545 0.2246097</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> beta_y[1] beta_y[1] -0.3991496 0.3038859</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>    <span class="co"># concise model summary</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ABRM Model Results</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ==================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Parameters estimated: 2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Mean absolute bias:  0.1583 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coverage rate:       100 %</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Use summary() for the full parameter table.</span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>  <span class="co"># full parameter table</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ABRM Model Summary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ==================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Parameters estimated: 2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Mean absolute bias:  0.1583 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coverage rate:  100 %</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       variable estimated_beta std_error ci_lower ci_upper true_beta     bias</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  covariate_x_1         0.1175    0.2246  -0.2913   0.5351       0.1  0.01745</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  covariate_y_1        -0.3991    0.3039  -1.0074   0.1932      -0.1 -0.29915</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  relative_bias within_ci</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17.45      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         299.15      TRUE</span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>     <span class="co"># MCMC trace and density plots</span></span></span>
+<span class="r-plt img"><img src="run_abrm-1.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="run_abrm-2.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>     <span class="co"># posterior variance-covariance matrices</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Variance-Covariance Matrices for ABRM Model</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ============================================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept Variance:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   beta_0_y: 4.656246</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X-Grid Coefficients Variance-Covariance Matrix:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Dimensions: 1 x 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           beta_x[1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> beta_x[1]   0.05045</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Y-Grid Coefficients Variance-Covariance Matrix:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Dimensions: 1 x 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           beta_y[1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> beta_y[1]  0.092347</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Use vcov_object$vcov_beta_x, vcov_object$vcov_beta_y, etc. to access matrices</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

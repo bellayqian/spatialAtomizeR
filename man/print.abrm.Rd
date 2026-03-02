@@ -2,7 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{print.abrm}
 \alias{print.abrm}
-\title{Print method for abrm objects}
+\title{Print Method for ABRM Objects}
 \usage{
 \method{print}{abrm}(x, ...)
 }
@@ -12,8 +12,56 @@
 \item{...}{Additional arguments (unused)}
 }
 \value{
-Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of the ABRM model results including convergence status, number of parameters estimated, and key fit statistics.
+Invisibly returns \code{x}. Called for its side effect of printing
+  a brief summary of the simulated misaligned spatial data.
 }
 \description{
-Print method for abrm objects
+Prints a concise summary of a fitted ABRM, including the number of
+parameters estimated and, when true parameter values are available, the
+mean absolute bias and 95\% credible-interval coverage rate.
+}
+\examples{
+\donttest{
+  ## Step 1: Simulate misaligned spatial data
+  sim_data <- simulate_misaligned_data(
+    seed              = 1,
+    dist_covariates_x = c("normal", "poisson"),
+    dist_covariates_y = c("normal", "poisson"),
+    dist_y            = "poisson",
+    x_intercepts      = c(0, -1),
+    y_intercepts      = c(0, -1),
+    beta0_y           = -1,
+    beta_x            = c(0.1, -0.05),
+    beta_y            = c(-0.1, 0.05)
+  )
+
+  ## Step 2: Retrieve the NIMBLE model code
+  model_code <- get_abrm_model()
+
+  ## Step 3: Fit the ABRM
+  ## (niter and nburnin are intentionally small for illustration only;
+  ##  use larger values, e.g. niter = 50000, nburnin = 30000, in practice)
+  results <- run_abrm(
+    gridx       = sim_data$gridx,
+    gridy       = sim_data$gridy,
+    atoms       = sim_data$atoms,
+    model_code  = model_code,
+    true_params = sim_data$true_params,
+    norm_idx_x  = 1,
+    pois_idx_x  = 2,
+    norm_idx_y  = 1,
+    pois_idx_y  = 2,
+    dist_y      = 2,
+    niter       = 1000,
+    nburnin     = 500,
+    nchains     = 2,
+    seed        = 1,
+    save_plots  = FALSE
+  )
+
+  ## Step 4: Print a concise model summary
+  print(results)
+  # Reports: number of parameters, mean absolute bias, coverage rate
+}
+
 }

@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 7,
   fig.height = 5,
-  eval = FALSE  # Set to TRUE to run code during build (requires external data for Example 2)
+  eval = TRUE
 )
 ```
 
@@ -25,21 +25,20 @@ knitr::opts_chunk$set(
 
 ## Installation
 
-```{r install, eval = FALSE}
+```{r install, eval=FALSE}
 # Install from CRAN
 install.packages("spatialAtomizeR")
 
 # Or install development version from GitHub
-devtools::install_github("bellayqian/spatialAtomizeR")
+# devtools::install_github("bellayqian/spatialAtomizeR")
 ```
 
 ## Load Required Packages
 
 **Important:** Always load `nimble` before using spatialAtomizeR functions that involve model fitting.
 
-```{r libraries, message = FALSE}
+```{r libraries}
 library(spatialAtomizeR)
-library(nimble)  # Required for ABRM models
 ```
 
 # Example 1: Simulated Data
@@ -50,7 +49,7 @@ This example demonstrates the complete workflow using simulated data.
 
 Generate spatial data with misaligned grids. The function creates two non-overlapping grids (X-grid and Y-grid) and their intersection (atoms).
 
-```{r simulate}
+```{r simulate_data_show, eval=FALSE}
 sim_data <- simulate_misaligned_data(
   seed = 42,
   
@@ -74,6 +73,13 @@ sim_data <- simulate_misaligned_data(
 )
 ```
 
+```{r simulate_data_run, include=FALSE}
+# Actually load the pre-computed version for vignette speed
+sim_data <- readRDS(
+  system.file("extdata", "sim_vignette_data.rds", package = "spatialAtomizeR")
+)
+```
+
 The simulated data object contains:
 - `gridx`: X-grid spatial features with covariates
 - `gridy`: Y-grid spatial features with covariates and outcome
@@ -84,6 +90,11 @@ The simulated data object contains:
 
 The `simulate_misaligned_data` function returns an object of class `misaligned_data` with useful S3 methods:
 
+```{r debug_class, include=FALSE}
+message("class of sim_data: ", paste(class(sim_data), collapse = ", "))
+message("plot method exists: ", isS3method("plot", "misaligned_data"))
+```
+
 ```{r examine_data}
 # Check the class
 class(sim_data)
@@ -93,6 +104,9 @@ print(sim_data)
 
 # Summary method shows more details
 summary(sim_data)
+
+# Default: overlay both grids to visualise misalignment
+plot(sim_data)
 ```
 
 ## Step 3: Get ABRM Model Code
@@ -107,7 +121,7 @@ model_code <- get_abrm_model()
 
 Fit the ABRM model. You must specify which covariates follow which distributions by providing their indices:
 
-```{r run_abrm}
+```{r run_abrm_show, eval=FALSE}
 abrm_results <- run_abrm(
   gridx = sim_data$gridx,
   gridy = sim_data$gridy,
@@ -130,7 +144,14 @@ abrm_results <- run_abrm(
   niter = 50000,    # Total iterations per chain
   nburnin = 30000,  # Burn-in iterations
   nchains = 2,      # Number of chains
-  seed = 123
+  seed = 123,
+  compute_waic = TRUE
+)
+```
+
+```{r fit_model_run, include=FALSE}
+abrm_results <- readRDS(
+  system.file("extdata", "abrm_vignette_results.rds", package = "spatialAtomizeR")
 )
 ```
 
@@ -152,43 +173,40 @@ summary(abrm_results)
 plot(abrm_results)
 ```
 
-Access vairance-covariance matrices from the MCMC posterior sample
+## Step 6: More Tests
 
-```{r vcov}
+### Access vairance-covariance matrices from the MCMC posterior sample
+
+```{r more_test2}
 # Get variance-covariance matrices
 vcov_matrices <- vcov(abrm_results)
-
-# Print summary
 print(vcov_matrices)
 
-# Access specific matrices
-vcov_matrices$vcov_beta_x   # Variance-covariance for X-grid coefficients
-vcov_matrices$vcov_beta_y   # Variance-covariance for Y-grid coefficients
-vcov_matrices$vcov_beta_0   # Variance of intercept
-vcov_matrices$vcov_all      # Combined matrix for all parameters
+# Test coef()
+coefs <- coef(abrm_results)
+print(coefs)
 
-# Compute standard errors from diagonal
-sqrt(diag(vcov_matrices$vcov_beta_x))
+# Test confint()
+ci_95 <- confint(abrm_results)
+print(ci_95)
 
-# Compute correlation matrix from covariance matrix
-cov2cor(vcov_matrices$vcov_beta_y)
+# Test parm subsetting
+ci_sub <- confint(abrm_results, parm = "covariate_x_1")
+print(ci_sub)
 
-# Check if parameters are correlated
-vcov_matrices$vcov_beta_x[1, 2]  # Covariance between first two X coefficients
+# Test fitted()
+fv <- fitted(abrm_results,
+             gridy = sim_data$gridy,
+             gridx = sim_data$gridx,
+             atoms = sim_data$atoms)
+print(fv)
+
+# waic_abrm Objects
+w <- waic(abrm_results)
+print(w)          # shows WAIC, lppd, pWAIC, n_params
+w$waic            # the raw scalar if you need it for comparison
 ```
 
-Access specific results:
-
-```{r access_results}
-# Parameter estimates table
-abrm_results$parameter_estimates
-
-# MCMC convergence diagnostics
-abrm_results$mcmc_results$convergence
-
-# Full MCMC samples
-# abrm_results$mcmc_results$samples
-```
 
 # Example 2: Real Data - Utah Counties and School Districts
 
@@ -196,7 +214,7 @@ This example demonstrates using real spatial data from Utah, matching the analys
 
 ## Load Required Packages for Spatial Data
 
-```{r load_spatial_packages, message = FALSE}
+```{r load_spatial_packages, message = FALSE, eval = FALSE}
 library(tigris)    # For US Census shapefiles
 library(sf)        # Spatial features
 library(sp)        # Spatial objects
@@ -208,7 +226,7 @@ library(ggplot2)   # Plotting
 
 ## Step 1: Load Utah Shapefiles
 
-```{r load_utah_data}
+```{r load_utah_data, eval = FALSE}
 set.seed(500)
 
 # Load Utah counties (Y-grid)
@@ -226,19 +244,24 @@ gridx <- scd %>%
 
 ## Step 2: Visualize Spatial Misalignment
 
-```{r plot_misalignment, fig.width = 7, fig.height = 5}
-ggplot() +
-  geom_sf(data = gridx, fill = NA, color = "orange", linewidth = 1.2) +
-  geom_sf(data = gridy, fill = NA, color = "blue", 
-          linetype = 'dashed', linewidth = 0.5) +
-  labs(title = "Spatial Misalignment in Utah",
-       subtitle = "Orange: School Districts | Blue: Counties") +
-  theme_void()
+```{r plot_misalignment, fig.width = 7, fig.height = 5, eval = FALSE}
+# Bundle grids into a misaligned_data object
+utah_mis <- structure(
+  list(gridy = gridy, gridx = gridx),
+  class = "misaligned_data"
+)
+
+# Default overlay plot
+plot(utah_mis, color_x = "orange", color_y = "blue", title   = "Spatial Misalignment in Utah")
+
+# You can also inspect each grid separately
+plot(utah_mis, which = "gridy", title = "Utah Counties")
+plot(utah_mis, which = "gridx", title = "Utah School Districts")
 ```
 
 ## Step 3: Create Atoms by Intersecting Grids
 
-```{r create_atoms}
+```{r create_atoms, eval = FALSE}
 # Intersect the two grids to create atoms
 atoms <- raster::intersect(as(gridy, 'Spatial'), as(gridx, 'Spatial'))
 atoms <- sf::st_as_sf(atoms)
@@ -253,7 +276,7 @@ atoms <- atoms %>%
 
 ABRM requires population counts at the atom level. Here we use LandScan gridded population data:
 
-```{r load_population}
+```{r load_population, eval = FALSE}
 # NOTE: You must download LandScan data separately
 # Available at: https://landscan.ornl.gov/
 # This example assumes the file is in your working directory
@@ -275,7 +298,7 @@ atoms$population <- pop_atoms
 
 For demonstration, we generate synthetic outcome and covariate data at the atom level:
 
-```{r generate_synthetic_data}
+```{r generate_synthetic_data, eval = FALSE}
 # Create atom-level spatial adjacency matrix
 W_a <- nb2mat(
   poly2nb(as(atoms, "Spatial"), queen = TRUE),
@@ -324,7 +347,7 @@ atoms <- atoms %>%
 
 In reality, we only observe aggregated data at the grid level, not at atoms:
 
-```{r aggregate_data}
+```{r aggregate_data, eval = FALSE}
 # Aggregate X covariates to X-grid
 gridx[["covariate_x_1"]] <- sapply(gridx$ID, function(j) {
   atom_indices <- which(atoms$ID_x == j)
@@ -346,7 +369,7 @@ gridy$y <- sapply(gridy$ID, function(j) {
 
 ## Step 7: Run ABRM on Real Data
 
-```{r run_abrm_utah}
+```{r run_abrm_utah, eval = FALSE}
 model_code <- get_abrm_model()
 
 mcmc_results <- run_abrm(
@@ -364,13 +387,33 @@ mcmc_results <- run_abrm(
   niter = 300000,
   nburnin = 200000,
   nchains = 2,
-  seed = 123
+  seed = 123,
+  compute_waic = TRUE
 )
 
 # View results
 summary(mcmc_results)
 ```
 
+## Step 8: Examine Real Data Results
+
+```{r more_test_real, eval=FALSE}
+# View results from the Utah model fit
+summary(mcmc_results)
+
+# Get variance-covariance matrices
+vcov(mcmc_results)
+
+# Coefficient estimates
+coef(mcmc_results)
+
+# 95% confidence intervals
+confint(mcmc_results)
+
+# WAIC
+w <- waic(mcmc_results)
+print(w)
+```
 # Understanding Distribution Indices
 
 When you specify covariates, the indices correspond to their positions:
@@ -436,4 +479,4 @@ citation("spatialAtomizeR")
 ```
 
 **Reference:**
-Qian, Y., Johnson, N., Krieger, N., & Nethery, R.C. (2026). spatialAtomizeR: Atom-Based Regression Models for Spatially Misaligned Data in R. R package version 0.2.6.
+Qian, Y., Johnson, N., Krieger, N., & Nethery, R.C. (2026). spatialAtomizeR: Atom-Based Regression Models for Spatially Misaligned Data in R. R package version 0.2.7.
