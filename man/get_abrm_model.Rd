@@ -7,7 +7,8 @@
 get_abrm_model()
 }
 \value{
-A nimbleCode object containing the model specification
+A \code{nimbleCode} object containing the NIMBLE model specification
+  for the ABRM. Pass this directly to \code{\link{run_abrm}}.
 }
 \description{
 Returns the NIMBLE code for the Atom-Based Regression Model with mixed-type variables.

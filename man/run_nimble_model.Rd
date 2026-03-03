@@ -48,8 +48,6 @@ run_nimble_model(
 \item{compute_waic}{Logical; if \code{TRUE}, WAIC is computed by NIMBLE and stored in the result, enabling \code{\link{waic}()} for model comparison. Default \code{FALSE} to keep fitting fast.}
 }
 \value{
-List containing MCMC samples, summary, and convergence diagnostics
-
 A named list with components \code{samples} (per-chain MCMC sample matrices), \code{summary} (posterior summary statistics), and
 \code{convergence} (Gelman-Rubin statistics, effective sample sizes, and optional diagnostic plots).
 }

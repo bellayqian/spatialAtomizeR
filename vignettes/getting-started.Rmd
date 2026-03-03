@@ -90,11 +90,6 @@ The simulated data object contains:
 
 The `simulate_misaligned_data` function returns an object of class `misaligned_data` with useful S3 methods:
 
-```{r debug_class, include=FALSE}
-message("class of sim_data: ", paste(class(sim_data), collapse = ", "))
-message("plot method exists: ", isS3method("plot", "misaligned_data"))
-```
-
 ```{r examine_data}
 # Check the class
 class(sim_data)
@@ -195,10 +190,7 @@ ci_sub <- confint(abrm_results, parm = "covariate_x_1")
 print(ci_sub)
 
 # Test fitted()
-fv <- fitted(abrm_results,
-             gridy = sim_data$gridy,
-             gridx = sim_data$gridx,
-             atoms = sim_data$atoms)
+fv <- fitted(abrm_results)
 print(fv)
 
 # waic_abrm Objects

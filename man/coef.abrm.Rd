@@ -2,7 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{coef.abrm}
 \alias{coef.abrm}
-\title{Extract Coefficients from an ABRM Object}
+\title{Extract Coefficients from ABRM Objects}
 \usage{
 \method{coef}{abrm}(object, ...)
 }

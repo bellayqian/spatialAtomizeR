@@ -1,4 +1,5 @@
-#' Print Method for Misaligned_data Objects
+#' Print Method for Misaligned Data Objects
+#' 
 #' @param x A misaligned_data object
 #' @param ... Additional arguments (unused)
 #' @return Invisibly returns the input object \code{x}. The function is called for its side effect of printing a summary of the simulated misaligned spatial data including grid dimensions and number of atoms.
@@ -269,7 +270,9 @@ print.summary.abrm <- function(x, digits = 4, ...) {
 #' @param ... Additional arguments (unused)
 #' 
 #' @return Invisibly returns \code{x}. Called for its side effect of printing
-#'   a brief summary of the simulated misaligned spatial data.
+#'   a concise ABRM model summary including number of parameters, mean
+#'   absolute bias, and credible-interval coverage rate (when true parameter
+#'   values are available).
 #'
 #' @examples
 #' \donttest{
@@ -400,6 +403,7 @@ plot.abrm <- function(x, ...) {
 }
 
 #' Variance-Covariance Method for ABRM Objects
+#' 
 #' Extracts variance-covariance matrices for regression coefficients from 
 #' MCMC posterior samples. Returns separate matrices for X-grid and Y-grid
 #' coefficients.
@@ -643,7 +647,7 @@ print.vcov.abrm <- function(x, ...) {
 
 # ───────────────── New S3 methods for abrm ────────────────────────────────
 
-#' Extract Coefficients from an ABRM Object
+#' Extract Coefficients from ABRM Objects
 #'
 #' Returns the posterior mean estimates for all regression coefficients as a
 #' named numeric vector.
@@ -679,7 +683,7 @@ coef.abrm <- function(object, ...) {
   structure(pe$estimated_beta, names = pe$variable)
 }
 
-#' Credible Intervals for an ABRM Object
+#' Credible Intervals for ABRM Objects
 #'
 #' Returns the 95\% posterior credible intervals for all estimated parameters.
 #' Note: these are Bayesian credible intervals from MCMC quantiles, not
@@ -688,8 +692,10 @@ coef.abrm <- function(object, ...) {
 #' @param object An object of class \code{"abrm"} returned by \code{\link{run_abrm}}.
 #' @param parm  Optional character vector of parameter names to subset. If
 #'   \code{NULL} (default), all parameters are returned.
-#' @param level Ignored. Intervals are always the 95\% credible intervals stored
-#'   during model fitting. Included only for S3 compatibility.
+#' @param level Confidence level for the credible interval (default \code{0.95}).
+#'   When \code{level = 0.95} (the default), the pre-computed 95\% intervals
+#'   stored during model fitting are returned directly. For other levels,
+#'   intervals are recomputed from the raw MCMC posterior samples.
 #' @param ... Additional arguments (currently unused).
 #'
 #' @return A matrix with two columns, \code{CI.Lower} and \code{CI.Upper}, and
@@ -743,24 +749,25 @@ confint.abrm <- function(object, parm = NULL, level = 0.95, ...) {
   mat
 }
 
-#' Fitted Values for an ABRM Object
+#' Fitted Values for ABRM Objects
 #'
 #' Computes posterior-mean fitted values at the Y-grid level by applying the
-#' estimated regression coefficients to the supplied covariate data. Because
-#' the \code{abrm} object does not store the original grids, \code{gridy} and
-#' \code{gridx} must be supplied by the user.
-#'
-#' @param object  An object of class \code{"abrm"} returned by \code{\link{run_abrm}}.
-#' @param gridy   The Y-grid \code{sf} data frame used to fit the model.
-#'   Must contain columns named \code{covariate_y_1}, \code{covariate_y_2}, etc.
-#' @param gridx   The X-grid \code{sf} data frame used to fit the model.
-#'   Must contain columns named \code{covariate_x_1}, \code{covariate_x_2}, etc.
-#' @param atoms   The atoms \code{sf} data frame containing \code{ID_y} and
-#'   \code{ID_x} linking atoms to their parent Y- and X-grid cells, plus a
-#'   \code{population} column for offset weighting.
+#' estimated regression coefficients to the supplied covariate data. 
+#' @param object An object of class \code{"abrm"} returned by \code{\link{run_abrm}}.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A named numeric vector of posterior-mean fitted values (on the linear predictor scale), one per Y-grid cell.
+#' @return A data frame with one row per Y-grid cell and four columns:
+#'   \describe{
+#'     \item{\code{y_grid_id}}{The original Y-grid cell ID.}
+#'     \item{\code{observed}}{The observed outcome value \code{y} for each
+#'       Y-grid cell. Note: the outcome is observed at the Y-grid level for
+#'       all cells. This is distinct from covariates, which may be
+#'       \emph{latent} (unobserved at the Y-grid level) for cells that span
+#'       multiple atoms.}
+#'     \item{\code{fitted}}{The model-predicted outcome on the original
+#'       outcome scale (counts for Poisson/binomial; continuous for normal).}
+#'     \item{\code{residual}}{Observed minus fitted.}
+#'   }
 #' 
 #' @examples
 #' \donttest{
@@ -775,81 +782,27 @@ confint.abrm <- function(object, parm = NULL, level = 0.95, ...) {
 #'     dist_y = 1, niter = 1000, nburnin = 500, nchains = 2, seed = 1,
 #'     save_plots = FALSE
 #'   )
-#'   fitted(results,
-#'          gridy = sim_data$gridy,
-#'          gridx = sim_data$gridx,
-#'          atoms = sim_data$atoms)
+#'   fitted(results)
 #' }
 #'
 #' @importFrom stats coef fitted
 #' @export
-fitted.abrm <- function(object, gridy = NULL, gridx = NULL, atoms = NULL, ...) {
-  
-  # Guard: all three grids must be supplied
-  if (is.null(gridy) || is.null(gridx) || is.null(atoms)) {
-    stop(
-      "fitted.abrm requires the original grid data.\n",
-      "Please supply: fitted(object, gridy = gridy, gridx = gridx, atoms = atoms)\n",
-      "Hint: if you used sim_data, pass sim_data$gridy, sim_data$gridx, sim_data$atoms."
-    )
+fitted.abrm <- function(object, ...) {
+  if (is.null(object$fitted_values)) {
+    stop("No fitted values found. Re-fit the model with the current version of run_abrm().")
   }
   
-  # Extract posterior mean coefficients
-  betas     <- coef(object)                               # named vector
-  beta_0    <- betas[grep("^beta_0_y$|^beta0_y$", names(betas))]
-  beta_x    <- betas[grep("^beta_x\\[",            names(betas))]
-  beta_y    <- betas[grep("^beta_y\\[",            names(betas))]
+  observed <- object$y_observed
+  fitted_vals <- object$fitted_values
   
-  # Drop geometry for arithmetic
-  gridy_df  <- sf::st_drop_geometry(gridy)
-  gridx_df  <- sf::st_drop_geometry(gridx)
-  atoms_df  <- sf::st_drop_geometry(atoms)
-  
-  # Identify covariate columns
-  x_cov_cols <- sort(grep("^covariate_x_", names(gridx_df), value = TRUE))
-  y_cov_cols <- sort(grep("^covariate_y_", names(gridy_df), value = TRUE))
-  
-  if (length(beta_x) != length(x_cov_cols))
-    warning("Number of beta_x coefficients (", length(beta_x),
-            ") does not match X-grid covariate columns (", length(x_cov_cols), ").")
-  if (length(beta_y) != length(y_cov_cols))
-    warning("Number of beta_y coefficients (", length(beta_y),
-            ") does not match Y-grid covariate columns (", length(y_cov_cols), ").")
-  
-  # Aggregate X-grid covariates to Y-grid via atoms
-  # For each Y-grid cell, compute population-weighted mean of X covariates
-  # across all atoms belonging to that cell.
-  y_ids <- gridy_df$ID
-  
-  x_contrib <- matrix(0, nrow = length(y_ids), ncol = length(beta_x))
-  
-  for (i in seq_along(y_ids)) {
-    atom_idx  <- which(atoms_df$ID_y == y_ids[i])
-    if (length(atom_idx) == 0) next
-    
-    atom_x_ids  <- atoms_df$ID_x[atom_idx]
-    atom_pops   <- atoms_df$population[atom_idx]
-    total_pop   <- sum(atom_pops)
-    if (total_pop == 0) next
-    
-    for (k in seq_along(x_cov_cols)) {
-      # Get the X-grid value for each atom's parent X-cell, weighted by population
-      x_vals <- gridx_df[[x_cov_cols[k]]][match(atom_x_ids, gridx_df$ID)]
-      x_contrib[i, k] <- sum(x_vals * atom_pops, na.rm = TRUE) / total_pop
-    }
-  }
-  
-  # Y-grid covariate matrix
-  y_contrib <- as.matrix(gridy_df[, y_cov_cols, drop = FALSE])
-  
-  # Compute linear predictor: beta_0 + X*beta_x + Z*beta_y
-  linear_pred <- as.numeric(beta_0) +
-    as.numeric(x_contrib %*% beta_x) +
-    as.numeric(y_contrib %*% beta_y)
-  
-  # Return named vector
-  cell_names  <- if (!is.null(rownames(gridy_df))) rownames(gridy_df) else paste0("y_cell_", y_ids)
-  structure(linear_pred, names = cell_names)
+  data.frame(
+    y_grid_id = object$y_grid_ids,
+    observed  = observed,
+    fitted    = round(fitted_vals, 4),
+    residual  = round(observed - fitted_vals, 4),
+    row.names = NULL,
+    stringsAsFactors = FALSE
+  )
 }
 
 #' Generic Function for WAIC
@@ -866,7 +819,7 @@ fitted.abrm <- function(object, gridy = NULL, gridx = NULL, atoms = NULL, ...) {
 #' @export
 waic <- function(object, ...) UseMethod("waic")
 
-#' WAIC for an ABRM Object
+#' WAIC for ABRM Objects
 #'
 #' Returns the Widely Applicable Information Criterion (WAIC) for a fitted
 #' ABRM. WAIC is the recommended information criterion for Bayesian models and

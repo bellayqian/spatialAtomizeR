@@ -2,10 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{vcov.abrm}
 \alias{vcov.abrm}
-\title{Variance-Covariance Method for ABRM Objects
-Extracts variance-covariance matrices for regression coefficients from 
-MCMC posterior samples. Returns separate matrices for X-grid and Y-grid
-coefficients.}
+\title{Variance-Covariance Method for ABRM Objects}
 \usage{
 \method{vcov}{abrm}(object, ...)
 }
@@ -22,7 +19,6 @@ A list with class "vcov.abrm" containing:
   \item{vcov_all}{Combined variance-covariance matrix for all parameters}
 }
 \description{
-Variance-Covariance Method for ABRM Objects
 Extracts variance-covariance matrices for regression coefficients from 
 MCMC posterior samples. Returns separate matrices for X-grid and Y-grid
 coefficients.

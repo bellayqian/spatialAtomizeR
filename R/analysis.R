@@ -1,6 +1,7 @@
 #' Run ABRM Analysis
 #'
-#' Runs the Atom-Based Regression Model on simulated data
+#' Fits an Atom-Based Regression Model (ABRM) to spatially misaligned data
+#' using Bayesian MCMC via NIMBLE. Works with both simulated and real-world data.
 #'
 #' @param gridx The X-grid sf dataframe, containing a numeric area ID variable named 'ID' and covariates named 'covariate_x_1','covariate_x_2',... 
 #' @param gridy The Y-grid sf dataframe, containing a numeric area ID variable named 'ID', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'. 
@@ -19,16 +20,26 @@
 #' @param nchains Number of MCMC chains (default: 2)
 #' @param thin Thinning interval (default: 10)
 #' @param seed Integer seed for reproducibility. Each chain uses seed+(chain_number-1) (default: NULL)
-#' @param sim_metadata Optional simulation metadata list
+#' @param sim_metadata Optional named list of simulation metadata (e.g.,
+#'   \code{sim_number}, \code{x_correlation}, \code{y_correlation}) passed
+#'   through to \code{\link{run_nimble_model}} and used to label diagnostic
+#'   plot file names when \code{save_plots = TRUE}. For non-simulation use,
+#'   leave as \code{NULL}.
 #' @param save_plots Logical, whether to save diagnostic plots (default: FALSE)
 #' @param output_dir Directory for saving outputs (default: NULL)
 #' @param compute_waic Logical; if \code{TRUE}, NIMBLE computes the Widely
 #'   Applicable Information Criterion (WAIC) during MCMC sampling and stores it
 #'   in the returned object. Retrieve it afterwards with \code{\link{waic}}.
 #'   Default \code{FALSE}.
-#' @return An object of class \code{"abrm"}: a named list with components \code{mcmc_results} (raw NIMBLE output including posterior samples and convergence diagnostics), 
-#' \code{parameter_estimates} (data frame of posterior summaries for the regression coefficients), and \code{all_parameters} (posterior summaries for all monitored parameters). 
-#' Use \code{print()}, \code{summary()}, \code{plot()}, and \code{vcov()} to inspect the fitted model.
+#' @return An object of class \code{"abrm"}: a named list with components
+#'   \code{mcmc_results}, \code{parameter_estimates}, \code{all_parameters},
+#'   \code{fitted_values} (numeric vector of Y-grid-level predicted outcome
+#'   values on the original outcome scale),
+#'   \code{y_grid_ids} (integer vector of Y-grid cell IDs in model order), and
+#'   \code{y_observed} (numeric vector of observed outcome values for directly
+#'   observed Y-grid cells). Use \code{fitted()} to extract a formatted
+#'   comparison table of observed vs. fitted values, and \code{waic()} to
+#'   retrieve model fit criteria when \code{compute_waic = TRUE}.
 #'
 #' @examples
 #' \donttest{
@@ -192,6 +203,39 @@ run_abrm <- function(gridx, gridy, atoms, model_code, true_params = NULL,
     stringsAsFactors = FALSE
   )
   
+  # ── Compute fitted values ─────────────────────────────────────────────────
+  # Extract posterior mean of atom-level linear predictor
+  abrm_linpred <- abrm_parameters[
+    grep("linear_pred_y", abrm_parameters$variable), "estimated_beta"
+  ]
+  
+  # Transform from link scale to outcome scale (atom level)
+  if (dist_y == 1) {
+    # Normal: identity link, scale by population
+    abrm_fitted_atom <- nimble_inputs$constants$pop_atoms_y * abrm_linpred
+  } else if (dist_y == 2) {
+    # Poisson: log link, exp() reverses it, then scale by population
+    abrm_fitted_atom <- exp(abrm_linpred) * nimble_inputs$constants$pop_atoms_y
+  } else {
+    # Binomial: logit link, expit() reverses it, then scale by population
+    abrm_fitted_atom <- nimble_inputs$constants$pop_atoms_y * (
+      exp(abrm_linpred) / (1 + exp(abrm_linpred))
+    )
+  }
+  
+  # Aggregate atom-level fitted values up to Y-grid cells
+  J_y      <- nimble_inputs$constants$J_y
+  ylat_ind <- nimble_inputs$constants$ylatent_ind
+  
+  abrm_fitted <- c(
+    # Directly observed Y-grid atoms (indices 1 to J_y)
+    abrm_fitted_atom[1:J_y],
+    # Latent Y-grid atoms: each row of ylatent_ind gives [start, end] range
+    apply(ylat_ind, 1, function(i)
+      sum(abrm_fitted_atom[(i[1] + J_y):(i[2] + J_y)])
+    )
+  )
+  
   # If true parameters are available, calculate bias metrics
   if(!is.null(sim_data$true_params)) {
     true_beta_x <- sim_data$true_params$beta_x
@@ -220,7 +264,10 @@ run_abrm <- function(gridx, gridy, atoms, model_code, true_params = NULL,
     result <- list(
       mcmc_results = abrm_results,
       parameter_estimates = abrm_betas,
-      all_parameters = abrm_parameters
+      all_parameters = abrm_parameters,
+      fitted_values = abrm_fitted,
+      y_grid_ids = bookkeeping$gridy_yorder$ID_y,
+      y_observed = nimble_inputs$data$y_obs
     )
     class(result) <- "abrm"
     return(result)
@@ -228,7 +275,10 @@ run_abrm <- function(gridx, gridy, atoms, model_code, true_params = NULL,
     result <- list(
       mcmc_results = abrm_results,
       parameter_estimates = abrm_parameters,
-      all_parameters = abrm_parameters
+      all_parameters = abrm_parameters,
+      fitted_values = abrm_fitted,
+      y_grid_ids = bookkeeping$gridy_yorder$ID_y,
+      y_observed = nimble_inputs$data$y_obs
     )
     class(result) <- "abrm"
     return(result)

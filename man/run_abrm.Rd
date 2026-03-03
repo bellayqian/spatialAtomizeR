@@ -63,7 +63,11 @@ run_abrm(
 
 \item{seed}{Integer seed for reproducibility. Each chain uses seed+(chain_number-1) (default: NULL)}
 
-\item{sim_metadata}{Optional simulation metadata list}
+\item{sim_metadata}{Optional named list of simulation metadata (e.g.,
+\code{sim_number}, \code{x_correlation}, \code{y_correlation}) passed
+through to \code{\link{run_nimble_model}} and used to label diagnostic
+plot file names when \code{save_plots = TRUE}. For non-simulation use,
+leave as \code{NULL}.}
 
 \item{save_plots}{Logical, whether to save diagnostic plots (default: FALSE)}
 
@@ -75,12 +79,19 @@ in the returned object. Retrieve it afterwards with \code{\link{waic}}.
 Default \code{FALSE}.}
 }
 \value{
-An object of class \code{"abrm"}: a named list with components \code{mcmc_results} (raw NIMBLE output including posterior samples and convergence diagnostics), 
-\code{parameter_estimates} (data frame of posterior summaries for the regression coefficients), and \code{all_parameters} (posterior summaries for all monitored parameters). 
-Use \code{print()}, \code{summary()}, \code{plot()}, and \code{vcov()} to inspect the fitted model.
+An object of class \code{"abrm"}: a named list with components
+  \code{mcmc_results}, \code{parameter_estimates}, \code{all_parameters},
+  \code{fitted_values} (numeric vector of Y-grid-level predicted outcome
+  values on the original outcome scale),
+  \code{y_grid_ids} (integer vector of Y-grid cell IDs in model order), and
+  \code{y_observed} (numeric vector of observed outcome values for directly
+  observed Y-grid cells). Use \code{fitted()} to extract a formatted
+  comparison table of observed vs. fitted values, and \code{waic()} to
+  retrieve model fit criteria when \code{compute_waic = TRUE}.
 }
 \description{
-Runs the Atom-Based Regression Model on simulated data
+Fits an Atom-Based Regression Model (ABRM) to spatially misaligned data
+using Bayesian MCMC via NIMBLE. Works with both simulated and real-world data.
 }
 \examples{
 \donttest{

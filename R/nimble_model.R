@@ -164,10 +164,11 @@ register_nimble_distributions <- function() {
 #'
 #' Returns the NIMBLE code for the Atom-Based Regression Model with mixed-type variables.
 #' Automatically registers custom distributions if not already registered.
+#' @return A \code{nimbleCode} object containing the NIMBLE model specification
+#'   for the ABRM. Pass this directly to \code{\link{run_abrm}}.
 #' @examples
 #' model_code <- get_abrm_model()
 #' print(model_code)
-#' @return A nimbleCode object containing the model specification
 #' @export
 get_abrm_model <- function() {
   
@@ -539,7 +540,6 @@ get_abrm_model <- function() {
 #' @param save_plots Logical, whether to save diagnostic plots (default: FALSE)
 #' @param output_dir Directory for saving plots (default: NULL)
 #' @param compute_waic Logical; if \code{TRUE}, WAIC is computed by NIMBLE and stored in the result, enabling \code{\link{waic}()} for model comparison. Default \code{FALSE} to keep fitting fast.
-#' @return List containing MCMC samples, summary, and convergence diagnostics
 #' @return A named list with components \code{samples} (per-chain MCMC sample matrices), \code{summary} (posterior summary statistics), and
 #' \code{convergence} (Gelman-Rubin statistics, effective sample sizes, and optional diagnostic plots).
 #' @examples
@@ -606,7 +606,7 @@ run_nimble_model <- function(constants, data, inits, sim_metadata = NULL,
     constants = constants,
     data = data,
     inits = inits,
-    monitors = c('beta_0_y', 'beta_y'),
+    monitors = c('beta_0_y', 'beta_y', 'linear_pred_y'),
     thin = thin,
     niter = niter,
     setSeed = if(!is.null(seed)) seed + (0:(nchains-1)) else FALSE,

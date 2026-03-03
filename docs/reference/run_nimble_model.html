@@ -117,8 +117,7 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>List containing MCMC samples, summary, and convergence diagnostics</p>
-<p>A named list with components <code>samples</code> (per-chain MCMC sample matrices), <code>summary</code> (posterior summary statistics), and
+    <p>A named list with components <code>samples</code> (per-chain MCMC sample matrices), <code>summary</code> (posterior summary statistics), and
 <code>convergence</code> (Gelman-Rubin statistics, effective sample sizes, and optional diagnostic plots).</p>
     </div>
 
@@ -174,13 +173,47 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> |-------------------------------------------------------|</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Calculating convergence diagnostics...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Diagnostic Summary Statistics:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ESS: 78.5</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ESS: 100.0</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Max Rhat: 5.920</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Parameters with high relative variance:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           parameter       mean        sd</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> beta_0_y   beta_0_y  1.2341041 2.1578336</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> beta_x[1] beta_x[1]  0.1174545 0.2246097</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> beta_y[1] beta_y[1] -0.3991496 0.3038859</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                           parameter        mean        sd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> beta_0_y                   beta_0_y  1.23410415 2.1578336</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> beta_x[1]                 beta_x[1]  0.11745451 0.2246097</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> beta_y[1]                 beta_y[1] -0.39914964 0.3038859</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[1]   linear_pred_y[1] -0.50225538 0.5419798</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[2]   linear_pred_y[2]  0.30462544 0.6044312</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[3]   linear_pred_y[3] -0.03589372 0.5548134</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[4]   linear_pred_y[4]  0.86799427 0.6742804</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[5]   linear_pred_y[5] -0.59359456 0.5282222</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[6]   linear_pred_y[6] -0.44420476 0.4989455</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[8]   linear_pred_y[8] -0.86532332 0.6041438</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[9]   linear_pred_y[9] -0.25048989 0.6253537</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[10] linear_pred_y[10] -0.51280141 0.4459109</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[11] linear_pred_y[11]  0.04138441 0.4282762</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[12] linear_pred_y[12] -0.76935680 0.5585525</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[13] linear_pred_y[13] -0.41809238 0.5714206</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[14] linear_pred_y[14] -0.56540811 0.6592940</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[15] linear_pred_y[15] -0.48890604 0.5536318</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[16] linear_pred_y[16]  0.40245270 0.8572750</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[17] linear_pred_y[17]  0.34009034 0.8021216</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[18] linear_pred_y[18] -0.25184705 0.5955863</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[19] linear_pred_y[19] -0.32701985 0.6561567</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[20] linear_pred_y[20] -0.48982214 0.6663216</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[21] linear_pred_y[21] -0.51712115 0.7392435</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[22] linear_pred_y[22] -0.28899952 0.8552084</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[23] linear_pred_y[23] -0.41877934 0.7378552</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[24] linear_pred_y[24] -0.81858207 0.6083035</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[25] linear_pred_y[25] -0.69513078 0.6409075</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[26] linear_pred_y[26]  0.11151816 0.7334858</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[27] linear_pred_y[27]  0.11900999 0.7140830</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[28] linear_pred_y[28] -0.93384558 0.7714800</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[29] linear_pred_y[29] -1.14640780 0.8954768</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[30] linear_pred_y[30] -0.44816776 0.5883457</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[31] linear_pred_y[31] -0.59106539 0.6769300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[32] linear_pred_y[32] -1.56667315 1.2163527</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[33] linear_pred_y[33] -1.20032551 0.9525730</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[34] linear_pred_y[34] -0.54231320 0.7120945</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> linear_pred_y[35] linear_pred_y[35] -0.48023691 0.8013428</span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ABRM Model Summary</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ==================</span>

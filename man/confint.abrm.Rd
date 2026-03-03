@@ -2,7 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{confint.abrm}
 \alias{confint.abrm}
-\title{Credible Intervals for an ABRM Object}
+\title{Credible Intervals for ABRM Objects}
 \usage{
 \method{confint}{abrm}(object, parm = NULL, level = 0.95, ...)
 }
@@ -12,8 +12,10 @@
 \item{parm}{Optional character vector of parameter names to subset. If
 \code{NULL} (default), all parameters are returned.}
 
-\item{level}{Ignored. Intervals are always the 95\% credible intervals stored
-during model fitting. Included only for S3 compatibility.}
+\item{level}{Confidence level for the credible interval (default \code{0.95}).
+When \code{level = 0.95} (the default), the pre-computed 95\% intervals
+stored during model fitting are returned directly. For other levels,
+intervals are recomputed from the raw MCMC posterior samples.}
 
 \item{...}{Additional arguments (currently unused).}
 }

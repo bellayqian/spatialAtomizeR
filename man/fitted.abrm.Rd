@@ -2,33 +2,32 @@
 % Please edit documentation in R/methods.R
 \name{fitted.abrm}
 \alias{fitted.abrm}
-\title{Fitted Values for an ABRM Object}
+\title{Fitted Values for ABRM Objects}
 \usage{
-\method{fitted}{abrm}(object, gridy = NULL, gridx = NULL, atoms = NULL, ...)
+\method{fitted}{abrm}(object, ...)
 }
 \arguments{
 \item{object}{An object of class \code{"abrm"} returned by \code{\link{run_abrm}}.}
 
-\item{gridy}{The Y-grid \code{sf} data frame used to fit the model.
-Must contain columns named \code{covariate_y_1}, \code{covariate_y_2}, etc.}
-
-\item{gridx}{The X-grid \code{sf} data frame used to fit the model.
-Must contain columns named \code{covariate_x_1}, \code{covariate_x_2}, etc.}
-
-\item{atoms}{The atoms \code{sf} data frame containing \code{ID_y} and
-\code{ID_x} linking atoms to their parent Y- and X-grid cells, plus a
-\code{population} column for offset weighting.}
-
 \item{...}{Additional arguments (currently unused).}
 }
 \value{
-A named numeric vector of posterior-mean fitted values (on the linear predictor scale), one per Y-grid cell.
+A data frame with one row per Y-grid cell and four columns:
+  \describe{
+    \item{\code{y_grid_id}}{The original Y-grid cell ID.}
+    \item{\code{observed}}{The observed outcome value \code{y} for each
+      Y-grid cell. Note: the outcome is observed at the Y-grid level for
+      all cells. This is distinct from covariates, which may be
+      \emph{latent} (unobserved at the Y-grid level) for cells that span
+      multiple atoms.}
+    \item{\code{fitted}}{The model-predicted outcome on the original
+      outcome scale (counts for Poisson/binomial; continuous for normal).}
+    \item{\code{residual}}{Observed minus fitted.}
+  }
 }
 \description{
 Computes posterior-mean fitted values at the Y-grid level by applying the
-estimated regression coefficients to the supplied covariate data. Because
-the \code{abrm} object does not store the original grids, \code{gridy} and
-\code{gridx} must be supplied by the user.
+estimated regression coefficients to the supplied covariate data.
 }
 \examples{
 \donttest{
@@ -43,10 +42,7 @@ the \code{abrm} object does not store the original grids, \code{gridy} and
     dist_y = 1, niter = 1000, nburnin = 500, nchains = 2, seed = 1,
     save_plots = FALSE
   )
-  fitted(results,
-         gridy = sim_data$gridy,
-         gridx = sim_data$gridx,
-         atoms = sim_data$atoms)
+  fitted(results)
 }
 
 }

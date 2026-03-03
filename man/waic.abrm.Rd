@@ -2,7 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{waic.abrm}
 \alias{waic.abrm}
-\title{WAIC for an ABRM Object}
+\title{WAIC for ABRM Objects}
 \usage{
 \method{waic}{abrm}(object, ...)
 }

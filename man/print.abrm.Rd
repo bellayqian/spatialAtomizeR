@@ -13,7 +13,9 @@
 }
 \value{
 Invisibly returns \code{x}. Called for its side effect of printing
-  a brief summary of the simulated misaligned spatial data.
+  a concise ABRM model summary including number of parameters, mean
+  absolute bias, and credible-interval coverage rate (when true parameter
+  values are available).
 }
 \description{
 Prints a concise summary of a fitted ABRM, including the number of

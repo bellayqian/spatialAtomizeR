@@ -54,6 +54,9 @@ abrm_results <- run_abrm(
   compute_waic = TRUE
 )
 
+# Verify fitted() works BEFORE saving
+fitted(abrm_results)
+
 dir.create("inst/extdata", recursive = TRUE, showWarnings = FALSE)
 saveRDS(abrm_results, "inst/extdata/abrm_vignette_results.rds")
 saveRDS(sim_data,     "inst/extdata/sim_vignette_data.rds")
