@@ -516,6 +516,11 @@ vcov.abrm <- function(object, ...) {
   # Create list to store results
   vcov_list <- list()
   
+  rename_params <- function(x) {
+    x <- gsub("^beta_x\\[(\\d+)\\]$", "covariate_x_\\1", x)
+    gsub("^beta_y\\[(\\d+)\\]$", "covariate_y_\\1", x)
+  }
+  
   # Compute variance for intercept (scalar)
   if (length(beta_0_idx) > 0) {
     vcov_list$vcov_beta_0 <- var(samples_matrix[, beta_0_idx, drop = TRUE])
@@ -528,8 +533,8 @@ vcov.abrm <- function(object, ...) {
   # Compute variance-covariance for X-grid coefficients
   if (length(beta_x_idx) > 0) {
     vcov_list$vcov_beta_x <- cov(samples_matrix[, beta_x_idx, drop = FALSE])
-    rownames(vcov_list$vcov_beta_x) <- param_names[beta_x_idx]
-    colnames(vcov_list$vcov_beta_x) <- param_names[beta_x_idx]
+    rownames(vcov_list$vcov_beta_x) <- rename_params(param_names[beta_x_idx])
+    colnames(vcov_list$vcov_beta_x) <- rename_params(param_names[beta_x_idx])
   } else {
     vcov_list$vcov_beta_x <- NULL
     warning("No X-grid coefficients (beta_x[]) found in MCMC samples")
@@ -538,8 +543,8 @@ vcov.abrm <- function(object, ...) {
   # Compute variance-covariance for Y-grid coefficients
   if (length(beta_y_idx) > 0) {
     vcov_list$vcov_beta_y <- cov(samples_matrix[, beta_y_idx, drop = FALSE])
-    rownames(vcov_list$vcov_beta_y) <- param_names[beta_y_idx]
-    colnames(vcov_list$vcov_beta_y) <- param_names[beta_y_idx]
+    rownames(vcov_list$vcov_beta_y) <- rename_params(param_names[beta_y_idx])
+    colnames(vcov_list$vcov_beta_y) <- rename_params(param_names[beta_y_idx])
   } else {
     vcov_list$vcov_beta_y <- NULL
     warning("No Y-grid coefficients (beta_y[]) found in MCMC samples")
@@ -549,8 +554,8 @@ vcov.abrm <- function(object, ...) {
   all_beta_idx <- c(beta_0_idx, beta_x_idx, beta_y_idx)
   if (length(all_beta_idx) > 0) {
     vcov_list$vcov_all <- cov(samples_matrix[, all_beta_idx, drop = FALSE])
-    rownames(vcov_list$vcov_all) <- param_names[all_beta_idx]
-    colnames(vcov_list$vcov_all) <- param_names[all_beta_idx]
+    rownames(vcov_list$vcov_all) <- rename_params(param_names[all_beta_idx])
+    colnames(vcov_list$vcov_all) <- rename_params(param_names[all_beta_idx])
   } else {
     vcov_list$vcov_all <- NULL
     warning("No beta parameters found in MCMC samples")
@@ -680,7 +685,9 @@ coef.abrm <- function(object, ...) {
   pe   <- object$all_parameters
   keep <- grep("^beta_0_y$|^beta_x\\[|^beta_y\\[", pe$variable)
   pe   <- pe[keep, , drop = FALSE]
-  structure(pe$estimated_beta, names = pe$variable)
+  nms  <- gsub("^beta_x\\[(\\d+)\\]$", "covariate_x_\\1", pe$variable)
+  nms  <- gsub("^beta_y\\[(\\d+)\\]$", "covariate_y_\\1", nms)
+  structure(pe$estimated_beta, names = nms)
 }
 
 #' Credible Intervals for ABRM Objects

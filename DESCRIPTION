@@ -34,6 +34,7 @@ Imports:
     ggplot2,
     reshape2,
     coda,
+    terra,
     BiasedUrn,
     stats,
     utils,

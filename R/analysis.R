@@ -209,6 +209,11 @@ run_abrm <- function(gridx, gridy, atoms, model_code, true_params = NULL,
     grep("linear_pred_y", abrm_parameters$variable), "estimated_beta"
   ]
   
+  # Remove linear_pred_y rows — used above for fitted values only,
+  # must not appear in any parameter table or S3 method output.
+  abrm_parameters <- abrm_parameters[
+    !grepl("^linear_pred_y", abrm_parameters$variable), , drop = FALSE]
+  
   # Transform from link scale to outcome scale (atom level)
   if (dist_y == 1) {
     # Normal: identity link, scale by population
@@ -271,10 +276,22 @@ run_abrm <- function(gridx, gridy, atoms, model_code, true_params = NULL,
     )
     class(result) <- "abrm"
     return(result)
+    
   } else {
+    # Filter to beta coefficients only and apply consistent covariate naming
+    beta_x_params <- grep("^beta_x\\[", abrm_parameters$variable)
+    beta_y_params <- grep("^beta_y\\[", abrm_parameters$variable)
+    beta_params   <- c(beta_x_params, beta_y_params)
+    abrm_betas    <- abrm_parameters[beta_params, ]
+    
+    abrm_betas$variable <- c(
+      paste0("covariate_x_", seq_along(beta_x_params)),
+      paste0("covariate_y_", seq_along(beta_y_params))
+    )
+    
     result <- list(
       mcmc_results = abrm_results,
-      parameter_estimates = abrm_parameters,
+      parameter_estimates = abrm_betas,
       all_parameters = abrm_parameters,
       fitted_values = abrm_fitted,
       y_grid_ids = bookkeeping$gridy_yorder$ID_y,

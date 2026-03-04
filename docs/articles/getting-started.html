@@ -273,8 +273,7 @@ sample<a class="anchor" aria-label="anchor" href="#access-vairance-covariance-ma
 </h4>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get variance-covariance matrices</span></span>
-<span><span class="va">vcov_matrices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">vcov_matrices</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variance-Covariance Matrices for ABRM Model</span></span>
 <span><span class="co">#&gt; ============================================</span></span>
@@ -283,31 +282,29 @@ sample<a class="anchor" aria-label="anchor" href="#access-vairance-covariance-ma
 <span><span class="co">#&gt;   beta_0_y: 1.703773</span></span>
 <span><span class="co">#&gt; X-Grid Coefficients Variance-Covariance Matrix:</span></span>
 <span><span class="co">#&gt;   Dimensions: 3 x 3 </span></span>
-<span><span class="co">#&gt;           beta_x[1] beta_x[2] beta_x[3]</span></span>
-<span><span class="co">#&gt; beta_x[1]  0.021714 -0.014287  0.036561</span></span>
-<span><span class="co">#&gt; beta_x[2] -0.014287  0.164777 -0.069159</span></span>
-<span><span class="co">#&gt; beta_x[3]  0.036561 -0.069159  0.720543</span></span>
+<span><span class="co">#&gt;               covariate_x_1 covariate_x_2 covariate_x_3</span></span>
+<span><span class="co">#&gt; covariate_x_1      0.021714     -0.014287      0.036561</span></span>
+<span><span class="co">#&gt; covariate_x_2     -0.014287      0.164777     -0.069159</span></span>
+<span><span class="co">#&gt; covariate_x_3      0.036561     -0.069159      0.720543</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Y-Grid Coefficients Variance-Covariance Matrix:</span></span>
 <span><span class="co">#&gt;   Dimensions: 3 x 3 </span></span>
-<span><span class="co">#&gt;           beta_y[1] beta_y[2] beta_y[3]</span></span>
-<span><span class="co">#&gt; beta_y[1]  0.020363 -0.011530 -0.020613</span></span>
-<span><span class="co">#&gt; beta_y[2] -0.011530  0.389514 -0.084022</span></span>
-<span><span class="co">#&gt; beta_y[3] -0.020613 -0.084022  0.602699</span></span>
+<span><span class="co">#&gt;               covariate_y_1 covariate_y_2 covariate_y_3</span></span>
+<span><span class="co">#&gt; covariate_y_1      0.020363     -0.011530     -0.020613</span></span>
+<span><span class="co">#&gt; covariate_y_2     -0.011530      0.389514     -0.084022</span></span>
+<span><span class="co">#&gt; covariate_y_3     -0.020613     -0.084022      0.602699</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Use vcov_object$vcov_beta_x, vcov_object$vcov_beta_y, etc. to access matrices</span></span>
 <span></span>
 <span><span class="co"># Test coef()</span></span>
-<span><span class="va">coefs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">coefs</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    beta_0_y   beta_x[1]   beta_x[2]   beta_x[3]   beta_y[1]   beta_y[2] </span></span>
-<span><span class="co">#&gt; -0.54060357  0.06764204  0.24491310 -0.68931577  0.20855084  0.04571204 </span></span>
-<span><span class="co">#&gt;   beta_y[3] </span></span>
-<span><span class="co">#&gt;  0.03414577</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      beta_0_y covariate_x_1 covariate_x_2 covariate_x_3 covariate_y_1 </span></span>
+<span><span class="co">#&gt;   -0.54060357    0.06764204    0.24491310   -0.68931577    0.20855084 </span></span>
+<span><span class="co">#&gt; covariate_y_2 covariate_y_3 </span></span>
+<span><span class="co">#&gt;    0.04571204    0.03414577</span></span>
 <span></span>
 <span><span class="co"># Test confint()</span></span>
-<span><span class="va">ci_95</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ci_95</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                  CI.Lower  CI.Upper</span></span>
 <span><span class="co">#&gt; covariate_x_1 -0.21281539 0.3598648</span></span>
 <span><span class="co">#&gt; covariate_x_2 -0.58057793 1.0312572</span></span>
@@ -317,14 +314,12 @@ sample<a class="anchor" aria-label="anchor" href="#access-vairance-covariance-ma
 <span><span class="co">#&gt; covariate_y_3 -1.39217558 1.5496064</span></span>
 <span></span>
 <span><span class="co"># Test parm subsetting</span></span>
-<span><span class="va">ci_sub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">abrm_results</span>, parm <span class="op">=</span> <span class="st">"covariate_x_1"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ci_sub</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">abrm_results</span>, parm <span class="op">=</span> <span class="st">"covariate_x_1"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 CI.Lower  CI.Upper</span></span>
 <span><span class="co">#&gt; covariate_x_1 -0.2128154 0.3598648</span></span>
 <span></span>
 <span><span class="co"># Test fitted()</span></span>
-<span><span class="va">fv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fv</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">abrm_results</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    y_grid_id observed  fitted residual</span></span>
 <span><span class="co">#&gt; 1          3       31 30.2001   0.7999</span></span>
 <span><span class="co">#&gt; 2          4       18 18.8310  -0.8310</span></span>
@@ -552,10 +547,7 @@ atoms:</p>
 <span>  nchains <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
 <span>  compute_waic <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># View results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mcmc_results</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="step-8-examine-real-data-results">Step 8: Examine Real Data Results<a class="anchor" aria-label="anchor" href="#step-8-examine-real-data-results"></a>

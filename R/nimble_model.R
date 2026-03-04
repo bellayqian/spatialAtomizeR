@@ -616,6 +616,14 @@ run_nimble_model <- function(constants, data, inits, sim_metadata = NULL,
     WAIC = compute_waic
   )
   
+  # Strip linear_pred_y from MCMC samples before diagnostics.
+  # The summary table keeps these rows so analysis.R can compute fitted values,
+  # but they must not appear in trace/density plots, vcov(), or confint().
+  for (ch in names(mcmc.out$samples)) {
+    keep <- !grepl("^linear_pred_y", colnames(mcmc.out$samples[[ch]]))
+    mcmc.out$samples[[ch]] <- mcmc.out$samples[[ch]][, keep, drop = FALSE]
+  }
+  
   message("Calculating convergence diagnostics...\n")
   diagnostics <- check_mcmc_diagnostics(mcmc.out, sim_metadata, p_x = constants$p_x, p_y = constants$p_y)
   

@@ -172,26 +172,21 @@ plot(abrm_results)
 
 ### Access vairance-covariance matrices from the MCMC posterior sample
 
-```{r more_test2}
+```{r more_test}
 # Get variance-covariance matrices
-vcov_matrices <- vcov(abrm_results)
-print(vcov_matrices)
+vcov(abrm_results)
 
 # Test coef()
-coefs <- coef(abrm_results)
-print(coefs)
+coef(abrm_results)
 
 # Test confint()
-ci_95 <- confint(abrm_results)
-print(ci_95)
+confint(abrm_results)
 
 # Test parm subsetting
-ci_sub <- confint(abrm_results, parm = "covariate_x_1")
-print(ci_sub)
+confint(abrm_results, parm = "covariate_x_1")
 
 # Test fitted()
-fv <- fitted(abrm_results)
-print(fv)
+fitted(abrm_results)
 
 # waic_abrm Objects
 w <- waic(abrm_results)
@@ -382,9 +377,6 @@ mcmc_results <- run_abrm(
   seed = 123,
   compute_waic = TRUE
 )
-
-# View results
-summary(mcmc_results)
 ```
 
 ## Step 8: Examine Real Data Results
