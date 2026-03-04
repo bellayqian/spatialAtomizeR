@@ -35,8 +35,6 @@ install.packages("spatialAtomizeR")
 
 ## Load Required Packages
 
-**Important:** Always load `nimble` before using spatialAtomizeR functions that involve model fitting.
-
 ```{r libraries}
 library(spatialAtomizeR)
 ```
@@ -419,36 +417,6 @@ binom_idx_x = 3   # Third position
 | 1    | Normal       | 'normal'    | Continuous data         |
 | 2    | Poisson      | 'poisson'   | Count/rate data         |
 | 3    | Binomial     | 'binomial'  | Proportion/binary data  |
-
-# Troubleshooting
-
-## Common Errors
-
-**Error: "could not find function 'getNimbleOption'"**
-- **Solution:** Load `nimble` before calling `get_abrm_model()`: `library(nimble)`
-
-**Error: "unused arguments (res1 = c(5, 5), res2 = c(10, 10))"**
-- **Solution:** The `simulate_misaligned_data()` function does not have `res1` or `res2` parameters. Grid resolutions are fixed internally.
-
-**Error: "gridx must contain an area ID variable named 'ID'"**
-- **Solution:** Ensure your spatial dataframes have a numeric column named `ID`
-
-# Key Parameters Reference
-
-## Critical Parameters (Don't Omit!)
-
-- `x_intercepts`: Intercepts for X covariates (must match length of `dist_covariates_x`)
-- `y_intercepts`: Intercepts for Y covariates (must match length of `dist_covariates_y`)
-- `beta0_y`: Outcome model intercept
-- `beta_x`: True coefficients for X covariates (if simulating)
-- `beta_y`: True coefficients for Y covariates (if simulating)
-
-## MCMC Parameters
-
-- `niter`: Total MCMC iterations per chain (default: 50000)
-- `nburnin`: Burn-in iterations to discard (default: 30000)
-- `nchains`: Number of independent chains (default: 2)
-- `thin`: Thinning interval (default: 10)
 
 ## Getting Help
 

@@ -167,8 +167,10 @@ register_nimble_distributions <- function() {
 #' @return A \code{nimbleCode} object containing the NIMBLE model specification
 #'   for the ABRM. Pass this directly to \code{\link{run_abrm}}.
 #' @examples
-#' model_code <- get_abrm_model()
-#' print(model_code)
+#' \donttest{
+#'   model_code <- get_abrm_model()
+#'   print(model_code)
+#' }
 #' @export
 get_abrm_model <- function() {
   

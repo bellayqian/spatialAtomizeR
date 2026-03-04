@@ -25,7 +25,6 @@ devtools::install_github("bellayqian/spatialAtomizeR")
 
 ```r
 library(spatialAtomizeR)
-library(nimble)  # Required for ABRM models
 
 # 1. Simulate misaligned spatial data with full parameter specification
 sim_data <- simulate_misaligned_data(

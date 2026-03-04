@@ -65,7 +65,7 @@
 (Bella), Principal Investigators: Dr. Nancy Krieger and Dr. Rachel
 Nethery</h4>
             
-            <h4 data-toc-skip class="date">2026-03-03</h4>
+            <h4 data-toc-skip class="date">2026-03-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bellayqian/spatialAtomizeR/blob/HEAD/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
       <div class="d-none name"><code>getting-started.Rmd</code></div>
@@ -94,8 +94,6 @@ spatial data using both simulated and real-world examples.</p>
 <div class="section level3">
 <h3 id="load-required-packages">Load Required Packages<a class="anchor" aria-label="anchor" href="#load-required-packages"></a>
 </h3>
-<p><strong>Important:</strong> Always load <code>nimble</code> before
-using spatialAtomizeR functions that involve model fitting.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bellayqian/spatialAtomizeR" class="external-link">spatialAtomizeR</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; spatialAtomizeR loaded. Use get_abrm_model() to access the model.</span></span></code></pre></div>
@@ -614,65 +612,6 @@ positions:</p>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-<div class="section level2">
-<h2 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
-</h2>
-<div class="section level3">
-<h3 id="common-errors">Common Errors<a class="anchor" aria-label="anchor" href="#common-errors"></a>
-</h3>
-<p><strong>Error: “could not find function ‘getNimbleOption’”</strong> -
-<strong>Solution:</strong> Load <code>nimble</code> before calling
-<code><a href="../reference/get_abrm_model.html">get_abrm_model()</a></code>: <code><a href="https://r-nimble.org" class="external-link">library(nimble)</a></code></p>
-<p><strong>Error: “unused arguments (res1 = c(5, 5), res2 = c(10,
-10))”</strong> - <strong>Solution:</strong> The
-<code><a href="../reference/simulate_misaligned_data.html">simulate_misaligned_data()</a></code> function does not have
-<code>res1</code> or <code>res2</code> parameters. Grid resolutions are
-fixed internally.</p>
-<p><strong>Error: “gridx must contain an area ID variable named
-‘ID’”</strong> - <strong>Solution:</strong> Ensure your spatial
-dataframes have a numeric column named <code>ID</code></p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="key-parameters-reference">Key Parameters Reference<a class="anchor" aria-label="anchor" href="#key-parameters-reference"></a>
-</h2>
-<div class="section level3">
-<h3 id="critical-parameters-dont-omit">Critical Parameters (Don’t Omit!)<a class="anchor" aria-label="anchor" href="#critical-parameters-dont-omit"></a>
-</h3>
-<ul>
-<li>
-<code>x_intercepts</code>: Intercepts for X covariates (must match
-length of <code>dist_covariates_x</code>)</li>
-<li>
-<code>y_intercepts</code>: Intercepts for Y covariates (must match
-length of <code>dist_covariates_y</code>)</li>
-<li>
-<code>beta0_y</code>: Outcome model intercept</li>
-<li>
-<code>beta_x</code>: True coefficients for X covariates (if
-simulating)</li>
-<li>
-<code>beta_y</code>: True coefficients for Y covariates (if
-simulating)</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="mcmc-parameters">MCMC Parameters<a class="anchor" aria-label="anchor" href="#mcmc-parameters"></a>
-</h3>
-<ul>
-<li>
-<code>niter</code>: Total MCMC iterations per chain (default:
-50000)</li>
-<li>
-<code>nburnin</code>: Burn-in iterations to discard (default:
-30000)</li>
-<li>
-<code>nchains</code>: Number of independent chains (default: 2)</li>
-<li>
-<code>thin</code>: Thinning interval (default: 10)</li>
-</ul>
 </div>
 <div class="section level3">
 <h3 id="getting-help">Getting Help<a class="anchor" aria-label="anchor" href="#getting-help"></a>

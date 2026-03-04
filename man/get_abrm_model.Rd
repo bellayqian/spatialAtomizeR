@@ -15,6 +15,8 @@ Returns the NIMBLE code for the Atom-Based Regression Model with mixed-type vari
 Automatically registers custom distributions if not already registered.
 }
 \examples{
-model_code <- get_abrm_model()
-print(model_code)
+\donttest{
+  model_code <- get_abrm_model()
+  print(model_code)
+}
 }
