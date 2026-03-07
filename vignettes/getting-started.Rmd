@@ -199,7 +199,7 @@ This example demonstrates using real spatial data from Utah, matching the analys
 
 ## Load Required Packages for Spatial Data
 
-```{r load_spatial_packages, message = FALSE, eval = FALSE}
+```{r load_spatial_packages, message = FALSE}
 library(tigris)    # For US Census shapefiles
 library(sf)        # Spatial features
 library(sp)        # Spatial objects
@@ -211,7 +211,7 @@ library(ggplot2)   # Plotting
 
 ## Step 1: Load Utah Shapefiles
 
-```{r load_utah_data, eval = FALSE}
+```{r load_utah_data}
 set.seed(500)
 
 # Load Utah counties (Y-grid)
@@ -229,7 +229,7 @@ gridx <- scd %>%
 
 ## Step 2: Visualize Spatial Misalignment
 
-```{r plot_misalignment, fig.width = 7, fig.height = 5, eval = FALSE}
+```{r plot_misalignment, fig.width = 7, fig.height = 5}
 # Bundle grids into a misaligned_data object
 utah_mis <- structure(
   list(gridy = gridy, gridx = gridx),

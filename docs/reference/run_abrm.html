@@ -248,22 +248,24 @@ Default <code>FALSE</code>.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ABRM Model Results</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ==================</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Parameters estimated: 2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Mean absolute bias:  0.1583 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Parameters estimated: 3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Mean absolute bias:  0.5169 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Coverage rate:       100 %</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Use summary() for the full parameter table.</span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>  <span class="co"># full parameter table</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ABRM Model Summary</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ==================</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Parameters estimated: 2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Mean absolute bias:  0.1583 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Parameters estimated: 3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Mean absolute bias:  0.5169 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Coverage rate:  100 %</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       variable estimated_beta std_error ci_lower ci_upper true_beta     bias</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      intercept         1.2341    2.1578  -2.7765   4.2839       0.0  1.23410</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  covariate_x_1         0.1175    0.2246  -0.2913   0.5351       0.1  0.01745</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  covariate_y_1        -0.3991    0.3039  -1.0074   0.1932      -0.1 -0.29915</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  relative_bias within_ci</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Inf      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          17.45      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         299.15      TRUE</span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span>     <span class="co"># MCMC trace and density plots</span></span></span>

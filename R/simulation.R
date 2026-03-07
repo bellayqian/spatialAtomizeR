@@ -322,6 +322,7 @@ simulate_misaligned_data <- function(seed = 2,
   
   # Store true parameters
   true_params <- list(
+    beta0_y = beta0_y,
     beta_x = beta_x,
     beta_y = beta_y,
     x_correlation = x_correlation,

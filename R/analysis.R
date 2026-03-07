@@ -248,13 +248,16 @@ run_abrm <- function(gridx, gridy, atoms, model_code, true_params = NULL,
     true_values <- c(true_beta_x, true_beta_y)
     
     # Filter for beta parameters (both X and Y)
+    beta_0_params <- grep("^beta_0_y$", abrm_parameters$variable)
     beta_x_params <- grep("^beta_x\\[", abrm_parameters$variable)
     beta_y_params <- grep("^beta_y\\[", abrm_parameters$variable)
-    beta_params <- c(beta_x_params, beta_y_params)
+    beta_params <- c(beta_0_params, beta_x_params, beta_y_params)
     abrm_betas <- abrm_parameters[beta_params, ]
     
+    true_values <- c(sim_data$true_params$beta0_y, true_beta_x, true_beta_y)
     abrm_betas$true_beta <- true_values
     abrm_betas$variable <- c(
+      "intercept",
       paste0("covariate_x_", 1:length(true_beta_x)),
       paste0("covariate_y_", 1:length(true_beta_y))
     )
@@ -279,12 +282,14 @@ run_abrm <- function(gridx, gridy, atoms, model_code, true_params = NULL,
     
   } else {
     # Filter to beta coefficients only and apply consistent covariate naming
+    beta_0_params <- grep("^beta_0_y$", abrm_parameters$variable)
     beta_x_params <- grep("^beta_x\\[", abrm_parameters$variable)
     beta_y_params <- grep("^beta_y\\[", abrm_parameters$variable)
-    beta_params   <- c(beta_x_params, beta_y_params)
+    beta_params   <- c(beta_0_params, beta_x_params, beta_y_params)
     abrm_betas    <- abrm_parameters[beta_params, ]
     
     abrm_betas$variable <- c(
+      "intercept",
       paste0("covariate_x_", seq_along(beta_x_params)),
       paste0("covariate_y_", seq_along(beta_y_params))
     )

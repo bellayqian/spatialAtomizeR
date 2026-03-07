@@ -34,7 +34,6 @@ Imports:
     ggplot2,
     reshape2,
     coda,
-    terra,
     BiasedUrn,
     stats,
     utils,
@@ -44,7 +43,8 @@ Imports:
 Suggests:
     testthat (>= 3.0.0),
     knitr,
-    rmarkdown
+    rmarkdown,
+    tigris
 VignetteBuilder: knitr
 URL: https://github.com/bellayqian/spatialAtomizeR
 BugReports: https://github.com/bellayqian/spatialAtomizeR/issues

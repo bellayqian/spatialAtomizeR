@@ -957,8 +957,6 @@ print.waic_abrm <- function(x, digits = 3, ...) {
   if (!is.na(x$penalty))
     cat("pWAIC  :", round(x$penalty, digits),
         " (effective number of parameters)\n")
-  cat("n_params:", x$n_params,
-      " (regression coefficients estimated)\n")
   cat("\nNote: lower WAIC indicates better predictive fit.\n",
       "      Compare only models fitted on identical data.\n", sep = "")
   invisible(x)
