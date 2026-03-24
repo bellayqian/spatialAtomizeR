@@ -251,10 +251,12 @@ plot(utah_mis, which = "gridx", title = "Utah School Districts")
 atoms <- raster::intersect(as(gridy, 'Spatial'), as(gridx, 'Spatial'))
 atoms <- sf::st_as_sf(atoms)
 
-# Rename ID variables to match expected names
-atoms <- atoms %>%
-  rename(ID_y = ID_1,    # Y-grid (county) ID
-         ID_x = ID_2)     # X-grid (school district) ID
+# Rename ID variables — column names vary by sf version:
+# Note: raster::intersect() + sf::st_as_sf() produces "ID"/"ID.1" on older sf
+# and "ID_1"/"ID_2" on newer sf (>= 1.0). This grep-based approach handles both.
+id_cols <- grep("^ID", names(atoms), value = TRUE)
+names(atoms)[names(atoms) == id_cols[1]] <- "ID_y"
+names(atoms)[names(atoms) == id_cols[2]] <- "ID_x"
 ```
 
 ## Step 4: Add Atom-Level Population Counts
@@ -431,4 +433,4 @@ citation("spatialAtomizeR")
 ```
 
 **Reference:**
-Qian, Y., Johnson, N., Krieger, N., & Nethery, R.C. (2026). spatialAtomizeR: Atom-Based Regression Models for Spatially Misaligned Data in R. R package version 0.2.7.
+Qian, Y., Johnson, N., Krieger, N., & Nethery, R.C. (2026). spatialAtomizeR: Atom-Based Regression Models for Spatially Misaligned Data in R. R package version 0.2.8.

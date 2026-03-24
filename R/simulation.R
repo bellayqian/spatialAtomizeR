@@ -178,15 +178,8 @@ simulate_misaligned_data <- function(seed = 2,
   # Fix the column name detection and renaming
   # First, identify which columns contain the grid IDs
   id_cols <- grep("^ID", names(atoms), value = TRUE)
-  if (length(id_cols) == 2) {
-    # Rename to ID_y and ID_x
-    names(atoms)[names(atoms) == id_cols[1]] <- "ID_y"
-    names(atoms)[names(atoms) == id_cols[2]] <- "ID_x"
-  } else {
-    # Fallback: try original naming approach
-    names(atoms)[which(names(atoms) == 'ID')] <- "ID_y"
-    names(atoms)[which(names(atoms) == 'ID.1')] <- "ID_x"
-  }
+  names(atoms)[names(atoms) == id_cols[1]] <- "ID_y"
+  names(atoms)[names(atoms) == id_cols[2]] <- "ID_x"
   
   atoms$ID_atomorder <- 1:nrow(atoms)
   

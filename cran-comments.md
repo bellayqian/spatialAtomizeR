@@ -1,6 +1,15 @@
 ## Resubmission
 
-This is a resubmission (v0.2.7) addressing reviewer comments on package quality,
+This is a patch resubmission fixing a bug reported by a CRAN reviewer.
+
+* Fixed: atom ID column names produced by `raster::intersect()` + `sf::st_as_sf()` 
+  vary by sf version ("ID"/"ID.1" in older sf, "ID_1"/"ID_2" in sf >= 1.0). 
+  The renaming step in `simulate_misaligned_data()` and the case example vignette 
+  now handles both conventions using `grep("^ID", ...)`.
+  
+## Previous submission (v0.2.7)
+
+Addressing reviewer comments on package quality,
 documentation, and replication material. Changes include:
 
 * Added `\examples{}` blocks to all exported functions; slow MCMC-based functions
@@ -37,15 +46,3 @@ documentation, and replication material. Changes include:
 ## Downstream dependencies
 
 There are currently no downstream dependencies for this package.
-
-## Previous submission (v0.2.6)
-
-* Fixed Editor's comments
-* Fixed `print()` statement causing debug output in console
-* Fixed unable to use S3 plot() function bug
-* Marked 14 internal helper functions as `@keywords internal` (no longer exported)
-* Fixed vignette errors: removed non-existent function parameters and corrected signatures
-* Improved S3 method output formatting
-* Enhanced documentation with working code examples
-* Added vcov() method for variance-covariance matrices
-* Fixed coefficient naming for beta_x and beta_y parameters

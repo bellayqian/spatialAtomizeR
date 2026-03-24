@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">spatialAtomizeR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +65,7 @@
 (Bella), Principal Investigators: Dr. Nancy Krieger and Dr. Rachel
 Nethery</h4>
             
-            <h4 data-toc-skip class="date">2026-03-06</h4>
+            <h4 data-toc-skip class="date">2026-03-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bellayqian/spatialAtomizeR/blob/HEAD/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
       <div class="d-none name"><code>getting-started.Rmd</code></div>
@@ -433,10 +433,12 @@ the analysis in the manuscript.</p>
 <span><span class="va">atoms</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a></span><span class="op">(</span><span class="va">gridy</span>, <span class="st">'Spatial'</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a></span><span class="op">(</span><span class="va">gridx</span>, <span class="st">'Spatial'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">atoms</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Rename ID variables to match expected names</span></span>
-<span><span class="va">atoms</span> <span class="op">&lt;-</span> <span class="va">atoms</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>ID_y <span class="op">=</span> <span class="va">ID_1</span>,    <span class="co"># Y-grid (county) ID</span></span>
-<span>         ID_x <span class="op">=</span> <span class="va">ID_2</span><span class="op">)</span>     <span class="co"># X-grid (school district) ID</span></span></code></pre></div>
+<span><span class="co"># Rename ID variables — column names vary by sf version:</span></span>
+<span><span class="co"># Note: raster::intersect() + sf::st_as_sf() produces "ID"/"ID.1" on older sf</span></span>
+<span><span class="co"># and "ID_1"/"ID_2" on newer sf (&gt;= 1.0). This grep-based approach handles both.</span></span>
+<span><span class="va">id_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"^ID"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">)</span> <span class="op">==</span> <span class="va">id_cols</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"ID_y"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">atoms</span><span class="op">)</span> <span class="op">==</span> <span class="va">id_cols</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"ID_x"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="step-4-add-atom-level-population-counts">Step 4: Add Atom-Level Population Counts<a class="anchor" aria-label="anchor" href="#step-4-add-atom-level-population-counts"></a>

@@ -1,8 +1,12 @@
-# spatialAtomizeR 0.2.7
+# spatialAtomizeR 0.2.8
 
 This is a resubmission (v0.2.7) addressing reviewer comments on package quality,
 documentation, and replication material. Changes include:
 
+* Fixed atom ID column renaming to handle both older sf (which produces 
+  `ID`/`ID.1` after `raster::intersect()`) and newer sf >= 1.0 (which 
+  produces `ID_1`/`ID_2`). Affected `simulate_misaligned_data()` and 
+  the case example vignette (#issue number if you have one).
 * Added `\examples{}` blocks to all exported functions; slow MCMC-based functions
   use `\dontrun{}` while lightweight functions (e.g., `simulate_misaligned_data()`,
   `get_abrm_model()`, `gen_correlated_spat()`, and all S3 methods for
