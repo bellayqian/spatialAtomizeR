@@ -21,17 +21,11 @@ Prints grid dimensions, atom counts, and the true regression coefficients
 (\code{beta_x} and \code{beta_y}) used to generate the data.
 }
 \examples{
-## Simulate misaligned spatial data
 sim_data <- simulate_misaligned_data(
-  seed              = 1,
-  dist_covariates_x = c("normal", "poisson"),
-  dist_covariates_y = c("normal", "poisson"),
-  dist_y            = "poisson",
-  x_intercepts      = c(0, -1),
-  y_intercepts      = c(0, -1),
-  beta0_y           = -1,
-  beta_x            = c(0.1, -0.05),
-  beta_y            = c(-0.1, 0.05)
+  seed = 1, dist_covariates_x = c("norm", "pois"),
+  dist_covariates_y = c("norm", "pois"), dist_y = "pois",
+  x_intercepts = c(0, -1), y_intercepts = c(0, -1),
+  beta0_y = -1, beta_x = c(0.1, -0.05), beta_y = c(-0.1, 0.05)
 )
 summary(sim_data)
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/nimble_model.R
 \name{Rmfnchypg}
 \alias{Rmfnchypg}
-\title{NIMBLE R Call Wrapper for BiasedUrn}
+\title{NIMBLE R Call Wrapper for BiasedUrn Sampler}
 \usage{
 Rmfnchypg(total, odds, ni)
 }

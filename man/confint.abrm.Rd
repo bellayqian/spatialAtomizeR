@@ -9,40 +9,39 @@
 \arguments{
 \item{object}{An object of class \code{"abrm"} returned by \code{\link{run_abrm}}.}
 
-\item{parm}{Optional character vector of parameter names to subset. If
-\code{NULL} (default), all parameters are returned.}
+\item{parm}{Optional character vector of parameters, given as covariate
+names (e.g. \code{"covariate_x_1"}, \code{"intercept"}) or internal
+names (e.g. \code{"beta_x[1]"}). If \code{NULL} (default), all
+coefficients are returned.}
 
-\item{level}{Confidence level for the credible interval (default \code{0.95}).
-When \code{level = 0.95} (the default), the pre-computed 95\% intervals
-stored during model fitting are returned directly. For other levels,
-intervals are recomputed from the raw MCMC posterior samples.}
+\item{level}{Credible level (default \code{0.95}).}
 
 \item{...}{Additional arguments (currently unused).}
 }
 \value{
 A matrix with two columns, \code{CI.Lower} and \code{CI.Upper}, and
-  one row per parameter.
+  one row per parameter, labelled with covariate names.
 }
 \description{
-Returns the 95\% posterior credible intervals for all estimated parameters.
+Returns equal-tailed posterior credible intervals for the regression
+coefficients, computed from the MCMC samples pooled across chains.
 Note: these are Bayesian credible intervals from MCMC quantiles, not
 frequentist confidence intervals.
 }
 \examples{
 \donttest{
   sim_data <- simulate_misaligned_data(
-    seed = 1, dist_covariates_x = "normal", dist_covariates_y = "normal",
-    dist_y = "normal", x_intercepts = 0, y_intercepts = 0,
+    seed = 1, dist_covariates_x = "norm", dist_covariates_y = "norm",
+    dist_y = "norm", x_intercepts = 0, y_intercepts = 0,
     beta0_y = 0, beta_x = 0.1, beta_y = -0.1
   )
   results <- run_abrm(
     gridx = sim_data$gridx, gridy = sim_data$gridy, atoms = sim_data$atoms,
-    model_code = get_abrm_model(), norm_idx_x = 1, norm_idx_y = 1,
-    dist_y = 1, niter = 1000, nburnin = 500, nchains = 2, seed = 1,
-    save_plots = FALSE
+    model_code = get_abrm_model(), x_types = "norm", y_types = "norm",
+    dist_y = "norm", niter = 1000, nburnin = 500, nchains = 2, seed = 1
   )
   confint(results)
-  confint(results, parm = "beta_x[1]")
+  confint(results, parm = "covariate_x_1", level = 0.9)
 }
 
 }

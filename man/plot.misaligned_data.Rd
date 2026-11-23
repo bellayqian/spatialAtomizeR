@@ -17,7 +17,9 @@
 \item{x}{A \code{misaligned_data} object.}
 
 \item{which}{Character string specifying what to plot. One of \code{"both"}
-(default), \code{"gridy"}, \code{"gridx"}, or \code{"atoms"}.}
+(default), \code{"gridy"}, \code{"gridx"}, or \code{"atoms"}.
+\code{which = "atoms"} is an error if \code{x$atoms} has not been
+computed (see \code{\link{create_atoms}}).}
 
 \item{color_y}{Color for the Y-grid boundaries. Default \code{"blue"}.}
 
@@ -30,37 +32,30 @@ a default title is used.}
 \code{which} is not \code{"both"}.}
 }
 \value{
-The input \code{x}, invisibly.
+A \code{ggplot} object. It is drawn when printed (for example at
+  the console), and can be modified with further \code{ggplot2} layers or
+  saved with \code{ggplot2::ggsave()}.
 }
 \description{
 Visualizes the spatial layout of a \code{misaligned_data} object. By default,
 both grids are overlaid to illustrate the misalignment between them.
 }
 \examples{
-## Simulate misaligned spatial data
 sim_data <- simulate_misaligned_data(
-  seed              = 1,
-  dist_covariates_x = c("normal", "poisson"),
-  dist_covariates_y = c("normal", "poisson"),
-  dist_y            = "poisson",
-  x_intercepts      = c(0, -1),
-  y_intercepts      = c(0, -1),
-  beta0_y           = -1,
-  beta_x            = c(0.1, -0.05),
-  beta_y            = c(-0.1, 0.05)
+  seed = 1, dist_covariates_x = c("norm", "pois"),
+  dist_covariates_y = c("norm", "pois"), dist_y = "pois",
+  x_intercepts = c(0, -1), y_intercepts = c(0, -1),
+  beta0_y = -1, beta_x = c(0.1, -0.05), beta_y = c(-0.1, 0.05)
 )
 # Default: overlay both grids to visualise misalignment
 plot(sim_data)
 
 # Plot a single component
 plot(sim_data, which = "gridy")
-plot(sim_data, which = "gridx")
 plot(sim_data, which = "atoms")
 
-# Custom colours
-plot(sim_data, color_y = "steelblue", color_x = "firebrick")
-
-# Custom title
-plot(sim_data, title = "Utah Spatial Misalignment")
+# The result is a ggplot object that can be extended
+p <- plot(sim_data, color_y = "steelblue", color_x = "firebrick")
+p + ggplot2::labs(caption = "Simulated data")
 
 }

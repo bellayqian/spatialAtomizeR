@@ -13,66 +13,38 @@
 }
 \value{
 A list with class "vcov.abrm" containing:
+  \item{vcov_beta_0}{Posterior variance of the intercept (named scalar)}
   \item{vcov_beta_x}{Variance-covariance matrix for X-grid coefficients}
   \item{vcov_beta_y}{Variance-covariance matrix for Y-grid coefficients}
-  \item{vcov_beta_0}{Variance of the intercept (scalar)}
-  \item{vcov_all}{Combined variance-covariance matrix for all parameters}
+  \item{vcov_beta_a}{Variance-covariance matrix for atom-level
+    coefficients (only when atom-level covariates were used)}
+  \item{vcov_all}{Combined variance-covariance matrix for all coefficients}
 }
 \description{
-Extracts variance-covariance matrices for regression coefficients from 
-MCMC posterior samples. Returns separate matrices for X-grid and Y-grid
-coefficients.
+Extracts variance-covariance matrices for regression coefficients from
+MCMC posterior samples. Returns separate matrices for X-grid, Y-grid and
+(if present) atom-level coefficients, plus the combined matrix. Rows and
+columns are labelled with covariate names.
 }
 \details{
-The variance-covariance matrices are computed from the posterior samples
-of the MCMC chains. If multiple chains were run, samples are combined
-across chains before computing covariances.
+The matrices are computed from the posterior samples pooled across chains.
 }
 \examples{
 \donttest{
-  ## Step 1: Simulate misaligned spatial data
   sim_data <- simulate_misaligned_data(
-    seed              = 1,
-    dist_covariates_x = c("normal", "poisson"),
-    dist_covariates_y = c("normal", "poisson"),
-    dist_y            = "poisson",
-    x_intercepts      = c(0, -1),
-    y_intercepts      = c(0, -1),
-    beta0_y           = -1,
-    beta_x            = c(0.1, -0.05),
-    beta_y            = c(-0.1, 0.05)
+    seed = 1, dist_covariates_x = c("norm", "pois"),
+    dist_covariates_y = c("norm", "pois"), dist_y = "pois",
+    x_intercepts = c(0, -1), y_intercepts = c(0, -1),
+    beta0_y = -1, beta_x = c(0.1, -0.05), beta_y = c(-0.1, 0.05)
   )
-
-  ## Step 2: Retrieve the NIMBLE model code
-  model_code <- get_abrm_model()
-
-  ## Step 3: Fit the ABRM
   results <- run_abrm(
-    gridx       = sim_data$gridx,
-    gridy       = sim_data$gridy,
-    atoms       = sim_data$atoms,
-    model_code  = model_code,
-    true_params = sim_data$true_params,
-    norm_idx_x  = 1,
-    pois_idx_x  = 2,
-    norm_idx_y  = 1,
-    pois_idx_y  = 2,
-    dist_y      = 2,
-    niter       = 1000,
-    nburnin     = 500,
-    nchains     = 2,
-    seed        = 1,
-    save_plots  = FALSE
+    gridx = sim_data$gridx, gridy = sim_data$gridy, atoms = sim_data$atoms,
+    model_code = get_abrm_model(),
+    x_types = c("norm", "pois"), y_types = c("norm", "pois"), dist_y = "pois",
+    niter = 1000, nburnin = 500, nchains = 2, seed = 1
   )
-
-  ## Step 4: Extract posterior variance-covariance matrices
   vcov_mats <- vcov(results)
-
-  # Posterior standard errors for X-grid and Y-grid coefficients
   sqrt(diag(vcov_mats$vcov_beta_x))
-  sqrt(diag(vcov_mats$vcov_beta_y))
-
-  # Posterior correlation matrix across all beta parameters
   cov2cor(vcov_mats$vcov_all)
 }
 

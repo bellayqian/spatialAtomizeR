@@ -9,206 +9,153 @@ utils::globalVariables(c(
 
 #' Check MCMC Diagnostics
 #'
-#' Calculates convergence diagnostics including Gelman-Rubin statistics
-#' and effective sample sizes for MCMC output
+#' Calculates convergence diagnostics (Gelman-Rubin R-hat and effective
+#' sample size) for MCMC output. Parameter names are used as they appear in
+#' the samples (\code{run_nimble_model()} has already renamed them).
 #'
-#' @param mcmc_output Output from NIMBLE MCMC containing samples
-#' @param sim_metadata Optional list with simulation metadata
-#' @return List with diagnostic results including convergence statistics and plots
+#' @param mcmc_output Output from NIMBLE MCMC containing \code{samples}, a
+#'   list of per-chain matrices.
+#' @param rhat_threshold,ess_threshold Thresholds used for the
+#'   \code{converged} flag.
+#' @return List with \code{diagnostics} (data frame: parameter, mean, sd,
+#'   rhat, ess, converged), \code{group_convergence}, \code{overall_converged},
+#'   \code{n_chains} and \code{chain_correlation}.
 #' @importFrom coda mcmc mcmc.list gelman.diag effectiveSize
 #' @importFrom stats cor sd median
-#' @importFrom utils head
 #' @keywords internal
 #' @noRd
-check_mcmc_diagnostics <- function(mcmc_output, sim_metadata = NULL, p_x = NULL, p_y = NULL) {
-  # Validate chain structure
+check_mcmc_diagnostics <- function(mcmc_output, rhat_threshold = 1.1,
+                                   ess_threshold = 400) {
   chains_list <- mcmc_output$samples
-  if (!is.list(chains_list) || length(chains_list) < 2) {
-    warning("Insufficient number of chains for convergence diagnostics")
-    return(list(converged = FALSE, error = "insufficient_chains"))
+  if (is.matrix(chains_list)) chains_list <- list(chain1 = chains_list)
+  n_chains <- length(chains_list)
+
+  mcmc_chains <- coda::mcmc.list(lapply(chains_list, coda::mcmc))
+  pooled <- do.call(rbind, chains_list)
+  param_names <- colnames(pooled)
+
+  if (n_chains >= 2L) {
+    gelman <- tryCatch(
+      coda::gelman.diag(mcmc_chains, autoburnin = FALSE, multivariate = FALSE)$psrf[, 1],
+      error = function(e) rep(NA_real_, length(param_names)))
+  } else {
+    warning("R-hat requires at least 2 chains; only effective sample sizes are reported.",
+            call. = FALSE)
+    gelman <- rep(NA_real_, length(param_names))
   }
-  
-  # Rename beta_y columns to beta_x and beta_y if p_x and p_y are provided
-  if (!is.null(p_x) && !is.null(p_y)) {
-    for (i in seq_along(chains_list)) {
-      old_names <- colnames(chains_list[[i]])
-      new_names <- old_names
-      
-      # Rename beta_y[1:p_x] to beta_x[1:p_x]
-      for (j in 1:p_x) {
-        old_pattern <- paste0("beta_y\\[", j, "\\]")
-        new_pattern <- paste0("beta_x[", j, "]")
-        new_names <- gsub(old_pattern, new_pattern, new_names, fixed = FALSE)
-      }
-      
-      # Rename beta_y[(p_x+1):(p_x+p_y)] to beta_y[1:p_y]
-      for (j in 1:p_y) {
-        old_idx <- p_x + j
-        old_pattern <- paste0("beta_y\\[", old_idx, "\\]")
-        new_pattern <- paste0("beta_y[", j, "]")
-        new_names <- gsub(old_pattern, new_pattern, new_names, fixed = FALSE)
-      }
-      
-      colnames(chains_list[[i]]) <- new_names
-    }
-  }
-  
-  # Convert to mcmc objects
-  chains_mcmc <- lapply(chains_list, function(x) {
-    if (is.null(colnames(x))) colnames(x) <- paste0("param", 1:ncol(x))
-    mcmc(x)
-  })
-  
-  mcmc_chains <- mcmc.list(chains_mcmc)
-  
-  # Calculate Gelman-Rubin statistics
-  gelman_diag <- try(gelman.diag(mcmc_chains, autoburnin = FALSE, multivariate = FALSE)$psrf, silent = TRUE)
-  
-  # Calculate effective sample sizes
-  eff_size <- try(effectiveSize(mcmc_chains), silent = TRUE)
-  
-  # Parameter means and SDs
-  param_names <- colnames(chains_list[[1]])
-  param_means <- colMeans(do.call(rbind, chains_list))
-  param_sds <- apply(do.call(rbind, chains_list), 2, sd)
-  
-  # Create diagnostics data frame
+  eff_size <- tryCatch(coda::effectiveSize(mcmc_chains),
+                       error = function(e) rep(NA_real_, length(param_names)))
+
   diagnostics <- data.frame(
     parameter = param_names,
-    mean = param_means,
-    sd = param_sds,
-    rhat = if(!inherits(gelman_diag, "try-error")) gelman_diag[,1] else rep(NA, length(param_names)),
-    ess = if(!inherits(eff_size, "try-error")) eff_size else rep(NA, length(param_names)),
-    stringsAsFactors = FALSE
+    mean = colMeans(pooled),
+    sd = apply(pooled, 2, stats::sd),
+    rhat = unname(gelman),
+    ess = unname(eff_size),
+    stringsAsFactors = FALSE,
+    row.names = NULL
   )
-  
-  # Add convergence assessment
-  diagnostics$converged <- with(diagnostics, rhat < 1.1 & ess > 400)
-  
-  # Group parameters
+  diagnostics$converged <- ifelse(is.na(diagnostics$rhat), NA,
+                                  diagnostics$rhat < rhat_threshold &
+                                    diagnostics$ess > ess_threshold)
+
   param_groups <- list(
     beta = grep("^beta", param_names, value = TRUE),
     tau = grep("^tau", param_names, value = TRUE),
     prec = grep("^Prec", param_names, value = TRUE)
   )
-  
-  # Check group convergence
-  group_convergence <- sapply(param_groups, function(group_params) {
-    group_diag <- diagnostics[diagnostics$parameter %in% group_params,]
-    all(group_diag$converged)
-  })
-  
-  # Create diagnostic plots
-  if (requireNamespace("ggplot2", quietly = TRUE)) {
-    if(is.null(sim_metadata)) {
-      # Create default metadata if none provided
-      sim_metadata <- list(
-        sim_number = 1,
-        x_correlation = NA,
-        y_correlation = NA
-      )
-    }
-    
-    # Generate plots using updated function
-    plots <- create_diagnostic_plots(chains_list, sim_metadata)
-  } else {
-    plots <- NULL
-  }
-  
-  return(list(
+  group_convergence <- vapply(param_groups, function(group_params) {
+    all(diagnostics$converged[diagnostics$parameter %in% group_params], na.rm = FALSE)
+  }, logical(1))
+
+  list(
     diagnostics = diagnostics,
     group_convergence = group_convergence,
     overall_converged = all(diagnostics$converged),
-    plots = plots,
-    chain_correlation = cor(do.call(rbind, chains_list))
-  ))
+    n_chains = n_chains,
+    chain_correlation = stats::cor(pooled)
+  )
 }
 
-#' Create Diagnostic Plots
-#'
-#' @param chains_list List of MCMC chains
-#' @param sim_metadata Simulation metadata
-#'
-#' @return List with trace and density plots
-#' @importFrom ggplot2 ggplot aes geom_line geom_density facet_wrap theme_minimal labs theme element_text
-#' @importFrom reshape2 melt
+#' Reshape a list of MCMC chains to long format for ggplot2
+#' @param chains_list List of per-chain matrices (iterations x parameters).
+#' @param params Columns to keep (default: all).
+#' @param labels Optional facet labels, same length as \code{params}.
 #' @keywords internal
 #' @noRd
-create_diagnostic_plots <- function(chains_list, sim_metadata) {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Package 'ggplot2' is required for plotting but is not installed.")
-  }
-  if (!requireNamespace("reshape2", quietly = TRUE)) {
-    stop("Package 'reshape2' is required for plotting but is not installed.")
-  }
-  
-  # Get parameters from chain data
-  params <- colnames(chains_list[[1]])
-  
-  # Create title with metadata
-  plot_title <- sprintf("MCMC Diagnostics (x_cor=%.1f, y_cor=%.1f, sim=%d)",
-                        sim_metadata$x_correlation, 
-                        sim_metadata$y_correlation, 
-                        sim_metadata$sim_number)
-  
-  # Prepare data for plotting
-  plot_data <- lapply(seq_along(chains_list), function(chain) {
-    data <- as.data.frame(chains_list[[chain]][, params, drop = FALSE])
-    data$iteration <- 1:nrow(data)
-    data$chain <- as.factor(chain)
-    reshape2::melt(data, id.vars = c("iteration", "chain"))
-  })
-  
-  # Combine and ensure it's a proper data frame
-  plot_data <- as.data.frame(do.call(rbind, plot_data))
-  
-  # Ensure variable is a factor
-  plot_data$variable <- as.factor(plot_data$variable)
-  
-  # Create trace plots - use .data pronoun for NSE variables
-  trace_plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = iteration, y = value, color = chain)) +
+.chains_long <- function(chains_list, params = NULL, labels = NULL) {
+  if (is.null(params)) params <- colnames(chains_list[[1]])
+  if (is.null(labels)) labels <- params
+  do.call(rbind, lapply(seq_along(chains_list), function(ch) {
+    m <- chains_list[[ch]][, params, drop = FALSE]
+    data.frame(
+      iteration = rep(seq_len(nrow(m)), times = ncol(m)),
+      chain = factor(ch, levels = seq_along(chains_list)),
+      variable = factor(rep(labels, each = nrow(m)), levels = unique(labels)),
+      value = as.vector(m)
+    )
+  }))
+}
+
+#' Create a Trace Plot from MCMC Chains
+#' @return A ggplot object.
+#' @importFrom ggplot2 ggplot aes geom_line facet_wrap theme_minimal labs theme element_text
+#' @keywords internal
+#' @noRd
+create_trace_plot <- function(chains_list, params = NULL, labels = NULL,
+                              title = "MCMC trace plots") {
+  plot_data <- .chains_long(chains_list, params, labels)
+  ggplot2::ggplot(plot_data, ggplot2::aes(x = iteration, y = value, color = chain)) +
     ggplot2::geom_line(alpha = 0.7) +
     ggplot2::facet_wrap(~variable, scales = "free_y") +
     ggplot2::theme_minimal() +
-    ggplot2::labs(title = plot_title,
-                  subtitle = "Trace Plots for All Parameters",
-                  x = "Iteration", y = "Parameter Value") +
+    ggplot2::labs(title = title, x = "Iteration (after burn-in and thinning)",
+                  y = "Parameter value", color = "Chain") +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 8),
                    plot.title = ggplot2::element_text(size = 11))
-  
-  # Create density plots
-  density_plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = value, fill = chain)) +
+}
+
+#' Create a Posterior Density Plot from MCMC Chains
+#' @return A ggplot object.
+#' @importFrom ggplot2 ggplot aes geom_density facet_wrap theme_minimal labs theme element_text
+#' @keywords internal
+#' @noRd
+create_density_plot <- function(chains_list, params = NULL, labels = NULL,
+                                title = "Posterior density plots") {
+  plot_data <- .chains_long(chains_list, params, labels)
+  ggplot2::ggplot(plot_data, ggplot2::aes(x = value, fill = chain)) +
     ggplot2::geom_density(alpha = 0.3) +
     ggplot2::facet_wrap(~variable, scales = "free") +
     ggplot2::theme_minimal() +
-    ggplot2::labs(title = plot_title,
-                  subtitle = "Density Plots for All Parameters",
-                  x = "Parameter Value", y = "Density") +
+    ggplot2::labs(title = title, x = "Parameter value", y = "Density", fill = "Chain") +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 8),
                    plot.title = ggplot2::element_text(size = 11))
-  
-  return(list(trace = trace_plot, density = density_plot))
 }
 
 #' Print Convergence Summary
 #'
 #' @param convergence_results Results from check_mcmc_diagnostics
-#' @return No return value, called for side effects. Prints convergence diagnostics including overall convergence status, minimum effective sample size, median ESS, maximum Rhat statistic, and identifies parameters with high relative variance.
+#' @return No return value, called for side effects (messages with median ESS,
+#'   maximum R-hat, and parameters with high relative variance).
 #' @keywords internal
 #' @noRd
 print_convergence_summary <- function(convergence_results) {
-  # Print general diagnostics summary
-  message("Diagnostic Summary Statistics:\n")
   diagnostics <- convergence_results$diagnostics
-  message(sprintf("Median ESS: %.1f\n", median(diagnostics$ess, na.rm = TRUE)))
-  message(sprintf("Max Rhat: %.3f\n", max(diagnostics$rhat, na.rm = TRUE)))
-  
-  # Check for any unusually high variances
-  high_var_params <- subset(diagnostics, sd/abs(mean) > 0.5)
-  if(nrow(high_var_params) > 0) {
-    message("Parameters with high relative variance:\n")
-    print(high_var_params[, c("parameter", "mean", "sd")])
+  if (is.null(diagnostics) || nrow(diagnostics) == 0L) return(invisible(NULL))
+  msg <- sprintf("Diagnostic summary: median ESS %.1f", median(diagnostics$ess, na.rm = TRUE))
+  if (any(!is.na(diagnostics$rhat))) {
+    msg <- sprintf("%s, max R-hat %.3f", msg, max(diagnostics$rhat, na.rm = TRUE))
   }
+  message(msg)
+
+  high_var <- diagnostics[diagnostics$sd / abs(diagnostics$mean) > 0.5, , drop = FALSE]
+  if (nrow(high_var) > 0L) {
+    message("Parameters with high relative variance (sd/|mean| > 0.5):\n",
+            paste(utils::capture.output(
+              print(high_var[, c("parameter", "mean", "sd")], row.names = FALSE)),
+              collapse = "\n"))
+  }
+  invisible(NULL)
 }
 
 #' Create Summary Statistics
@@ -216,57 +163,49 @@ print_convergence_summary <- function(convergence_results) {
 #' @param all_results Combined results data frame
 #' @param output_dir Output directory
 #' @return A list with two components: \code{method_summary} (data frame containing overall summary statistics for each method, including mean bias, relative bias, and coverage rates) and \code{param_summary} (data frame containing parameter-specific comparisons across methods). The function also saves these summaries to CSV files in the output directory.
-#' @importFrom dplyr group_by summarize select
+#' @importFrom dplyr group_by summarize
 #' @importFrom tidyr pivot_wider
 #' @importFrom utils write.csv
 #' @keywords internal
 #' @noRd
 create_summary_statistics <- function(all_results, output_dir) {
-  # Calculate summary statistics by method
-  summary_stats <- all_results %>%
-    group_by(method) %>%
-    summarize(
+  summary_stats <- all_results |>
+    dplyr::group_by(method) |>
+    dplyr::summarize(
       mean_abs_bias = mean(abs(bias)),
       mean_rel_bias = mean(abs(relative_bias)),
       rmse = sqrt(mean(bias^2)),
       coverage_rate = mean(within_ci) * 100,
-      .groups = 'drop'
+      .groups = "drop"
     )
-  
-  # Save summary
-  write.csv(summary_stats, file = file.path(output_dir, "method_summary_stats.csv"), 
-            row.names = FALSE)
-  
-  # Create a summary table for each parameter
-  # FIXED: Aggregate first, then pivot
-  param_summary <- all_results %>%
-    group_by(method, variable) %>%
-    summarize(
+
+  utils::write.csv(summary_stats, file = file.path(output_dir, "method_summary_stats.csv"),
+                   row.names = FALSE)
+
+  param_summary <- all_results |>
+    dplyr::group_by(method, variable) |>
+    dplyr::summarize(
       mean_estimated_beta = mean(estimated_beta),
       mean_true_beta = mean(true_beta),
       mean_bias = mean(bias),
       mean_relative_bias = mean(relative_bias),
       coverage_rate = mean(within_ci) * 100,
-      .groups = 'drop'
-    ) %>%
-    pivot_wider(
+      .groups = "drop"
+    ) |>
+    tidyr::pivot_wider(
       id_cols = variable,
       names_from = method,
       values_from = c(mean_estimated_beta, mean_bias, mean_relative_bias, coverage_rate),
       names_sep = "_"
     )
-  
-  # Save parameter summary
-  write.csv(param_summary, file = file.path(output_dir, "parameter_summary.csv"), 
-            row.names = FALSE)
-  
-  # Print summary to console
-  message("Method Comparison Summary:\n")
-  print(summary_stats)
-  
-  message("Parameter-Specific Comparison:\n")
-  print(param_summary)
-  
-  return(list(method_summary = summary_stats, param_summary = param_summary))
-}
 
+  utils::write.csv(param_summary, file = file.path(output_dir, "parameter_summary.csv"),
+                   row.names = FALSE)
+
+  message("Method Comparison Summary:")
+  print(summary_stats)
+  message("Parameter-Specific Comparison:")
+  print(param_summary)
+
+  list(method_summary = summary_stats, param_summary = param_summary)
+}

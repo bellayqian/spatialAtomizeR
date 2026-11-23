@@ -9,14 +9,19 @@ run_abrm(
   gridy,
   atoms,
   model_code,
+  x_types,
+  y_types,
+  dist_y = "pois",
+  x_vars = NULL,
+  y_vars = NULL,
+  outcome = "y",
+  atom_vars = NULL,
+  id_x = "ID",
+  id_y = "ID",
+  atom_id_x = "ID_x",
+  atom_id_y = "ID_y",
+  population = NULL,
   true_params = NULL,
-  norm_idx_x = NULL,
-  pois_idx_x = NULL,
-  binom_idx_x = NULL,
-  norm_idx_y = NULL,
-  pois_idx_y = NULL,
-  binom_idx_y = NULL,
-  dist_y = 2,
   niter = 50000,
   nburnin = 30000,
   nchains = 2,
@@ -25,33 +30,80 @@ run_abrm(
   sim_metadata = NULL,
   save_plots = FALSE,
   output_dir = NULL,
-  compute_waic = FALSE
+  compute_waic = FALSE,
+  ...
 )
 }
 \arguments{
-\item{gridx}{The X-grid sf dataframe, containing a numeric area ID variable named 'ID' and covariates named 'covariate_x_1','covariate_x_2',...}
+\item{gridx}{The X-grid \code{sf} data frame, containing an area ID column
+(see \code{id_x}) and the X-grid covariates (see \code{x_vars}).}
 
-\item{gridy}{The Y-grid sf dataframe, containing a numeric area ID variable named 'ID', covariates named 'covariate_y_1','covariate_y_2',...., and an outcome named 'y'.}
+\item{gridy}{The Y-grid \code{sf} data frame, containing an area ID column
+(see \code{id_y}), the Y-grid covariates (see \code{y_vars}) and the
+outcome (see \code{outcome}).}
 
-\item{atoms}{The atom sf dataframe, which should contain numeric variables named 'ID_x' and 'ID_y' holding the X-grid and Y-grid cell IDs for each atom, as well as an atom-level population count named 'population'.}
+\item{atoms}{The atom \code{sf} data frame (for example from
+\code{\link{create_atoms}}). Must contain the X-grid and Y-grid ID of
+each atom (see \code{atom_id_x}, \code{atom_id_y}), the population
+denominator column(s) (see \code{population}) and any atom-level
+covariates (see \code{atom_vars}).}
 
-\item{model_code}{NIMBLE model code from get_abrm_model()}
+\item{model_code}{NIMBLE model code from \code{\link{get_abrm_model}}.}
 
-\item{true_params}{The true outcome model regression coefficient parameters, if known (e.g., from simulate_misaligned_data())}
+\item{x_types}{Character vector with one element per X-grid covariate (in
+the order of \code{x_vars}) giving its distribution: \code{"norm"},
+\code{"pois"} or \code{"binom"}. The long forms \code{"normal"},
+\code{"poisson"} and \code{"binomial"} are also accepted.}
 
-\item{norm_idx_x}{Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as normally-distributed}
+\item{y_types}{As \code{x_types}, for the Y-grid covariates (in the order of
+\code{y_vars}).}
 
-\item{pois_idx_x}{Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as Poisson-distributed}
+\item{dist_y}{Distribution of the outcome: \code{"norm"}, \code{"pois"}
+(default) or \code{"binom"} (long forms also accepted).}
 
-\item{binom_idx_x}{Vector of numeric indices of X-grid covariates (ordered as 'covariate_x_1','covariate_x_2',...) that should be treated as binomial-distributed}
+\item{x_vars}{Character vector of X-grid covariate column names in
+\code{gridx}. If \code{NULL} (default), all columns named
+\code{covariate_x_1}, \code{covariate_x_2}, ... are used.}
 
-\item{norm_idx_y}{Vector of numeric indices of Y-grid covariates (ordered as 'covariate_y_1','covariate_y_2',...) that should be treated as normally-distributed}
+\item{y_vars}{Character vector of Y-grid covariate column names in
+\code{gridy}. If \code{NULL} (default), all columns named
+\code{covariate_y_1}, \code{covariate_y_2}, ... are used.}
 
-\item{pois_idx_y}{Vector of numeric indices of Y-grid covariates (ordered as 'covariate_y_1','covariate_y_2',...) that should be treated as Poisson-distributed}
+\item{outcome}{Name of the outcome column in \code{gridy}. Default \code{"y"}.}
 
-\item{binom_idx_y}{Vector of numeric indices of Y-grid covariates (ordered as 'covariate_y_1','covariate_y_2',...) that should be treated as binomial-distributed}
+\item{atom_vars}{Optional character vector of atom-level covariate column
+names in \code{atoms}. If \code{NULL} (default), any columns named
+\code{covariate_a_1}, \code{covariate_a_2}, ... are used; use
+\code{character(0)} to fit without atom-level covariates.}
 
-\item{dist_y}{Distribution type for outcome (1=normal, 2=poisson, 3=binomial)}
+\item{id_x, id_y}{Names of the area ID columns in \code{gridx} and
+\code{gridy}. IDs may be integer, numeric or character but must be unique
+within each grid. Default \code{"ID"}.}
+
+\item{atom_id_x, atom_id_y}{Names of the columns in \code{atoms} holding each
+atom's X-grid and Y-grid ID. Defaults \code{"ID_x"} and \code{"ID_y"}
+(the names produced by \code{\link{create_atoms}}).}
+
+\item{population}{Population denominator(s) in \code{atoms}. Either
+\itemize{
+  \item a single column name used for every variable, or
+  \item a named list \code{list(x = , y = , outcome = )} giving one column
+    name per X-grid covariate, one per Y-grid covariate (each may be a
+    single name to recycle) and one for the outcome, or
+  \item \code{NULL} (default): use a column named \code{population} if
+    present; otherwise per-variable columns named
+    \code{population_covariate_x_1}, ..., \code{population_covariate_y_1},
+    ..., and \code{population_y} (as produced by
+    \code{\link{simulate_misaligned_data}}).
+}}
+
+\item{true_params}{Optional true values of the outcome-model coefficients,
+used to report bias and credible-interval coverage. Build it with
+\code{\link{abrm_params}} (recommended), or pass the
+\code{true_params} component returned by
+\code{\link{simulate_misaligned_data}}, which has the same format. A plain
+named list with the same elements is also accepted. See
+\strong{Format of \code{true_params}} below.}
 
 \item{niter}{Number of MCMC iterations (default: 50000)}
 
@@ -69,7 +121,7 @@ through to \code{\link{run_nimble_model}} and used to label diagnostic
 plot file names when \code{save_plots = TRUE}. For non-simulation use,
 leave as \code{NULL}.}
 
-\item{save_plots}{Logical, whether to save diagnostic plots (default: FALSE)}
+\item{save_plots}{Logical, whether to save diagnostic plots to a PDF (default: FALSE)}
 
 \item{output_dir}{Directory for saving outputs (default: NULL)}
 
@@ -77,30 +129,87 @@ leave as \code{NULL}.}
 Applicable Information Criterion (WAIC) during MCMC sampling and stores it
 in the returned object. Retrieve it afterwards with \code{\link{waic}}.
 Default \code{FALSE}.}
+
+\item{...}{Only used to support the deprecated arguments
+\code{norm_idx_x}, \code{pois_idx_x}, \code{binom_idx_x},
+\code{norm_idx_y}, \code{pois_idx_y} and \code{binom_idx_y}, which are
+converted to \code{x_types} / \code{y_types} with a warning. Any other
+argument is an error.}
 }
 \value{
 An object of class \code{"abrm"}: a named list with components
-  \code{mcmc_results}, \code{parameter_estimates}, \code{all_parameters},
-  \code{fitted_values} (numeric vector of Y-grid-level predicted outcome
-  values on the original outcome scale),
-  \code{y_grid_ids} (integer vector of Y-grid cell IDs in model order), and
-  \code{y_observed} (numeric vector of observed outcome values for directly
-  observed Y-grid cells). Use \code{fitted()} to extract a formatted
-  comparison table of observed vs. fitted values, and \code{waic()} to
-  retrieve model fit criteria when \code{compute_waic = TRUE}.
+  \describe{
+    \item{\code{mcmc_results}}{Output of \code{\link{run_nimble_model}}:
+      MCMC samples, posterior summary, convergence diagnostics (see
+      \code{\link{mcmc_diagnostics}}) and, optionally, WAIC.}
+    \item{\code{parameter_estimates}}{Data frame with one row per
+      regression coefficient: \code{variable} (the covariate name, or
+      \code{"intercept"}), \code{parameter} (the internal parameter name,
+      e.g. \code{"beta_x[1]"}), \code{estimated_beta}, \code{std_error},
+      \code{ci_lower}, \code{ci_upper}, and, when \code{true_params} is
+      supplied, \code{true_beta}, \code{bias}, \code{relative_bias} and
+      \code{within_ci}.}
+    \item{\code{all_parameters}}{Posterior summaries of all monitored
+      parameters.}
+    \item{\code{fitted_values}}{Numeric vector of Y-grid-level predicted
+      outcome values on the original outcome scale.}
+    \item{\code{y_grid_ids}}{Y-grid cell IDs (as in \code{gridy[[id_y]]})
+      in model order.}
+    \item{\code{y_observed}}{Observed outcome values in model order.}
+    \item{\code{param_labels}}{Named character vector mapping internal
+      parameter names to covariate names.}
+    \item{\code{model_info}}{List recording \code{x_vars}, \code{y_vars},
+      \code{atom_vars}, \code{outcome}, \code{x_types}, \code{y_types} and
+      \code{dist_y}.}
+  }
+  Use \code{fitted()} for a table of observed vs. fitted values,
+  \code{\link{plot_trace}} / \code{\link{plot_density}} for MCMC plots,
+  \code{\link{mcmc_diagnostics}} for R-hat and effective sample sizes, and
+  \code{waic()} for model fit criteria when \code{compute_waic = TRUE}.
 }
 \description{
 Fits an Atom-Based Regression Model (ABRM) to spatially misaligned data
-using Bayesian MCMC via NIMBLE. Works with both simulated and real-world data.
+using Bayesian MCMC via NIMBLE. Works with both simulated and real-world
+data. Variables can have any column names: tell \code{run_abrm()} which
+columns to use through \code{x_vars}, \code{y_vars}, \code{outcome},
+\code{atom_vars}, the ID arguments and \code{population}.
 }
+\section{Format of \code{true_params}}{
+
+\code{true_params} is a list, best created with \code{\link{abrm_params}()},
+with the following elements. Any of them may be omitted; coefficients
+without a true value get \code{NA} in the results and are left out of the
+bias and coverage summaries.
+\describe{
+  \item{\code{beta0_y}}{Numeric scalar: the outcome-model intercept.
+    (\code{beta_0_y} is accepted as an alias.)}
+  \item{\code{beta_x}}{Numeric vector of length \code{length(x_vars)}: the
+    coefficients of the X-grid covariates. Unnamed vectors are matched by
+    position (the order of \code{x_vars}); named vectors are matched by
+    covariate name.}
+  \item{\code{beta_y}}{Numeric vector of length \code{length(y_vars)}: the
+    coefficients of the Y-grid covariates, matched as for \code{beta_x}.}
+  \item{\code{beta_a}}{Numeric vector of length \code{length(atom_vars)}:
+    the coefficients of the atom-level covariates, matched as for
+    \code{beta_x}.}
+}
+Other elements (such as \code{x_correlation} from
+\code{simulate_misaligned_data()}) are ignored. For example:
+\preformatted{
+true_params = abrm_params(beta0_y = -1,
+                          beta_x  = c(0.10, -0.05),
+                          beta_y  = c(income = -0.10, pct_old = 0.05))
+}
+}
+
 \examples{
 \donttest{
   # Simulate misaligned spatial data with one normal covariate per grid
   sim_data <- simulate_misaligned_data(
     seed = 1,
-    dist_covariates_x = "normal",
-    dist_covariates_y = "normal",
-    dist_y = "normal",
+    dist_covariates_x = "norm",
+    dist_covariates_y = "norm",
+    dist_y = "norm",
     x_intercepts = 0,
     y_intercepts = 0,
     beta0_y = 0,
@@ -108,30 +217,41 @@ using Bayesian MCMC via NIMBLE. Works with both simulated and real-world data.
     beta_y = -0.1
   )
 
-  # Retrieve the pre-compiled NIMBLE model code
+  # Retrieve the NIMBLE model code
   model_code <- get_abrm_model()
 
   # Fit the ABRM (use small niter/nburnin for illustration only)
   results <- run_abrm(
-    gridx      = sim_data$gridx,
-    gridy      = sim_data$gridy,
-    atoms      = sim_data$atoms,
-    model_code = model_code,
-    true_params = sim_data$true_params,
-    norm_idx_x = 1,
-    norm_idx_y = 1,
-    dist_y     = 1,
-    niter      = 1000,
-    nburnin    = 500,
-    nchains    = 2,
-    seed       = 1,
-    save_plots = FALSE
+    gridx       = sim_data$gridx,
+    gridy       = sim_data$gridy,
+    atoms       = sim_data$atoms,
+    model_code  = model_code,
+    x_types     = "norm",
+    y_types     = "norm",
+    dist_y      = "norm",
+    true_params = abrm_params(beta0_y = 0, beta_x = 0.1, beta_y = -0.1),
+    niter       = 1000,
+    nburnin     = 500,
+    nchains     = 2,
+    seed        = 1
   )
 
-  print(results)    # concise model summary
-  summary(results)  # full parameter table
-  plot(results)     # MCMC trace and density plots
-  vcov(results)     # posterior variance-covariance matrices
+  print(results)             # concise model summary
+  summary(results)           # full parameter table
+  plot_trace(results)        # MCMC trace plots (a ggplot object)
+  plot_density(results)      # posterior density plots (a ggplot object)
+  mcmc_diagnostics(results)  # R-hat and effective sample sizes
+
+  # Covariates can have any names
+  gx <- sim_data$gridx; names(gx)[names(gx) == "covariate_x_1"] <- "income"
+  gy <- sim_data$gridy; names(gy)[names(gy) == "covariate_y_1"] <- "age"
+  results2 <- run_abrm(
+    gridx = gx, gridy = gy, atoms = sim_data$atoms, model_code = model_code,
+    x_vars = "income", y_vars = "age", outcome = "y",
+    x_types = "norm", y_types = "norm", dist_y = "norm",
+    niter = 1000, nburnin = 500, seed = 1
+  )
+  coef(results2)
 }
 
 }

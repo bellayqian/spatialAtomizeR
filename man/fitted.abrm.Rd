@@ -14,7 +14,7 @@
 \value{
 A data frame with one row per Y-grid cell and four columns:
   \describe{
-    \item{\code{y_grid_id}}{The original Y-grid cell ID.}
+    \item{\code{y_grid_id}}{The Y-grid cell ID, as supplied in \code{gridy}.}
     \item{\code{observed}}{The observed outcome value \code{y} for each
       Y-grid cell. Note: the outcome is observed at the Y-grid level for
       all cells. This is distinct from covariates, which may be
@@ -32,15 +32,14 @@ estimated regression coefficients to the supplied covariate data.
 \examples{
 \donttest{
   sim_data <- simulate_misaligned_data(
-    seed = 1, dist_covariates_x = "normal", dist_covariates_y = "normal",
-    dist_y = "normal", x_intercepts = 0, y_intercepts = 0,
+    seed = 1, dist_covariates_x = "norm", dist_covariates_y = "norm",
+    dist_y = "norm", x_intercepts = 0, y_intercepts = 0,
     beta0_y = 0, beta_x = 0.1, beta_y = -0.1
   )
   results <- run_abrm(
     gridx = sim_data$gridx, gridy = sim_data$gridy, atoms = sim_data$atoms,
-    model_code = get_abrm_model(), norm_idx_x = 1, norm_idx_y = 1,
-    dist_y = 1, niter = 1000, nburnin = 500, nchains = 2, seed = 1,
-    save_plots = FALSE
+    model_code = get_abrm_model(), x_types = "norm", y_types = "norm",
+    dist_y = "norm", niter = 1000, nburnin = 500, nchains = 2, seed = 1
   )
   fitted(results)
 }

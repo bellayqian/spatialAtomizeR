@@ -8,9 +8,9 @@ sim_data <- simulate_misaligned_data(
   seed = 42,
   
   # Distribution specifications for covariates
-  dist_covariates_x = c('normal', 'poisson', 'binomial'),
-  dist_covariates_y = c('normal', 'poisson', 'binomial'),
-  dist_y = 'poisson',  # Outcome distribution
+  dist_covariates_x = c('norm', 'pois', 'binom'),
+  dist_covariates_y = c('norm', 'pois', 'binom'),
+  dist_y = 'pois',  # Outcome distribution
   
   # Intercepts for data generation (REQUIRED)
   x_intercepts = c(4, -1, -1),      # One per X covariate
@@ -35,16 +35,12 @@ abrm_results <- run_abrm(
   model_code = model_code,
   true_params = sim_data$true_params,  # Optional: for validation
   
-  # Map distribution indices to positions in dist_covariates_x/y
-  norm_idx_x = 1,   # 'normal' is 1st in dist_covariates_x
-  pois_idx_x = 2,   # 'poisson' is 2nd
-  binom_idx_x = 3,  # 'binomial' is 3rd
-  norm_idx_y = 1,   # Same for Y covariates
-  pois_idx_y = 2,
-  binom_idx_y = 3,
+  # Distribution of each covariate (same order as dist_covariates_x/y)
+  x_types = c("norm", "pois", "binom"),
+  y_types = c("norm", "pois", "binom"),
   
-  # Outcome distribution: 1=normal, 2=poisson, 3=binomial
-  dist_y = 2,
+  # Outcome distribution: "norm", "pois" or "binom"
+  dist_y = "pois",
   
   # MCMC parameters
   niter = 50000,    # Total iterations per chain

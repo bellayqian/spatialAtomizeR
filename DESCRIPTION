@@ -1,8 +1,8 @@
 Package: spatialAtomizeR
 Type: Package
 Title: Spatial Analysis with Misaligned Data Using Atom-Based Regression Models
-Version: 0.2.8
-Date: 2026-03-24
+Version: 0.3.0
+Date: 2026-11-17
 Authors@R: c(
     person("Yunzhe", "Qian", email = "qyzanemos@gmail.com", role = c("aut", "cre")),
     person("Rachel", "Nethery", email = "rnethery@hsph.harvard.edu", role = "aut"),
@@ -22,24 +22,21 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends: 
-    R (>= 4.0.0)
+    R (>= 4.1.0)
 Imports:
     nimble,
     sp,
     sf,
     spdep,
-    MASS,
     dplyr,
     tidyr,
     ggplot2,
-    reshape2,
     coda,
     BiasedUrn,
     stats,
     utils,
     grDevices,
-    methods,
-    raster
+    methods
 Suggests:
     testthat (>= 3.0.0),
     knitr,

@@ -50,14 +50,10 @@ results <- run_abrm(
   gridy = sim_data$gridy,
   atoms = sim_data$atoms,
   model_code = model_code,
-  true_params = sim_data$true_params, # optional vector of true outcome model coefficient parameters
-  norm_idx_x = 1,   # Index of normal-distributed X covariate
-  pois_idx_x = 2,   # Index of Poisson-distributed X covariate
-  binom_idx_x = 3,  # Index of binomial-distributed X covariate
-  norm_idx_y = 1,   # Index of normal-distributed Y covariate
-  pois_idx_y = 2,   # Index of Poisson-distributed Y covariate
-  binom_idx_y = 3,  # Index of binomial-distributed Y covariate
-  dist_y = 2,       # Outcome distribution: 1=normal, 2=poisson, 3=binomial
+  true_params = sim_data$true_params, # optional: true coefficients (see ?abrm_params)
+  x_types = c("norm", "pois", "binom"),  # distribution of each X covariate
+  y_types = c("norm", "pois", "binom"),  # distribution of each Y covariate
+  dist_y = "pois",  # outcome distribution: "norm", "pois" or "binom"
   niter = 50000,    # MCMC iterations
   nburnin = 30000,  # Burn-in iterations
   nchains = 2       # Number of chains
@@ -65,6 +61,9 @@ results <- run_abrm(
 
 # 4. View results
 print(results$parameter_estimates)
+plot_trace(results)         # trace plots (a ggplot object)
+plot_density(results)       # posterior density plots (a ggplot object)
+mcmc_diagnostics(results)   # R-hat and effective sample sizes
 ```
 
 ## Main Features
@@ -165,27 +164,45 @@ The `simulate_misaligned_data()` function accepts the following parameters:
 - `x_correlation`: Correlation between X-grid covariates (0 to 1)
 - `y_correlation`: Correlation between Y-grid covariates (0 to 1)
 
-## Distribution Type Indices
+## Covariate Distributions and Column Names
 
-When running ABRM models, you need to specify which covariates follow which distributions:
+When running ABRM models, say which distribution each covariate follows:
 
-- `norm_idx_x`, `norm_idx_y`: Indices of normally-distributed covariates
-- `pois_idx_x`, `pois_idx_y`: Indices of Poisson-distributed covariates
-- `binom_idx_x`, `binom_idx_y`: Indices of binomially-distributed covariates
-- `dist_y`: Outcome distribution type (1=normal, 2=poisson, 3=binomial)
+- `x_types`: character vector with one element per X-grid covariate
+- `y_types`: character vector with one element per Y-grid covariate
+- `dist_y`: outcome distribution
 
-**Example:** If `dist_covariates_x = c('normal', 'poisson', 'binomial')`, then:
-- `norm_idx_x = 1` (first covariate)
-- `pois_idx_x = 2` (second covariate)
-- `binom_idx_x = 3` (third covariate)
+Each takes the values `"norm"`, `"pois"` or `"binom"`.
+
+**Example:** If `dist_covariates_x = c("norm", "pois", "binom")`, then
+`x_types = c("norm", "pois", "binom")`.
+
+By default `run_abrm()` looks for columns named `covariate_x_1`, `covariate_x_2`,
+..., `covariate_y_1`, ... and `y` (outcome). To use your own column names, pass
+them with `x_vars`, `y_vars` and `outcome`; `id_x`, `id_y`, `atom_id_x`,
+`atom_id_y` and `population` name the ID and population columns. Grid IDs can be
+integer, numeric or character.
+
+The `norm_idx_*`/`pois_idx_*`/`binom_idx_*` arguments and numeric `dist_y`
+(1, 2, 3) from earlier versions still work but are deprecated.
+
+## Creating Atoms
+
+Atoms are the pieces of the intersection of the two grids; `create_atoms(gridy, gridx)`
+computes them with the **sf** package alone.
+
+## True Parameter Values
+
+To compare estimates against known coefficients, build `true_params` with
+`abrm_params(beta0_y = , beta_x = , beta_y = )`. Vectors can be unnamed (matched by
+position) or named (matched by covariate name).
 
 ## Requirements
 
-- R >= 4.0.0
+- R >= 4.1.0
 - **nimble** for MCMC sampling (must be loaded)
-- Spatial packages: **sp**, **sf**, **spdep**, **raster**
+- Spatial packages: **sp**, **sf**, **spdep**
 - **BiasedUrn** for multivariate hypergeometric sampling
-- MASS for multivariate normal generation
 - dplyr, tidyr for data manipulation
 
 ## Funding and Project Information

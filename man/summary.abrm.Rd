@@ -28,20 +28,21 @@ An object of class \code{"summary.abrm"} (a list) with components:
 Returns a structured summary of a fitted ABRM, including posterior means,
 standard deviations, and 95% credible intervals for all regression
 coefficients. When true parameter values are available (i.e., the model
-was fitted on simulated data via \code{\link{simulate_misaligned_data}}),
-mean absolute bias and credible-interval coverage are also reported.
+was fitted with \code{true_params}), mean absolute bias and
+credible-interval coverage are also reported.
 }
 \examples{
 \donttest{
   sim_data <- simulate_misaligned_data(
-    seed = 1, dist_covariates_x = "normal", dist_covariates_y = "normal",
-    dist_y = "normal", x_intercepts = 0, y_intercepts = 0,
+    seed = 1, dist_covariates_x = "norm", dist_covariates_y = "norm",
+    dist_y = "norm", x_intercepts = 0, y_intercepts = 0,
     beta0_y = 0, beta_x = 0.1, beta_y = -0.1
   )
   results <- run_abrm(
     gridx = sim_data$gridx, gridy = sim_data$gridy, atoms = sim_data$atoms,
-    model_code = get_abrm_model(), norm_idx_x = 1, norm_idx_y = 1,
-    dist_y = 1, niter = 1000, nburnin = 500, nchains = 2, seed = 1
+    model_code = get_abrm_model(), x_types = "norm", y_types = "norm",
+    dist_y = "norm", true_params = sim_data$true_params,
+    niter = 1000, nburnin = 500, nchains = 2, seed = 1
   )
   summary(results)    # full parameter table with bias and coverage
 }

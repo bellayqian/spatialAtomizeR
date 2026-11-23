@@ -52,9 +52,9 @@ sim_data <- simulate_misaligned_data(
   seed = 42,
   
   # Distribution specifications for covariates
-  dist_covariates_x = c('normal', 'poisson', 'binomial'),
-  dist_covariates_y = c('normal', 'poisson', 'binomial'),
-  dist_y = 'poisson',  # Outcome distribution
+  dist_covariates_x = c('norm', 'pois', 'binom'),
+  dist_covariates_y = c('norm', 'pois', 'binom'),
+  dist_y = 'pois',  # Outcome distribution
   
   # Intercepts for data generation (REQUIRED)
   x_intercepts = c(4, -1, -1),      # One per X covariate
@@ -112,7 +112,7 @@ model_code <- get_abrm_model()
 
 ## Step 4: Run ABRM Analysis
 
-Fit the ABRM model. You must specify which covariates follow which distributions by providing their indices:
+Fit the ABRM model. Say which distribution each covariate follows with `x_types` (one entry per X-grid covariate) and `y_types` (one per Y-grid covariate), and the outcome distribution with `dist_y`. Each is `"norm"`, `"pois"` or `"binom"`. Covariates are taken from columns named `covariate_x_1`, `covariate_x_2`, ... by default; use `x_vars`, `y_vars` and `outcome` to point to columns with other names (see the Utah example below).
 
 ```{r run_abrm_show, eval=FALSE}
 abrm_results <- run_abrm(
@@ -120,18 +120,16 @@ abrm_results <- run_abrm(
   gridy = sim_data$gridy,
   atoms = sim_data$atoms,
   model_code = model_code,
-  true_params = sim_data$true_params,  # Optional: for validation
+  # Optional: true coefficients, for validation. simulate_misaligned_data()
+  # returns them in the right format; for your own values use abrm_params().
+  true_params = sim_data$true_params,
   
-  # Map distribution indices to positions in dist_covariates_x/y
-  norm_idx_x = 1,   # 'normal' is 1st in dist_covariates_x
-  pois_idx_x = 2,   # 'poisson' is 2nd
-  binom_idx_x = 3,  # 'binomial' is 3rd
-  norm_idx_y = 1,   # Same for Y covariates
-  pois_idx_y = 2,
-  binom_idx_y = 3,
+  # Distribution of each covariate, in the order of the columns
+  x_types = c("norm", "pois", "binom"),
+  y_types = c("norm", "pois", "binom"),
   
-  # Outcome distribution: 1=normal, 2=poisson, 3=binomial
-  dist_y = 2,
+  # Outcome distribution: "norm", "pois" or "binom"
+  dist_y = "pois",
   
   # MCMC parameters
   niter = 50000,    # Total iterations per chain
@@ -162,8 +160,16 @@ print(abrm_results)
 # Summary method shows detailed parameter estimates
 summary(abrm_results)
 
-# Plot method shows MCMC diagnostics (if available)
-plot(abrm_results)
+# MCMC trace plots and posterior density plots. Both return ggplot objects,
+# so they can be modified or saved with ggplot2::ggsave().
+plot_trace(abrm_results)
+plot_density(abrm_results)
+
+# plot() chooses between the two with 'type'
+plot(abrm_results, type = "density")
+
+# Convergence diagnostics (R-hat and effective sample size) as a data frame
+mcmc_diagnostics(abrm_results)
 ```
 
 ## Step 6: More Tests
@@ -204,9 +210,9 @@ library(tigris)    # For US Census shapefiles
 library(sf)        # Spatial features
 library(sp)        # Spatial objects
 library(spdep)     # Spatial dependence
-library(raster)    # Spatial data manipulation
 library(dplyr)     # Data manipulation
 library(ggplot2)   # Plotting
+library(raster)    # Only for reading the LandScan population raster in Step 4
 ```
 
 ## Step 1: Load Utah Shapefiles
@@ -216,15 +222,13 @@ set.seed(500)
 
 # Load Utah counties (Y-grid)
 cnty <- counties(state = 'UT')
-gridy <- cnty %>%
-  rename(ID = GEOID) %>%
-  mutate(ID = as.numeric(ID))  # ID must be numeric
+gridy <- cnty |>
+  rename(ID = GEOID)  # IDs can be character (GEOIDs) or numeric
 
 # Load Utah school districts (X-grid)
 scd <- school_districts(state = 'UT')
-gridx <- scd %>%
-  rename(ID = GEOID) %>%
-  mutate(ID = as.numeric(ID))
+gridx <- scd |>
+  rename(ID = GEOID)
 ```
 
 ## Step 2: Visualize Spatial Misalignment
@@ -247,16 +251,10 @@ plot(utah_mis, which = "gridx", title = "Utah School Districts")
 ## Step 3: Create Atoms by Intersecting Grids
 
 ```{r create_atoms, eval = FALSE}
-# Intersect the two grids to create atoms
-atoms <- raster::intersect(as(gridy, 'Spatial'), as(gridx, 'Spatial'))
-atoms <- sf::st_as_sf(atoms)
-
-# Rename ID variables — column names vary by sf version:
-# Note: raster::intersect() + sf::st_as_sf() produces "ID"/"ID.1" on older sf
-# and "ID_1"/"ID_2" on newer sf (>= 1.0). This grep-based approach handles both.
-id_cols <- grep("^ID", names(atoms), value = TRUE)
-names(atoms)[names(atoms) == id_cols[1]] <- "ID_y"
-names(atoms)[names(atoms) == id_cols[2]] <- "ID_x"
+# Intersect the two grids to create atoms, using only the sf package.
+# The result has columns ID_y and ID_x holding the Y-grid and X-grid ID of
+# each atom. Point and line pieces where boundaries merely touch are dropped.
+atoms <- create_atoms(gridy, gridx)
 ```
 
 ## Step 4: Add Atom-Level Population Counts
@@ -294,7 +292,7 @@ W_a <- nb2mat(
 )
 
 # Generate spatial random effects
-atoms <- atoms %>%
+atoms <- atoms |>
   mutate(
     re_x = gen_correlated_spat(W = W_a, n_vars = 1, correlation = 1, rho = 0.8),
     re_z = gen_correlated_spat(W = W_a, n_vars = 1, correlation = 1, rho = 0.8),
@@ -302,7 +300,7 @@ atoms <- atoms %>%
   )
 
 # Generate atom-level covariates and outcome
-atoms <- atoms %>%
+atoms <- atoms |>
   mutate(
     # X-grid covariate (Poisson)
     covariate_x_1 = rpois(
@@ -315,7 +313,7 @@ atoms <- atoms %>%
       mean = population * (3 + re_z), 
       sd = 1 * population
     )
-  ) %>%
+  ) |>
   mutate(
     # Outcome (Poisson)
     y = rpois(
@@ -365,10 +363,15 @@ mcmc_results <- run_abrm(
   atoms = atoms,
   model_code = model_code,
   
-  # Specify covariate distributions
-  pois_idx_x = 1,  # X covariate is Poisson
-  norm_idx_y = 1,  # Y covariate is Normal
-  dist_y = 2,      # Outcome is Poisson
+  # Covariate and outcome columns (any names; here the defaults)
+  x_vars = "covariate_x_1",
+  y_vars = "covariate_y_1",
+  outcome = "y",
+  
+  # Distributions: one entry per covariate
+  x_types = "pois",   # X covariate is Poisson
+  y_types = "norm",   # Y covariate is Normal
+  dist_y = "pois",    # Outcome is Poisson
   
   # MCMC settings (increase for real analysis)
   niter = 300000,
@@ -398,27 +401,27 @@ confint(mcmc_results)
 w <- waic(mcmc_results)
 print(w)
 ```
-# Understanding Distribution Indices
+# Understanding Distribution Types
 
-When you specify covariates, the indices correspond to their positions:
+`x_types` and `y_types` list the distribution of each covariate, in the same order as the covariate columns (`x_vars` / `y_vars`):
 
 ```r
-dist_covariates_x = c('normal', 'poisson', 'binomial')
-#                       ^1        ^2         ^3
+dist_covariates_x = c('norm', 'pois', 'binom')
 
 # So you would specify:
-norm_idx_x = 1    # First position
-pois_idx_x = 2    # Second position  
-binom_idx_x = 3   # Third position
+x_types = c("norm", "pois", "binom")
 ```
 
 ## Distribution Type Codes
 
-| Code | Distribution | String      | Use Case                |
-|------|--------------|-------------|-------------------------|
-| 1    | Normal       | 'normal'    | Continuous data         |
-| 2    | Poisson      | 'poisson'   | Count/rate data         |
-| 3    | Binomial     | 'binomial'  | Proportion/binary data  |
+| Distribution | Value        | Use Case                |
+|--------------|--------------|-------------------------|
+| Normal       | `"norm"`     | Continuous data         |
+| Poisson      | `"pois"`     | Count/rate data         |
+| Binomial     | `"binom"`    | Proportion/binary data  |
+
+The long forms `"normal"`, `"poisson"` and `"binomial"` are also accepted.
+The same values are used for `dist_y`.
 
 ## Getting Help
 

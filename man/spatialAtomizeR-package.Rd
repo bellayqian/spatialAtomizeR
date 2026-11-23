@@ -17,8 +17,12 @@ with misaligned grids.
 
 \describe{
   \item{\code{\link{simulate_misaligned_data}}}{Generate simulated spatial data}
+  \item{\code{\link{create_atoms}}}{Intersect two grids to create atoms}
   \item{\code{\link{get_abrm_model}}}{Get NIMBLE model code for ABRM}
   \item{\code{\link{run_abrm}}}{Run atom-based Bayesian regression model}
+  \item{\code{\link{abrm_params}}}{Specify true coefficient values for \code{run_abrm()}}
+  \item{\code{\link{plot_trace}}, \code{\link{plot_density}}}{MCMC trace and density plots}
+  \item{\code{\link{mcmc_diagnostics}}}{R-hat and effective sample sizes}
 }
 }
 

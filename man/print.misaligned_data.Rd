@@ -21,9 +21,9 @@ Print Method for Misaligned Data Objects
 ## Simulate misaligned spatial data
 sim_data <- simulate_misaligned_data(
   seed              = 1,
-  dist_covariates_x = c("normal", "poisson"),
-  dist_covariates_y = c("normal", "poisson"),
-  dist_y            = "poisson",
+  dist_covariates_x = c("norm", "pois"),
+  dist_covariates_y = c("norm", "pois"),
+  dist_y            = "pois",
   x_intercepts      = c(0, -1),
   y_intercepts      = c(0, -1),
   beta0_y           = -1,

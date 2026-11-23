@@ -6,11 +6,11 @@
 \usage{
 simulate_misaligned_data(
   seed = 2,
-  dist_covariates_x = c("normal", "poisson", "binomial"),
-  dist_covariates_y = c("normal", "poisson", "binomial"),
-  dist_y = "poisson",
-  x_intercepts = rep(0, 3),
-  y_intercepts = rep(0, 3),
+  dist_covariates_x = c("norm", "pois", "binom"),
+  dist_covariates_y = c("norm", "pois", "binom"),
+  dist_y = "pois",
+  x_intercepts = rep(0, length(dist_covariates_x)),
+  y_intercepts = rep(0, length(dist_covariates_y)),
   rho_x = 0.6,
   rho_y = 0.6,
   x_correlation = 0.5,
@@ -19,21 +19,26 @@ simulate_misaligned_data(
   beta_x = NULL,
   beta_y = NULL,
   diff_pops = TRUE,
+  diff_pops_per_var = FALSE,
   xy_cov_cor = FALSE
 )
 }
 \arguments{
 \item{seed}{Random seed (default = 2)}
 
-\item{dist_covariates_x}{Vector specifying distribution type for each synthetic X-grid covariate ('poisson', 'binomial', or 'normal')}
+\item{dist_covariates_x}{Character vector giving the distribution of each
+synthetic X-grid covariate: \code{"norm"}, \code{"pois"} or
+\code{"binom"} (the long forms \code{"normal"}, \code{"poisson"},
+\code{"binomial"} are also accepted).}
 
-\item{dist_covariates_y}{Vector specifying distribution type for each synthetic Y-grid covariate ('poisson', 'binomial', or 'normal')}
+\item{dist_covariates_y}{As \code{dist_covariates_x}, for the Y-grid covariates.}
 
-\item{dist_y}{Distribution type for synthetic outcome variable (one of 'poisson', 'binomial', or 'normal')}
+\item{dist_y}{Distribution of the synthetic outcome: one of \code{"norm"},
+\code{"pois"} or \code{"binom"} (long forms also accepted).}
 
-\item{x_intercepts}{Intercepts for X covariates}
+\item{x_intercepts}{Intercepts for X covariates (one per covariate).}
 
-\item{y_intercepts}{Intercepts for Y covariates}
+\item{y_intercepts}{Intercepts for Y covariates (one per covariate).}
 
 \item{rho_x}{Spatial correlation parameter for X-grid covariates (0 to 1 with higher values yielding more spatial correlation, default = 0.6)}
 
@@ -43,37 +48,46 @@ simulate_misaligned_data(
 
 \item{y_correlation}{Between-variable correlation for all pairs of Y-grid covariates (default = 0.5)}
 
-\item{beta0_y}{Intercept for outcome model}
+\item{beta0_y}{Intercept for outcome model (required).}
 
-\item{beta_x}{Outcome model coefficients for X-grid covariates}
+\item{beta_x}{Outcome model coefficients for X-grid covariates (required; one per X covariate).}
 
-\item{beta_y}{Outcome model coefficients for Y-grid covariates}
+\item{beta_y}{Outcome model coefficients for Y-grid covariates (required; one per Y covariate).}
 
-\item{diff_pops}{Logical, indicating whether the atoms should be generated with different population sizes (diff_pops = TRUE) or a common population size (diff_pops = FALSE)}
+\item{diff_pops}{Logical, indicating whether the atoms should be generated with different population sizes (diff_pops = TRUE) or a common population size (diff_pops = FALSE). Ignored when \code{diff_pops_per_var = TRUE}.}
+
+\item{diff_pops_per_var}{Logical. When \code{TRUE}, each covariate and the outcome receive their own population denominator column in the atoms object (named \code{population_covariate_x_1}, \code{population_covariate_y_1}, ..., and \code{population_y}). When \code{FALSE} (default), a single \code{population} column is used for all variables.}
 
 \item{xy_cov_cor}{Logical, indicating whether the atom-level spatial random effects for X-grid and Y-grid covariates should be correlated (xy_cov_cor = TRUE) or not. When set to TRUE, the x_correlation and rho_x parameters are used to generate all covariates (separate correlation parameters are not allowed for X-grid and Y-grid covariates).}
 }
 \value{
-An object of class \code{"misaligned_data"}: a named list with components \code{gridy} (Y-grid sf data frame with outcome and Y
-  covariates), \code{gridx} (X-grid sf data frame with X covariates), \code{atoms} (atom-level sf data frame, the spatial intersection of the
-  two grids), and \code{true_params} (list of the true regression coefficients used for data generation).
+An object of class \code{"misaligned_data"}: a named list with
+  components \code{gridy} (Y-grid sf data frame with integer \code{ID},
+  outcome \code{y} and Y covariates \code{covariate_y_1}, ...),
+  \code{gridx} (X-grid sf data frame with integer \code{ID} and X
+  covariates \code{covariate_x_1}, ...), \code{atoms} (atom-level sf data
+  frame, the spatial intersection of the two grids, with integer
+  \code{ID_y}, \code{ID_x} and \code{ID_atomorder}), and
+  \code{true_params} (an \code{\link{abrm_params}} object holding the true
+  regression coefficients used for data generation, ready to pass to
+  \code{\link{run_abrm}}).
 }
 \description{
 Simulate Misaligned Spatial Data
 }
 \examples{
 sim_data <- simulate_misaligned_data(
-seed = 1,
-dist_covariates_x = c('normal', 'poisson', 'binomial'),
-dist_covariates_y = c('normal', 'poisson', 'binomial'),
-dist_y = "poisson",
-x_intercepts = c(4, -1, -1), 
-y_intercepts = c(4, -1, -1),
-beta0_y = -1, 
-x_correlation = 0.5, 
-y_correlation = 0.5,
-beta_x = c(-0.03, 0.1, -0.2), 
-beta_y = c(0.03, -0.1, 0.2)
+  seed = 1,
+  dist_covariates_x = c("norm", "pois", "binom"),
+  dist_covariates_y = c("norm", "pois", "binom"),
+  dist_y = "pois",
+  x_intercepts = c(4, -1, -1),
+  y_intercepts = c(4, -1, -1),
+  beta0_y = -1,
+  x_correlation = 0.5,
+  y_correlation = 0.5,
+  beta_x = c(-0.03, 0.1, -0.2),
+  beta_y = c(0.03, -0.1, 0.2)
 )
 class(sim_data)              # "misaligned_data"
 print(sim_data)              # grid dimensions and atom count

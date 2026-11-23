@@ -14,24 +14,55 @@ gen_correlated_spat(
 )
 }
 \arguments{
-\item{W}{Spatial adjacency matrix}
+\item{W}{Symmetric, non-negative \eqn{n \times n} adjacency matrix (for
+example from \code{spdep::nb2mat(..., style = "B")}). Every unit must
+have at least one neighbour.}
 
-\item{n_vars}{Number of variables}
+\item{n_vars}{Number of variables (columns) to generate.}
 
-\item{rho}{Spatial correlation parameter (default = 0.6)}
+\item{rho}{Spatial dependence parameter, \eqn{-1 < \rho < 1}. Values closer
+to 1 give stronger spatial smoothing (default 0.6).}
 
-\item{var_spat}{Spatial variance (default = 1)}
+\item{var_spat}{Positive scale (variance multiplier) applied to the whole
+field (default 1).}
 
-\item{correlation}{Correlation between variables (default = 0.5)}
+\item{correlation}{Between-variable correlation. Either a single number,
+used for every pair of variables (exchangeable correlation), or a full
+\code{n_vars} x \code{n_vars} correlation matrix. Ignored when
+\code{n_vars = 1}. Default 0.5.}
 
-\item{verify}{Logical for verification (default = FALSE)}
+\item{verify}{Logical. If \code{TRUE}, a message compares the target
+between-variable correlation matrix with the empirical correlation of the
+generated columns (default \code{FALSE}).}
 }
 \value{
-Matrix of spatial effects with \code{nrow(W)} rows and \code{n_vars}
-  columns, where each column is one spatially-correlated variable.
+Numeric matrix with \code{nrow(W)} rows and \code{n_vars} columns,
+  where each column is one spatially correlated variable.
 }
 \description{
-Generate Correlated Spatial Effects
+Draws one realisation of a multivariate proper conditional autoregressive
+(MCAR) random field over the areal units described by the adjacency matrix
+\code{W}. Each column of the result is one spatially structured variable,
+and the columns are correlated with one another according to
+\code{correlation}.
+}
+\details{
+Let \eqn{Q = D_W - \rho W}, where \eqn{D_W} is the diagonal matrix of
+neighbour counts, and let \eqn{C} be the \code{n_vars} x \code{n_vars}
+between-variable correlation matrix. The generated matrix \eqn{\Phi} has
+\deqn{\mathrm{Cov}(\Phi_{\cdot j}, \Phi_{\cdot k}) = \sigma^2 C_{jk} Q^{-1},}
+with \eqn{\sigma^2 = } \code{var_spat}; that is,
+\eqn{\mathrm{vec}(\Phi) \sim N(0, \sigma^2 \, C \otimes Q^{-1})}.
+
+The draw is computed as \eqn{\Phi = \sigma R_Q^{-1} Z U_C}, where
+\eqn{Q = R_Q^\top R_Q} and \eqn{C = U_C^\top U_C} are Cholesky
+factorisations and \eqn{Z} is an \eqn{n \times p} matrix of independent
+standard normals. This avoids forming and inverting the \eqn{np \times np}
+Kronecker-product precision matrix, so the cost is \eqn{O(n^3 + p^3)}
+rather than \eqn{O(n^3 p^3)}, and no dense joint covariance is ever stored.
+
+\eqn{Q} is positive definite when \eqn{|\rho| < 1} and every unit has at
+least one neighbour; both conditions are checked, with informative errors.
 }
 \examples{
 # A simple 4-node chain graph adjacency matrix
@@ -44,7 +75,12 @@ W <- matrix(c(0, 1, 0, 0,
 set.seed(1)
 effects <- gen_correlated_spat(W, n_vars = 2, rho = 0.5, correlation = 0.4)
 dim(effects)        # 4 rows (areas) x 2 columns (variables)
-cor(effects)        # between-variable correlation (approx. 0.4)
+
+# A full correlation matrix can be given instead of a single value
+C <- matrix(c(1, 0.3, -0.2,
+              0.3, 1, 0.5,
+              -0.2, 0.5, 1), 3, 3)
+effects3 <- gen_correlated_spat(W, n_vars = 3, correlation = C)
 
 }
 \keyword{internal}

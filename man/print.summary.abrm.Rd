@@ -25,19 +25,17 @@ including posterior means, standard deviations, credible intervals, and
 \examples{
 \donttest{
   sim_data <- simulate_misaligned_data(
-    seed = 1, dist_covariates_x = "normal", dist_covariates_y = "normal",
-    dist_y = "normal", x_intercepts = 0, y_intercepts = 0,
+    seed = 1, dist_covariates_x = "norm", dist_covariates_y = "norm",
+    dist_y = "norm", x_intercepts = 0, y_intercepts = 0,
     beta0_y = 0, beta_x = 0.1, beta_y = -0.1
   )
   results <- run_abrm(
     gridx = sim_data$gridx, gridy = sim_data$gridy, atoms = sim_data$atoms,
-    model_code = get_abrm_model(), norm_idx_x = 1, norm_idx_y = 1,
-    dist_y = 1, niter = 1000, nburnin = 500, nchains = 2, seed = 1,
-    save_plots = FALSE
+    model_code = get_abrm_model(), x_types = "norm", y_types = "norm",
+    dist_y = "norm", niter = 1000, nburnin = 500, nchains = 2, seed = 1
   )
   s <- summary(results)
-  print(s)              # same as typing summary(results) interactively
-  print(s, digits = 2)  # fewer decimal places
+  print(s, digits = 2)
 }
 
 }

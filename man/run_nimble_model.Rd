@@ -41,15 +41,19 @@ run_nimble_model(
 
 \item{seed}{Integer seed for reproducibility. Each chain uses seed+(chain_number-1) (default: NULL)}
 
-\item{save_plots}{Logical, whether to save diagnostic plots (default: FALSE)}
+\item{save_plots}{Logical, whether to save trace and density plots to a PDF file (default: FALSE)}
 
 \item{output_dir}{Directory for saving plots (default: NULL)}
 
 \item{compute_waic}{Logical; if \code{TRUE}, WAIC is computed by NIMBLE and stored in the result, enabling \code{\link{waic}()} for model comparison. Default \code{FALSE} to keep fitting fast.}
 }
 \value{
-A named list with components \code{samples} (per-chain MCMC sample matrices), \code{summary} (posterior summary statistics), and
-\code{convergence} (Gelman-Rubin statistics, effective sample sizes, and optional diagnostic plots).
+A named list with components \code{samples} (per-chain MCMC sample
+  matrices, with the outcome coefficients named \code{beta_0_y},
+  \code{beta_x[]}, \code{beta_y[]} and \code{beta_a[]}), \code{summary}
+  (posterior summary statistics), \code{convergence} (Gelman-Rubin
+  statistics and effective sample sizes; see \code{\link{mcmc_diagnostics}})
+  and, when \code{compute_waic = TRUE}, \code{WAIC}.
 }
 \description{
 Run NIMBLE Model with Diagnostics
@@ -60,9 +64,9 @@ Run NIMBLE Model with Diagnostics
   # run_nimble_model() internally after preparing all inputs.
   sim_data <- simulate_misaligned_data(
     seed = 1,
-    dist_covariates_x = "normal",
-    dist_covariates_y = "normal",
-    dist_y = "normal",
+    dist_covariates_x = "norm",
+    dist_covariates_y = "norm",
+    dist_y = "norm",
     x_intercepts = 0,
     y_intercepts = 0,
     beta0_y = 0,
@@ -75,10 +79,10 @@ Run NIMBLE Model with Diagnostics
     gridy = sim_data$gridy,
     atoms = sim_data$atoms,
     model_code = model_code,
+    x_types = "norm",
+    y_types = "norm",
+    dist_y = "norm",
     true_params = sim_data$true_params,
-    norm_idx_x = 1,
-    norm_idx_y = 1,
-    dist_y = 1,
     niter = 1000, nburnin = 500, nchains = 2,
     seed = 1, save_plots = FALSE
   )

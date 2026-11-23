@@ -8,7 +8,8 @@ NULL
 # Declare global variables used in NIMBLE models to avoid R CMD check NOTEs
 utils::globalVariables(c(
   # NIMBLE model parameters and indices
-  "D", "J_x", "J_y", "S_x", "S_y", "p_x", "p_y",
+  "D", "J_x", "J_y", "S_x", "S_y", "p_x", "p_y", "p_a",
+  "covars_atom_x", "covars_atom_y", "beta_a_x", "beta_a_yx",
   "norm_n_x", "norm_n_y", "pois_n_x", "pois_n_y", "binom_n_x", "binom_n_y",
   "norm_idx_x", "norm_idx_y", "pois_idx_x", "pois_idx_y", "binom_idx_x", "binom_idx_y",
   "vartype_y",
@@ -23,7 +24,7 @@ utils::globalVariables(c(
   
   # Spatial structure
   "expand_x", "expand_y", "xlatent_ind", "ylatent_ind",
-  "pop_atoms_x", "pop_atoms_y", "y_to_atom",
+  "pop_atoms_x", "pop_atoms_y", "pop_atoms_outcome", "y_to_atom",
   
   # Data arrays
   "x", "x_reorder", "x_latent", "yx_obs", "yx_latent", "y_obs",
@@ -35,7 +36,7 @@ utils::globalVariables(c(
   "inverse", "inprod",
   
   # NIMBLE custom distribution functions
-  "dmfnchypg", "Rmfnchypg", "rmfnchypg", "returnType", "abrm_results"
+  "dmfnchypg", "Rmfnchypg", "rmfnchypg", "returnType"
 ))
 
 #' spatialAtomizeR: Bayesian Spatial Regression with Misaligned Data
@@ -46,8 +47,12 @@ utils::globalVariables(c(
 #' @section Main Functions:
 #' \describe{
 #'   \item{\code{\link{simulate_misaligned_data}}}{Generate simulated spatial data}
+#'   \item{\code{\link{create_atoms}}}{Intersect two grids to create atoms}
 #'   \item{\code{\link{get_abrm_model}}}{Get NIMBLE model code for ABRM}
 #'   \item{\code{\link{run_abrm}}}{Run atom-based Bayesian regression model}
+#'   \item{\code{\link{abrm_params}}}{Specify true coefficient values for \code{run_abrm()}}
+#'   \item{\code{\link{plot_trace}}, \code{\link{plot_density}}}{MCMC trace and density plots}
+#'   \item{\code{\link{mcmc_diagnostics}}}{R-hat and effective sample sizes}
 #' }
 #'
 #' @name spatialAtomizeR-package
